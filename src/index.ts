@@ -1,4 +1,3 @@
-import { Collection as CollectionType } from './types/main'
-export {}
+import { collect, Collection } from "./collect"
 
-export type { CollectionType }
+export { collect, Collection }
