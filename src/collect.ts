@@ -224,7 +224,7 @@ export class Collection<T> {
   //   const uniqueItems = this.items.filter(item => !otherItems.includes(item));
   //   return new Collection(uniqueItems);
   // }
-  isEqual(value: never, other: never): boolean {
+  isEqual(value: any, other: any): boolean {
     if (value === other) {
       return true;
     }
