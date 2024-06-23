@@ -1,3 +1,3 @@
-import { collect, Collection } from "./collect"
+import { collect, Collection } from './collect'
 
 export { collect, Collection }

@@ -1,1 +1,1 @@
-export type Predicate<T> = (item: T, index: number) => boolean;
+export type Predicate<T> = (item: T, index: number) => boolean

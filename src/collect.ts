@@ -1,4 +1,4 @@
-import { Predicate } from "./types/main";
+import { Predicate } from './types/main'
 
 export class Collection<T> {
   private items: T[]
@@ -9,75 +9,70 @@ export class Collection<T> {
 
   all(predicate?: Predicate<T>): T[] {
     if (predicate) {
-      return this.items.filter((item, index) => predicate(item, index));
+      return this.items.filter((item, index) => predicate(item, index))
     }
-    return this.items;
+    return this.items
   }
 
-
-  after(item: T | string|Predicate<T>, strict: boolean = false): T | null {
+  after(item: T | string | Predicate<T>, strict: boolean = false): T | null {
     if (typeof item === 'function') {
-      const predicate = item as Predicate<T>;
+      const predicate = item as Predicate<T>
       for (let i = 0; i < this.items.length; i++) {
         if (predicate(this.items[i], i)) {
-          return this.items[i + 1] || null;
+          return this.items[i + 1] || null
         }
       }
-      return null;
+      return null
     } else {
-      const index = this.items.findIndex(i =>
-        strict ? i === item : i == item
-      );
+      const index = this.items.findIndex((i) => (strict ? i === item : i == item))
       if (index === -1 || index === this.items.length - 1) {
-        return null;
+        return null
       }
-      return this.items[index + 1];
+      return this.items[index + 1]
     }
   }
-
 
   average(callback?: (item: T) => number): number {
-    if(this.items.length === 0) {
-      return 0;
+    if (this.items.length === 0) {
+      return 0
     }
-    if(callback) {
-      return this.sum(callback) / this.items.length;
+    if (callback) {
+      return this.sum(callback) / this.items.length
     }
 
-    return this.sum(item => Number(item)) / this.items.length;
+    return this.sum((item) => Number(item)) / this.items.length
   }
-
 
   avg(callback?: (item: T) => number): number {
     return this.average(callback)
   }
 
-
-  before(item: T | string|Predicate<T>, strict: boolean = false): T | null {
+  before(item: T | string | Predicate<T>, strict: boolean = false): T | null {
     if (typeof item === 'function') {
-      const predicate = item as Predicate<T>;
+      const predicate = item as Predicate<T>
       for (let i = 1; i < this.items.length; i++) {
         if (predicate(this.items[i], i)) {
-          return this.items[i - 1];
+          return this.items[i - 1]
         }
       }
-      return null;
+      return null
     } else {
-      const index = this.items.findIndex(i =>
-        strict ? i === item : i == item
-      );
+      const index = this.items.findIndex((i) => (strict ? i === item : i == item))
       if (index === -1 || index === 0) {
-        return null;
+        return null
       }
-      return this.items[index - 1];
+      return this.items[index - 1]
     }
   }
 
-  chunk(size: number): Collection<T[]> {
-    const chunks: T[][] = []
+  chunk(size: number): Collection<Collection<T>> {
+    if (size <= 0) return new Collection<Collection<T>>([])
+
+    const chunks: Collection<T>[] = []
     for (let i = 0; i < this.items.length; i += size) {
-      chunks.push(this.items.slice(i, i + size))
+      chunks.push(new Collection(this.items.slice(i, i + size)))
     }
+
     return new Collection(chunks)
   }
 
