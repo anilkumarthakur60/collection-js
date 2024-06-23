@@ -1,3 +1,5 @@
+import { Iteratee, Predicate, PredicateChulkWhile, PredicateContains } from './types/main'
+
 export class Collection<T> {
   private items: T[]
 
@@ -5,41 +7,93 @@ export class Collection<T> {
     this.items = items
   }
 
-  all(): T[] {
+  all(predicate?: Predicate<T>): T[] {
+    if (predicate) {
+      return this.items.filter((item, index) => predicate(item, index))
+    }
     return this.items
   }
 
-  average(callback: (item: T) => number): number {
-    return this.sum(callback) / this.items.length
+  after(item: T | string | Predicate<T>, strict: boolean = false): T | null {
+    if (typeof item === 'function') {
+      const predicate = item as Predicate<T>
+      for (let i = 0; i < this.items.length; i++) {
+        if (predicate(this.items[i], i)) {
+          return this.items[i + 1] || null
+        }
+      }
+      return null
+    } else {
+      const index = this.items.findIndex((i) => (strict ? i === item : i == item))
+      if (index === -1 || index === this.items.length - 1) {
+        return null
+      }
+      return this.items[index + 1]
+    }
   }
 
-  avg(callback: (item: T) => number): number {
+  average(callback?: (item: T) => number): number {
+    if (this.items.length === 0) {
+      return 0
+    }
+    if (callback) {
+      return this.sum(callback) / this.items.length
+    }
+
+    return this.sum((item) => Number(item)) / this.items.length
+  }
+
+  avg(callback?: (item: T) => number): number {
     return this.average(callback)
   }
 
-  chunk(size: number): Collection<T[]> {
-    const chunks: T[][] = []
-    for (let i = 0; i < this.items.length; i += size) {
-      chunks.push(this.items.slice(i, i + size))
+  before(item: T | string | Predicate<T>, strict: boolean = false): T | null {
+    if (typeof item === 'function') {
+      const predicate = item as Predicate<T>
+      for (let i = 1; i < this.items.length; i++) {
+        if (predicate(this.items[i], i)) {
+          return this.items[i - 1]
+        }
+      }
+      return null
+    } else {
+      const index = this.items.findIndex((i) => (strict ? i === item : i == item))
+      if (index === -1 || index === 0) {
+        return null
+      }
+      return this.items[index - 1]
     }
+  }
+
+  chunk(size: number): Collection<Collection<T>> {
+    if (size <= 0) return new Collection<Collection<T>>([])
+    const chunks: Collection<T>[] = []
+    for (let i = 0; i < this.items.length; i += size) {
+      chunks.push(new Collection(this.items.slice(i, i + size)))
+    }
+
     return new Collection(chunks)
   }
 
-  chunkWhile(callback: (item: T, index: number) => boolean): Collection<T[]> {
-    const chunks: T[][] = []
-    let chunk: T[] = []
+  chunkWhile(predicate: PredicateChulkWhile<T>): Collection<Collection<T>> {
+    if (this.items.length === 0) return new Collection<Collection<T>>([])
+
+    const chunks: Collection<T>[] = []
+    let currentChunk: T[] = []
+
     for (let i = 0; i < this.items.length; i++) {
-      if (callback(this.items[i], i)) {
-        if (chunk.length > 0) {
-          chunks.push(chunk)
-        }
-        chunk = []
+      if (i === 0 || predicate(this.items[i], i, this.items)) {
+        currentChunk.push(this.items[i])
+      } else {
+        chunks.push(new Collection(currentChunk))
+        currentChunk = [this.items[i]]
       }
-      chunk.push(this.items[i])
     }
-    if (chunk.length > 0) {
-      chunks.push(chunk)
+
+    if (currentChunk.length > 0) {
+      chunks.push(new Collection(currentChunk))
     }
+
     return new Collection(chunks)
   }
 
@@ -55,8 +109,11 @@ export class Collection<T> {
     return new Collection(flattened)
   }
 
-  collect<U>(callback: (item: T, index: number) => U): Collection<U> {
-    return new Collection(this.items.map(callback))
+  // collect<U>(callback: (item: T, index: number) => U): Collection<U> {
+  //   return new Collection(this.items.map(callback))
+  // }
+  collect(): Collection<T> {
+    return new Collection(this.items)
   }
 
   combine<U>(values: U[]): Collection<[T, U]> {
@@ -71,16 +128,33 @@ export class Collection<T> {
     return new Collection(combined)
   }
 
-  concat(...values: T[]): Collection<T> {
-    return new Collection(this.items.concat(...values))
+  concat<U>(items: U[] | Collection<U>): Collection<T | U> {
+    const newItems = items instanceof Collection ? items.all() : items
+    return new Collection((this.items as (T | U)[]).concat(newItems))
   }
 
-  contains(callback: (item: T) => boolean): boolean {
-    return this.items.some(callback)
+  contains(value: T | PredicateContains<T> | Partial<T>): boolean {
+    if (typeof value === 'function') {
+      return this.items.some(value as Predicate<T>)
+    }
+
+    if (typeof value === 'object' && value !== null) {
+      return this.items.some((item) =>
+        Object.keys(value).every(
+          (key) =>
+            (item as Record<string, unknown>)[key] === (value as Record<string, unknown>)[key]
+        )
+      )
+    }
+
+    return this.items.includes(value as T)
   }
 
-  containsOneItem(callback: (item: T) => boolean): boolean {
-    return this.items.filter(callback).length === 1
+  containsOneItem(callback?: PredicateContains<T>): boolean {
+    if (callback) {
+      return this.items.filter(callback).length === 1
+    }
+    return this.items.length === 1
   }
 
   containsStrict(value: T): boolean {
@@ -91,37 +165,94 @@ export class Collection<T> {
     return this.items.length
   }
 
-  countBy(callback: (item: T) => string): Record<string, number> {
-    return this.items.reduce(
-      (result, item) => {
-        const key = callback(item)
-        if (!result[key]) {
-          result[key] = 0
-        }
-        result[key]++
-        return result
-      },
-      {} as Record<string, number>
-    )
+  countBy(iteratee: Iteratee<T>): Record<string, number> {
+    return this.items.reduce((acc: Record<string, number>, item: T) => {
+      const key = iteratee(item).toString()
+      if (!acc[key]) {
+        acc[key] = 0
+      }
+      acc[key]++
+      return acc
+    }, {})
   }
 
-  crossJoin<U>(values: U[]): Collection<[T, U]> {
-    const combined: [T, U][] = []
-    this.items.forEach((item) => {
-      values.forEach((value) => {
-        combined.push([item, value])
-      })
-    })
-    return new Collection(combined)
+  // crossJoin<U>(...values: U[]): Collection<[T, U]> {
+  //   const combined: [T, U][] = []
+  //   this.items.forEach((item) => {
+  //     values.forEach((value) => {
+  //       combined.push([item, value])
+  //     })
+  //   })
+  //   return new Collection(combined)
+  // }
+
+  crossJoin<U>(...arrays: U[][]): Collection<(T | U)[]> {
+    const result: (T | U)[][] = []
+
+    const helper = (current: (T | U)[], depth: number) => {
+      if (depth === arrays.length) {
+        result.push(current)
+        return
+      }
+
+      for (const value of arrays[depth]) {
+        helper([...current, value], depth + 1)
+      }
+    }
+
+    for (const item of this.items) {
+      helper([item], 0)
+    }
+
+    return new Collection<(T | U)[]>(result)
   }
 
   dd(): void {
-    console.log(this.items)
+
+    this.dump()
+    if (typeof process !== 'undefined') {
+      process.exit(1)
+    }
   }
 
-  diff(values: T[]): Collection<T> {
-    const diffItems = this.items.filter((item) => !values.includes(item))
-    return new Collection(diffItems)
+  // diff(values: T[]): Collection<T> {
+  //   const diffItems = this.items.filter((item) => !values.includes(item))
+  //   return new Collection(diffItems)
+  // }
+  // diff(other: T[] | Collection<T>): Collection<T> {
+  //   const otherItems = other instanceof Collection ? other.items : other;
+  //   const uniqueItems = this.items.filter(item => !otherItems.includes(item));
+  //   return new Collection(uniqueItems);
+  // }
+  isEqual(value: any, other: any): boolean {
+    if (value === other) {
+      return true;
+    }
+
+    if (typeof value !== 'object' || value === null || typeof other !== 'object' || other === null) {
+      return false;
+    }
+
+    const keysA = Object.keys(value);
+    const keysB = Object.keys(other);
+
+    if (keysA.length !== keysB.length) {
+      return false;
+    }
+
+    for (const key of keysA) {
+      if (!keysB.includes(key) || !this.isEqual(value[key], other[key])) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  diff(other: T[] | Collection<T>): Collection<T> {
+    const otherItems = other instanceof Collection ? other.items : other;
+    const uniqueItems = this.items.filter(item => !otherItems.some(otherItem => this.isEqual(item, otherItem)));
+    return new Collection(uniqueItems);
   }
 
   diffAssoc(values: T[]): Collection<T> {
@@ -155,8 +286,10 @@ export class Collection<T> {
     return result
   }
 
-  dump(): void {
+  dump(): T[] {
     console.log(this.items)
+    return this.items
+
   }
 
   duplicates(): Collection<T> {
@@ -170,6 +303,7 @@ export class Collection<T> {
   each(callback: (item: T, index: number) => void): void {
     this.items.forEach(callback)
   }
+
   eachSpread(callback: (...args: T extends (infer I)[] ? I[] : never) => void): void {
     this.items.forEach((item) => callback(...(item as T extends (infer I)[] ? I[] : never)))
   }
@@ -666,8 +800,8 @@ export class Collection<T> {
   unique(callback?: (item: T) => unknown): Collection<T> {
     const uniqueItems = callback
       ? this.items.filter(
-          (item, index, self) => self.findIndex((i) => callback(i) === callback(item)) === index
-        )
+        (item, index, self) => self.findIndex((i) => callback(i) === callback(item)) === index
+      )
       : Array.from(new Set(this.items))
     return new Collection(uniqueItems)
   }
