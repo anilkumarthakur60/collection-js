@@ -1,4 +1,4 @@
-import { Predicate, PredicateChulkWhile, PredicateContains } from './types/main'
+import { Iteratee, Predicate, PredicateChulkWhile, PredicateContains } from './types/main'
 
 export class Collection<T> {
   private items: T[]
@@ -133,24 +133,6 @@ export class Collection<T> {
     return new Collection((this.items as (T | U)[]).concat(newItems))
   }
 
-  // contains(item: T | Predicate<T>): boolean {
-  //   if (typeof item === 'function') {
-  //     return this.items.some(item as Predicate<T>)
-  //   }
-  //   return this.items.includes(item as T)
-  // }
-  // contains(value: T |string| Predicate<T>): boolean {
-  //   if (typeof value === 'function') {
-  //     return this.items.some(value as Predicate<T>);
-  //   } else if (typeof value === 'object' && value !== null) {
-  //     return this.items.some(item => Object.keys(value).every(key =>
-  //       Object.prototype.hasOwnProperty.call(item, key) &&
-  //       item[key] === (value as any)[key]));
-  //   } else {
-  //     return this.items.includes(value as T);
-  //   }
-  // }
-
   contains(value: T | PredicateContains<T> | Partial<T>): boolean {
     if (typeof value === 'function') {
       return this.items.some(value as Predicate<T>)
@@ -183,18 +165,15 @@ export class Collection<T> {
     return this.items.length
   }
 
-  countBy(callback: (item: T) => string): Record<string, number> {
-    return this.items.reduce(
-      (result, item) => {
-        const key = callback(item)
-        if (!result[key]) {
-          result[key] = 0
-        }
-        result[key]++
-        return result
-      },
-      {} as Record<string, number>
-    )
+  countBy(iteratee: Iteratee<T>): Record<string, number> {
+    return this.items.reduce((acc: Record<string, number>, item: T) => {
+      const key = iteratee(item).toString()
+      if (!acc[key]) {
+        acc[key] = 0
+      }
+      acc[key]++
+      return acc
+    }, {})
   }
 
   crossJoin<U>(values: U[]): Collection<[T, U]> {
