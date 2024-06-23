@@ -38,8 +38,3 @@ describe('Collection', () => {
     })
   })
 })
-
-
-
-
-
