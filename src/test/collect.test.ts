@@ -124,3 +124,98 @@ describe('average', () => {
     expect(collection.average()).toBe(0.6);
   });
 });
+
+
+
+describe('avg', () => {
+  it('The avg method returns the avg of a list of numbers:', () => {
+    const collection = collect([1, 2, 3, 4, 5]);
+    expect(collection.avg()).toBe(3);
+  });
+
+  it('The avg method returns 0 for an empty collection:', () => {
+    const collection = collect([]);
+    expect(collection.avg()).toBe(0);
+  });
+
+  it('The avg method returns the avg of a specific attribute in a collection of objects:', () => {
+    const collection = collect([
+      { name: 'Alice', age: 25 },
+      { name: 'Bob', age: 30 },
+      { name: 'Charlie', age: 35 }
+    ]);
+    expect(collection.avg(item => item.age)).toBe(30);
+  });
+
+  it('The avg method returns the avg based on a custom callback:', () => {
+    const collection = collect([1, 2, 3, 4, 5]);
+    expect(collection.avg(item => item * 2)).toBe(6);
+  });
+
+  it('The avg method handles mixed data types correctly:', () => {
+    const collection = collect([1, '2', 3, '4', 5]);
+    expect(collection.avg()).toBe(3);
+  });
+
+  it('The avg method handles nested object structures:', () => {
+    const collection = collect([
+      { data: { value: 10 } },
+      { data: { value: 20 } },
+      { data: { value: 30 } }
+    ]);
+    expect(collection.avg(item => item.data.value)).toBe(20);
+  });
+
+  it('The avg method handles a collection with boolean values (treated as 1 for true and 0 for false):', () => {
+    const collection = collect([true, false, true, true, false]);
+    expect(collection.avg()).toBe(0.6);
+  });
+});
+
+//before
+describe('before', () => {
+  it('The before method returns the item before the given item. null is returned if the given item is not found or is the first item:', () => {
+    const collection = collect([1, 2, 3, 4, 5]);
+    expect(collection.before(3)).toBe(2);
+    expect(collection.before(1)).toBe(null);
+  });
+
+  it('The before method supports loose comparison:', () => {
+    const collection = collect([2, 4, 6, 8]);
+    expect(collection.before('6')).toBe(4);
+  });
+
+  it('The before method supports strict comparison:', () => {
+    const collection = collect([2, 4, 6, 8]);
+    expect(collection.before('6', true)).toBe(null);
+  });
+
+  it('The before method supports custom closure:', () => {
+    const collection = collect([2, 4, 6, 8]);
+    expect(collection.before((item: number) => item > 5)).toBe(4);
+  });
+});
+
+
+describe('before', () => {
+  it('The before method returns the item before the given item. null is returned if the given item is not found or is the first item:', () => {
+    const collection = collect([1, 2, 3, 4, 5]);
+    expect(collection.before(3)).toBe(2);
+    expect(collection.before(1)).toBe(null);
+  });
+
+  it('The before method supports loose comparison:', () => {
+    const collection = collect([2, 4, 6, 8]);
+    expect(collection.before('4')).toBe(2);
+  });
+
+  it('The before method supports strict comparison:', () => {
+    const collection = collect([2, 4, 6, 8]);
+    expect(collection.before('4', true)).toBe(null);
+  });
+
+  it('The before method supports custom closure:', () => {
+    const collection = collect([2, 4, 6, 8]);
+    expect(collection.before((item: number) => item > 5)).toBe(4);
+  });
+});
