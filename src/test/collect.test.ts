@@ -42,3 +42,85 @@ describe('Collection', () => {
     });
   });
 });
+
+describe('after', () => {
+  it('The after method returns the item after the given item. null is returned if the given item is not found or is the last item:', () => {
+    const collection = collect([1, 2, 3, 4, 5]);
+    expect(collection.after(3)).toBe(4);
+    expect(collection.after(5)).toBe(null);
+  });
+
+  it('The after method supports loose comparison:', () => {
+    const collection = collect([2, 4, 6, 8]);
+    expect(collection.after('4')).toBe(6);
+  });
+
+  it('The after method supports strict comparison:', () => {
+    const collection = collect([2, 4, 6, 8]);
+    expect(collection.after('4', true)).toBe(null);
+  });
+
+  it('The after method supports custom closure:', () => {
+    const collection = collect([2, 4, 6, 8]);
+    expect(collection.after((item: number) => item > 5)).toBe(8);
+  });
+});
+
+describe('all', () => {
+  it('The all method returns all items in the collection:', () => {
+    const collection = collect([1, 2, 3, 4]);
+    expect(collection.all()).toEqual([1, 2, 3, 4]);
+  });
+
+  it('The all method returns all items in the collection that pass the truth test provided as the first argument to the method:', () => {
+    const collection = collect([1, 2, 3, 4]);
+    expect(collection.all((value) => value > 2)).toEqual([3, 4]);
+  });
+});
+
+
+
+describe('average', () => {
+  it('The average method returns the average of a list of numbers:', () => {
+    const collection = collect([1, 2, 3, 4, 5]);
+    expect(collection.average()).toBe(3);
+  });
+
+  it('The average method returns 0 for an empty collection:', () => {
+    const collection = collect([]);
+    expect(collection.average()).toBe(0);
+  });
+
+  it('The average method returns the average of a specific attribute in a collection of objects:', () => {
+    const collection = collect([
+      { name: 'Alice', age: 25 },
+      { name: 'Bob', age: 30 },
+      { name: 'Charlie', age: 35 }
+    ]);
+    expect(collection.average(item => item.age)).toBe(30);
+  });
+
+  it('The average method returns the average based on a custom callback:', () => {
+    const collection = collect([1, 2, 3, 4, 5]);
+    expect(collection.average(item => item * 2)).toBe(6);
+  });
+
+  it('The average method handles mixed data types correctly:', () => {
+    const collection = collect([1, '2', 3, '4', 5]);
+    expect(collection.average()).toBe(3);
+  });
+
+  it('The average method handles nested object structures:', () => {
+    const collection = collect([
+      { data: { value: 10 } },
+      { data: { value: 20 } },
+      { data: { value: 30 } }
+    ]);
+    expect(collection.average(item => item.data.value)).toBe(20);
+  });
+
+  it('The average method handles a collection with boolean values (treated as 1 for true and 0 for false):', () => {
+    const collection = collect([true, false, true, true, false]);
+    expect(collection.average()).toBe(0.6);
+  });
+});

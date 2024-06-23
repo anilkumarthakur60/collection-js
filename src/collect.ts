@@ -1,3 +1,5 @@
+import { Predicate } from "./types/main";
+
 export class Collection<T> {
   private items: T[]
 
@@ -5,13 +7,50 @@ export class Collection<T> {
     this.items = items
   }
 
-  all(): T[] {
-    return this.items
+  all(predicate?: Predicate<T>): T[] {
+    if (predicate) {
+      return this.items.filter((item, index) => predicate(item, index));
+    }
+    return this.items;
   }
 
-  average(callback: (item: T) => number): number {
-    return this.sum(callback) / this.items.length
+
+  after(item: T | string|Predicate<T>, strict: boolean = false): T | null {
+    if (typeof item === 'function') {
+      const predicate = item as Predicate<T>;
+      for (let i = 0; i < this.items.length; i++) {
+        if (predicate(this.items[i], i)) {
+          return this.items[i + 1] || null;
+        }
+      }
+      return null;
+    } else {
+      const index = this.items.findIndex(i =>
+        strict ? i === item : i == item
+      );
+      if (index === -1 || index === this.items.length - 1) {
+        return null;
+      }
+      return this.items[index + 1];
+    }
   }
+
+
+  // average(callback: (item: T) => number): number {
+  //   return this.sum(callback) / this.items.length
+  // }
+
+  average(callback?: (item: T) => number): number {
+    if(this.items.length === 0) {
+      return 0;
+    }
+    if(callback) {
+      return this.sum(callback) / this.items.length;
+    }
+
+    return this.sum(item => Number(item)) / this.items.length;
+  }
+
 
   avg(callback: (item: T) => number): number {
     return this.average(callback)
