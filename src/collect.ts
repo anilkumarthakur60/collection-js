@@ -1,7 +1,7 @@
 import { Iteratee, Predicate, PredicateChulkWhile, PredicateContains } from './types/main'
 
 export class Collection<T> {
-  private items: T[]
+  protected items: T[]
 
   constructor(items: T[] = []) {
     this.items = items
@@ -224,7 +224,22 @@ export class Collection<T> {
   //   const uniqueItems = this.items.filter(item => !otherItems.includes(item));
   //   return new Collection(uniqueItems);
   // }
-  isEqual(value: any, other: any): boolean {
+
+  diff(other: T[] | Collection<T>): Collection<T> {
+    const otherItems = other instanceof Collection ? other.items : other;
+    const uniqueItems = this.items.filter(item => !otherItems.some(otherItem => this.isEqual(item, otherItem)));
+    return new Collection(uniqueItems);
+  }
+  protected getArrayableItems(items: Collection<T> | T[]): T[] {
+    if (items instanceof Collection) {
+      return items.all();
+    }
+    return items;
+  }
+
+  public isEqual(value: Record<string, unknown>, other: Record<string, unknown>): boolean {
+
+  // public isEqual(value: any, other: any): boolean {
     if (value === other) {
       return true;
     }
@@ -249,17 +264,13 @@ export class Collection<T> {
     return true;
   }
 
-  diff(other: T[] | Collection<T>): Collection<T> {
-    const otherItems = other instanceof Collection ? other.items : other;
-    const uniqueItems = this.items.filter(item => !otherItems.some(otherItem => this.isEqual(item, otherItem)));
-    return new Collection(uniqueItems);
+  diffAssoc(values: Collection<T> | T[]): Collection<T> {
+    const arrayableValues = this.getArrayableItems(values);
+    const diffItems = this.items.filter(item =>
+      !arrayableValues.some(value => this.isEqual(item, value))
+    );
+    return new Collection(diffItems);
   }
-
-  diffAssoc(values: T[]): Collection<T> {
-    const diffItems = this.items.filter((item) => !values.includes(item))
-    return new Collection(diffItems)
-  }
-
   diffAssocUsing(values: T[], callback: (item: T) => unknown): Collection<T> {
     const diffItems = this.items.filter(
       (item) => !values.some((value) => callback(value) === callback(item))
