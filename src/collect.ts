@@ -336,7 +336,7 @@ class Collection<T> {
       if (seen.has(value)) {
         if (!duplicates.has(value)) {
           duplicates.add(value)
-          result.push(item)
+          result.push(seen.get(value))
         }
       } else {
         seen.set(value, item)
