@@ -228,7 +228,7 @@ class Collection<T> {
     return items
   }
 
-  public isEqual(value: any, other: any): boolean {
+  isEqual(value: any, other: any): boolean {
     if (value === other) {
       return true
     }
@@ -293,14 +293,31 @@ class Collection<T> {
     return !this.contains(value)
   }
 
-  dot(): Record<string, T> {
-    const result: Record<string, T> = {}
-    this.items.forEach((item) => {
-      if (typeof item === 'object' && item !== null) {
-        Object.assign(result, item)
-      }
-    })
-    return result
+  dot(): Record<string, any> {
+    const flatten = (obj: any, prefix = ''): Record<string, any> => {
+      return Object.keys(obj).reduce(
+        (acc, k) => {
+          const pre = prefix.length ? prefix + '.' : ''
+          if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
+            Object.assign(acc, flatten(obj[k], pre + k))
+          } else {
+            acc[pre + k] = obj[k]
+          }
+          return acc
+        },
+        {} as Record<string, any>
+      )
+    }
+
+    return this.items.reduce(
+      (acc, item) => {
+        if (typeof item === 'object' && item !== null) {
+          Object.assign(acc, flatten(item))
+        }
+        return acc
+      },
+      {} as Record<string, any>
+    )
   }
 
   dump(): T[] {
@@ -308,8 +325,25 @@ class Collection<T> {
     return this.items
   }
 
-  duplicates(): Collection<T> {
-    return this.filter((item, index, array) => array.indexOf(item) !== index)
+  duplicates(key?: keyof T): Collection<T> {
+    const seen = new Map()
+    const duplicates = new Set()
+    const result: T[] = []
+
+    this.items.forEach((item) => {
+      const value = key ? (item as any)[key] : item
+
+      if (seen.has(value)) {
+        if (!duplicates.has(value)) {
+          duplicates.add(value)
+          result.push(item)
+        }
+      } else {
+        seen.set(value, item)
+      }
+    })
+
+    return new Collection(result)
   }
 
   duplicatesStrict(): Collection<T> {
