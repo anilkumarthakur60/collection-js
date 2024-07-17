@@ -403,7 +403,7 @@ export class Collection<T> {
     return this
   }
 
-  every(callback: (item: T) => boolean): boolean {
+  every(callback: (item: T, index: number) => boolean): boolean {
     return this.items.every(callback)
   }
 
