@@ -421,9 +421,18 @@ export class Collection<T> {
     return new Collection(this.items.filter(callback))
   }
 
-  first(): T | undefined {
-    return this.items[0]
+  first(predicate?: (item: T, index: number) => boolean): T | null {
+    if (predicate) {
+      for (let i = 0; i < this.items.length; i++) {
+        if (predicate(this.items[i], i)) {
+          return this.items[i];
+        }
+      }
+      return null;
+    }
+    return this.items.length > 0 ? this.items[0] : null;
   }
+
 
   firstOrFail(): T {
     if (this.items.length === 0) {
