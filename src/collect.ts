@@ -1,7 +1,7 @@
-import { Iteratee, Predicate, PredicateChulkWhile, PredicateContains } from './types/main'
+import { Iteratee, Predicate, PredicateChunkWhile, PredicateContains } from './types/main'
 
 export class Collection<T> {
-  private items: T[]
+  protected items: T[]
 
   constructor(items: T[] = []) {
     this.items = items
@@ -75,7 +75,7 @@ export class Collection<T> {
     return new Collection(chunks)
   }
 
-  chunkWhile(predicate: PredicateChulkWhile<T>): Collection<Collection<T>> {
+  chunkWhile(predicate: PredicateChunkWhile<T>): Collection<Collection<T>> {
     if (this.items.length === 0) return new Collection<Collection<T>>([])
 
     const chunks: Collection<T>[] = []
@@ -208,96 +208,165 @@ export class Collection<T> {
   }
 
   dd(): void {
-
     this.dump()
     if (typeof process !== 'undefined') {
       process.exit(1)
     }
   }
 
-  // diff(values: T[]): Collection<T> {
-  //   const diffItems = this.items.filter((item) => !values.includes(item))
-  //   return new Collection(diffItems)
-  // }
-  // diff(other: T[] | Collection<T>): Collection<T> {
-  //   const otherItems = other instanceof Collection ? other.items : other;
-  //   const uniqueItems = this.items.filter(item => !otherItems.includes(item));
-  //   return new Collection(uniqueItems);
-  // }
+  diff(other: T[] | Collection<T>): Collection<T> {
+    const otherItems = other instanceof Collection ? other.items : other
+    const uniqueItems = this.items.filter(
+      (item) => !otherItems.some((otherItem) => this.isEqual(item, otherItem))
+    )
+    return new Collection(uniqueItems)
+  }
+  protected getArrayableItems(items: Collection<T> | T[]): T[] {
+    if (items instanceof Collection) {
+      return items.all()
+    }
+    return items
+  }
+
   isEqual(value: any, other: any): boolean {
     if (value === other) {
-      return true;
+      return true
     }
 
-    if (typeof value !== 'object' || value === null || typeof other !== 'object' || other === null) {
-      return false;
+    if (
+      typeof value !== 'object' ||
+      value === null ||
+      typeof other !== 'object' ||
+      other === null
+    ) {
+      return false
     }
 
-    const keysA = Object.keys(value);
-    const keysB = Object.keys(other);
+    const keysA = Object.keys(value)
+    const keysB = Object.keys(other)
 
     if (keysA.length !== keysB.length) {
-      return false;
+      return false
     }
 
     for (const key of keysA) {
       if (!keysB.includes(key) || !this.isEqual(value[key], other[key])) {
-        return false;
+        return false
       }
     }
 
-    return true;
+    return true
   }
 
-  diff(other: T[] | Collection<T>): Collection<T> {
-    const otherItems = other instanceof Collection ? other.items : other;
-    const uniqueItems = this.items.filter(item => !otherItems.some(otherItem => this.isEqual(item, otherItem)));
-    return new Collection(uniqueItems);
-  }
-
-  diffAssoc(values: T[]): Collection<T> {
-    const diffItems = this.items.filter((item) => !values.includes(item))
+  diffAssoc(values: Collection<T> | T[]): Collection<T> {
+    const arrayableValues = this.getArrayableItems(values)
+    const diffItems = this.items.filter(
+      (item) => !arrayableValues.some((value) => this.isEqual(item, value))
+    )
     return new Collection(diffItems)
   }
-
   diffAssocUsing(values: T[], callback: (item: T) => unknown): Collection<T> {
     const diffItems = this.items.filter(
       (item) => !values.some((value) => callback(value) === callback(item))
     )
     return new Collection(diffItems)
   }
+  diffKeys(values: Collection<T> | T[]): Collection<T> {
+    const otherItems = this.getArrayableItems(values).reduce(
+      (acc, item) => {
+        Object.keys(item as Record<string, any>).forEach((key) => {
+          acc[key] = true
+        })
+        return acc
+      },
+      {} as Record<string, boolean>
+    )
 
-  diffKeys<K extends keyof T>(values: K[]): Collection<T> {
-    const diffItems = this.items.filter((item) => !values.includes(item as unknown as K))
+    const diffItems = this.items.filter(
+      (item) => !Object.keys(item as Record<string, any>).some((key) => otherItems[key])
+    )
+
     return new Collection(diffItems)
   }
 
-  doesntContain(callback: (item: T) => boolean): boolean {
-    return !this.contains(callback)
+  doesntContain(value: T | PredicateContains<T> | Partial<T>): boolean {
+    return !this.contains(value)
   }
 
-  dot(): Record<string, T> {
-    const result: Record<string, T> = {}
-    this.items.forEach((item) => {
-      if (typeof item === 'object' && item !== null) {
-        Object.assign(result, item)
-      }
-    })
-    return result
+  dot(): Record<string, any> {
+    const flatten = (obj: any, prefix = ''): Record<string, any> => {
+      return Object.keys(obj).reduce(
+        (acc, k) => {
+          const pre = prefix.length ? prefix + '.' : ''
+          if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
+            Object.assign(acc, flatten(obj[k], pre + k))
+          } else {
+            acc[pre + k] = obj[k]
+          }
+          return acc
+        },
+        {} as Record<string, any>
+      )
+    }
+
+    return this.items.reduce(
+      (acc, item) => {
+        if (typeof item === 'object' && item !== null) {
+          Object.assign(acc, flatten(item))
+        }
+        return acc
+      },
+      {} as Record<string, any>
+    )
   }
 
   dump(): T[] {
     console.log(this.items)
     return this.items
-
   }
 
-  duplicates(): Collection<T> {
-    return this.filter((item, index, array) => array.indexOf(item) !== index)
+  duplicates(key?: keyof T): Collection<T> {
+    const seen = new Map()
+    const duplicates = new Set()
+    const result: T[] = []
+
+    this.items.forEach((item) => {
+      const value = key ? (item as any)[key] : item
+
+      if (seen.has(value)) {
+        if (!duplicates.has(value)) {
+          duplicates.add(value)
+          result.push(seen.get(value))
+        }
+      } else {
+        seen.set(value, item)
+      }
+    })
+
+    return new Collection(result)
   }
 
-  duplicatesStrict(): Collection<T> {
-    return this.filter((item, index, array) => array.indexOf(item) !== index)
+  duplicatesStrict(key?: keyof T): Collection<T> {
+    const seen = new Map<any, T[]>()
+    const result: T[] = []
+
+    this.items.forEach((item) => {
+      const value = key ? (item as any)[key] : item
+
+      if (seen.has(value)) {
+        seen.get(value)!.push(item)
+      } else {
+        seen.set(value, [item])
+      }
+    })
+
+    seen.forEach((items) => {
+      if (items.length > 1) {
+        result.push(...items)
+      }
+    })
+
+    return new Collection(result)
   }
 
   each(callback: (item: T, index: number) => void): void {
@@ -800,8 +869,8 @@ export class Collection<T> {
   unique(callback?: (item: T) => unknown): Collection<T> {
     const uniqueItems = callback
       ? this.items.filter(
-        (item, index, self) => self.findIndex((i) => callback(i) === callback(item)) === index
-      )
+          (item, index, self) => self.findIndex((i) => callback(i) === callback(item)) === index
+        )
       : Array.from(new Set(this.items))
     return new Collection(uniqueItems)
   }
