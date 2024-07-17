@@ -425,14 +425,13 @@ export class Collection<T> {
     if (predicate) {
       for (let i = 0; i < this.items.length; i++) {
         if (predicate(this.items[i], i)) {
-          return this.items[i];
+          return this.items[i]
         }
       }
-      return null;
+      return null
     }
-    return this.items.length > 0 ? this.items[0] : null;
+    return this.items.length > 0 ? this.items[0] : null
   }
-
 
   firstOrFail(): T {
     if (this.items.length === 0) {
