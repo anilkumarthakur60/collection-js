@@ -369,14 +369,24 @@ export class Collection<T> {
     return new Collection(result)
   }
 
-  each(callback: (item: T, index: number) => void): void {
+  each(callback: (item: T, index: number) => void): this {
     this.items.forEach(callback)
+    return this
   }
 
-  eachSpread(callback: (...args: T extends (infer I)[] ? I[] : never) => void): void {
-    this.items.forEach((item) => callback(...(item as T extends (infer I)[] ? I[] : never)))
+  // eachSpread(callback: (...args: T extends (infer I)[] ? I[] : never) => void): void {
+  //   this.items.forEach((item) => callback(...(item as T extends (infer I)[] ? I[] : never)))
+  // }
+  eachSpread(callback: (...args: any[]) => void | boolean): this {
+    for (let i = 0; i < this.items.length; i++) {
+      const item = this.items[i]
+      const result = callback(...(Array.isArray(item) ? item : [item]))
+      if (result === false) {
+        break
+      }
+    }
+    return this
   }
-
   ensure(callback: (item: T) => boolean): Collection<T> {
     return new Collection(this.items.filter(callback))
   }
