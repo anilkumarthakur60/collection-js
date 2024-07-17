@@ -1,5 +1,6 @@
 import { Iteratee, Predicate, PredicateChunkWhile, PredicateContains } from './types/main'
 import { UnexpectedValueException } from './exceptions/UnexpectedValueException.ts'
+import { ItemNotFoundException } from './exceptions/ItemNotFoundException.ts'
 
 export class Collection<T> {
   protected items: T[]
@@ -432,12 +433,19 @@ export class Collection<T> {
     }
     return this.items.length > 0 ? this.items[0] : null
   }
-
-  firstOrFail(): T {
-    if (this.items.length === 0) {
-      throw new Error('No items found')
+  firstOrFail(predicate?: (item: T, index: number) => boolean): T {
+    if (predicate) {
+      for (let i = 0; i < this.items.length; i++) {
+        if (predicate(this.items[i], i)) {
+          return this.items[i]
+        }
+      }
+      throw new ItemNotFoundException('No items found that match the predicate')
     }
-    return this.items[0]
+    if (this.items.length > 0) {
+      return this.items[0]
+    }
+    throw new ItemNotFoundException('No items found in the collection')
   }
 
   firstWhere<K extends keyof T>(key: K, value: T[K]): T | undefined {
