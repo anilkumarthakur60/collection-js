@@ -1,0 +1,70 @@
+{
+  "name": "@anilkumarthakur/collection",
+  "private": false,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "dist/index.umd.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "jest",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "format": "prettier --write src/",
+    "lint-format": "npm run lint && npm run format"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-patch": "^1.8.0",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.13.0",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-perfectionist": "^2.10.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.5",
+    "ts-jest": "^29.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0",
+    "vite-plugin-dts": "^3.9.1"
+  },
+  "keywords": [
+    "collection",
+    "data-structure",
+    "algorithms",
+    "typescript",
+    "javascript",
+    "library",
+    "laravel",
+    "php",
+    "laravel-collections",
+    "collection-js",
+    "collection-ts",
+    "collection-php",
+    "collection-laravel",
+    "collection-library",
+    "collection-algorithms",
+    "collection-data-structure",
+    "collection-typescript",
+    "collection-javascript",
+    "collection-laravel",
+    "collection-php",
+    "collection-library"
+  ]
+}
