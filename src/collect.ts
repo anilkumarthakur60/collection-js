@@ -473,16 +473,21 @@ export class Collection<T> {
     return new Collection(flattened)
   }
 
-  flatten<U>(): Collection<U> {
-    const flattened: U[] = []
-    this.items.forEach((item) => {
-      if (Array.isArray(item)) {
-        flattened.push(...(item as unknown as U[]))
-      } else {
-        flattened.push(item as unknown as U)
-      }
-    })
-    return new Collection(flattened)
+  flatten<U>(depth: number = Infinity): Collection<U> {
+    const flattenHelper = (arr: any[], depth: number): any[] => {
+      if (depth < 1) return arr
+      return arr.reduce((acc, val) => {
+        if (Array.isArray(val)) {
+          acc.push(...flattenHelper(val, depth - 1))
+        } else {
+          acc.push(val)
+        }
+        return acc
+      }, [])
+    }
+
+    const flattenedItems = flattenHelper(this.items, depth)
+    return new Collection<U>(flattenedItems as U[])
   }
 
   flip(): Collection<Record<string, number>> {
