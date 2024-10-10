@@ -36,10 +36,6 @@ export class Collection<T> {
   }
 
 
-  // average(callback: (item: T) => number): number {
-  //   return this.sum(callback) / this.items.length
-  // }
-
   average(callback?: (item: T) => number): number {
     if(this.items.length === 0) {
       return 0;
@@ -52,8 +48,29 @@ export class Collection<T> {
   }
 
 
-  avg(callback: (item: T) => number): number {
+  avg(callback?: (item: T) => number): number {
     return this.average(callback)
+  }
+
+
+  before(item: T | string|Predicate<T>, strict: boolean = false): T | null {
+    if (typeof item === 'function') {
+      const predicate = item as Predicate<T>;
+      for (let i = 1; i < this.items.length; i++) {
+        if (predicate(this.items[i], i)) {
+          return this.items[i - 1];
+        }
+      }
+      return null;
+    } else {
+      const index = this.items.findIndex(i =>
+        strict ? i === item : i == item
+      );
+      if (index === -1 || index === 0) {
+        return null;
+      }
+      return this.items[index - 1];
+    }
   }
 
   chunk(size: number): Collection<T[]> {
