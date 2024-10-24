@@ -1,4 +1,4 @@
-import { Predicate } from './types/main'
+import { Predicate, PredicateChulkWhile } from './types/main'
 
 export class Collection<T> {
   private items: T[]
@@ -67,7 +67,6 @@ export class Collection<T> {
 
   chunk(size: number): Collection<Collection<T>> {
     if (size <= 0) return new Collection<Collection<T>>([])
-
     const chunks: Collection<T>[] = []
     for (let i = 0; i < this.items.length; i += size) {
       chunks.push(new Collection(this.items.slice(i, i + size)))
@@ -76,21 +75,25 @@ export class Collection<T> {
     return new Collection(chunks)
   }
 
-  chunkWhile(callback: (item: T, index: number) => boolean): Collection<T[]> {
-    const chunks: T[][] = []
-    let chunk: T[] = []
+  chunkWhile(predicate: PredicateChulkWhile<T>): Collection<Collection<T>> {
+    if (this.items.length === 0) return new Collection<Collection<T>>([])
+
+    const chunks: Collection<T>[] = []
+    let currentChunk: T[] = []
+
     for (let i = 0; i < this.items.length; i++) {
-      if (callback(this.items[i], i)) {
-        if (chunk.length > 0) {
-          chunks.push(chunk)
-        }
-        chunk = []
+      if (i === 0 || predicate(this.items[i], i, this.items)) {
+        currentChunk.push(this.items[i])
+      } else {
+        chunks.push(new Collection(currentChunk))
+        currentChunk = [this.items[i]]
       }
-      chunk.push(this.items[i])
     }
-    if (chunk.length > 0) {
-      chunks.push(chunk)
+
+    if (currentChunk.length > 0) {
+      chunks.push(new Collection(currentChunk))
     }
+
     return new Collection(chunks)
   }
 
@@ -106,8 +109,11 @@ export class Collection<T> {
     return new Collection(flattened)
   }
 
-  collect<U>(callback: (item: T, index: number) => U): Collection<U> {
-    return new Collection(this.items.map(callback))
+  // collect<U>(callback: (item: T, index: number) => U): Collection<U> {
+  //   return new Collection(this.items.map(callback))
+  // }
+  collect(): Collection<T> {
+    return new Collection(this.items)
   }
 
   combine<U>(values: U[]): Collection<[T, U]> {
@@ -122,12 +128,16 @@ export class Collection<T> {
     return new Collection(combined)
   }
 
-  concat(...values: T[]): Collection<T> {
-    return new Collection(this.items.concat(...values))
+  concat<U>(items: U[] | Collection<U>): Collection<T | U> {
+    const newItems = items instanceof Collection ? items.all() : items
+    return new Collection((this.items as (T | U)[]).concat(newItems))
   }
 
-  contains(callback: (item: T) => boolean): boolean {
-    return this.items.some(callback)
+  contains(item: T | Predicate<T>): boolean {
+    if (typeof item === 'function') {
+      return this.items.some(item as Predicate<T>)
+    }
+    return this.items.includes(item as T)
   }
 
   containsOneItem(callback: (item: T) => boolean): boolean {
