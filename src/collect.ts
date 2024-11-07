@@ -1,4 +1,4 @@
-import { Predicate, PredicateChulkWhile } from './types/main'
+import { Predicate, PredicateChulkWhile, PredicateContains } from './types/main'
 
 export class Collection<T> {
   private items: T[]
@@ -133,12 +133,41 @@ export class Collection<T> {
     return new Collection((this.items as (T | U)[]).concat(newItems))
   }
 
-  contains(item: T | Predicate<T>): boolean {
-    if (typeof item === 'function') {
-      return this.items.some(item as Predicate<T>)
+  // contains(item: T | Predicate<T>): boolean {
+  //   if (typeof item === 'function') {
+  //     return this.items.some(item as Predicate<T>)
+  //   }
+  //   return this.items.includes(item as T)
+  // }
+  // contains(value: T |string| Predicate<T>): boolean {
+  //   if (typeof value === 'function') {
+  //     return this.items.some(value as Predicate<T>);
+  //   } else if (typeof value === 'object' && value !== null) {
+  //     return this.items.some(item => Object.keys(value).every(key =>
+  //       Object.prototype.hasOwnProperty.call(item, key) &&
+  //       item[key] === (value as any)[key]));
+  //   } else {
+  //     return this.items.includes(value as T);
+  //   }
+  // }
+
+
+  contains(value: T | PredicateContains<T> | Partial<T>): boolean {
+    if (typeof value === 'function') {
+      return this.items.some(value as Predicate<T>);
     }
-    return this.items.includes(item as T)
+
+    if (typeof value === 'object' && value !== null) {
+      return this.items.some(item =>
+        Object.keys(value).every(key =>
+          (item as Record<string, unknown>)[key] === (value as Record<string, unknown>)[key]
+        )
+      );
+    }
+
+    return this.items.includes(value as T);
   }
+
 
   containsOneItem(callback: (item: T) => boolean): boolean {
     return this.items.filter(callback).length === 1
@@ -585,7 +614,7 @@ export class Collection<T> {
     const shuffled = [...this.items]
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
-      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+        ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
     }
     return new Collection(shuffled)
   }
@@ -727,8 +756,8 @@ export class Collection<T> {
   unique(callback?: (item: T) => unknown): Collection<T> {
     const uniqueItems = callback
       ? this.items.filter(
-          (item, index, self) => self.findIndex((i) => callback(i) === callback(item)) === index
-        )
+        (item, index, self) => self.findIndex((i) => callback(i) === callback(item)) === index
+      )
       : Array.from(new Set(this.items))
     return new Collection(uniqueItems)
   }
