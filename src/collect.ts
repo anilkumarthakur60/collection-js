@@ -151,26 +151,28 @@ export class Collection<T> {
   //   }
   // }
 
-
   contains(value: T | PredicateContains<T> | Partial<T>): boolean {
     if (typeof value === 'function') {
-      return this.items.some(value as Predicate<T>);
+      return this.items.some(value as Predicate<T>)
     }
 
     if (typeof value === 'object' && value !== null) {
-      return this.items.some(item =>
-        Object.keys(value).every(key =>
-          (item as Record<string, unknown>)[key] === (value as Record<string, unknown>)[key]
+      return this.items.some((item) =>
+        Object.keys(value).every(
+          (key) =>
+            (item as Record<string, unknown>)[key] === (value as Record<string, unknown>)[key]
         )
-      );
+      )
     }
 
-    return this.items.includes(value as T);
+    return this.items.includes(value as T)
   }
 
-
-  containsOneItem(callback: (item: T) => boolean): boolean {
-    return this.items.filter(callback).length === 1
+  containsOneItem(callback?: PredicateContains<T>): boolean {
+    if (callback) {
+      return this.items.filter(callback).length === 1
+    }
+    return this.items.length === 1
   }
 
   containsStrict(value: T): boolean {
@@ -614,7 +616,7 @@ export class Collection<T> {
     const shuffled = [...this.items]
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
-        ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
     }
     return new Collection(shuffled)
   }
@@ -756,8 +758,8 @@ export class Collection<T> {
   unique(callback?: (item: T) => unknown): Collection<T> {
     const uniqueItems = callback
       ? this.items.filter(
-        (item, index, self) => self.findIndex((i) => callback(i) === callback(item)) === index
-      )
+          (item, index, self) => self.findIndex((i) => callback(i) === callback(item)) === index
+        )
       : Array.from(new Set(this.items))
     return new Collection(uniqueItems)
   }

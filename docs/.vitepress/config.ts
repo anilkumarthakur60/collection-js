@@ -11,7 +11,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Example', link: '/markdown-examples' },
-      { text: 'Docs', link: '/docs' },
+      { text: 'Docs', link: '/docs' }
     ],
 
     sidebar: [
@@ -23,12 +23,11 @@ export default defineConfig({
         ]
       },
       {
-        text:'Docs',
-        items:[
-          {text:'Introduction',link:'/docs'},
-          {text:'Installation',link:'/docs/installation'},
-          {text:'Usage',link:'/docs/usage'},
-
+        text: 'Docs',
+        items: [
+          { text: 'Introduction', link: '/docs' },
+          { text: 'Installation', link: '/docs/installation' },
+          { text: 'Usage', link: '/docs/usage' }
         ]
       }
     ],

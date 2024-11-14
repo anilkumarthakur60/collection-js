@@ -9,7 +9,7 @@ VitePress provides Syntax Highlighting powered by [Shiki](https://github.com/shi
 **Input**
 
 ````md
-```js{4}Custom Containers
+````js{4}Custom Containers
 export default {
   data () {
     return {
@@ -18,6 +18,7 @@ export default {
   }
 }
 ```Custom Containers
+````
 ````
 
 **Output**
