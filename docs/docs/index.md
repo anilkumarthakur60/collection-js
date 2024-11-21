@@ -8,7 +8,7 @@ VitePress provides Syntax Highlighting powered by [Shiki](https://github.com/shi
 
 **Input**
 
-````md
+`````md
 ````js{4}Custom Containers
 export default {
   data () {
@@ -19,6 +19,8 @@ export default {
 }
 ```Custom Containers
 ````
+`````
+
 ````
 
 **Output**
@@ -84,3 +86,4 @@ This is a details block.
 ## More
 
 Check out the documentation for the [full list of markdown extensions](https://vitepress.dev/guide/markdown).
+````
