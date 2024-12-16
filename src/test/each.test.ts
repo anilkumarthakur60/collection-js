@@ -54,7 +54,7 @@ describe('Collection each method', () => {
 
   it('should work with different data types in the collection', () => {
     const collection = collect([1, 'apple', true, { id: 2 }, null])
-    const result: any = []
+    const result: string[] = []
     collection.each((item) => {
       result.push(typeof item)
     })

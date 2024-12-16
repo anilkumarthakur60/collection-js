@@ -8,7 +8,7 @@ describe('Collection eachSpread method', () => {
       [5, 6]
     ])
     const result: number[] = []
-    collection.eachSpread((a, b) => {
+    collection.eachSpread((a: number, b: number) => {
       result.push(a + b)
     })
     expect(result).toEqual([3, 7, 11])
@@ -21,7 +21,7 @@ describe('Collection eachSpread method', () => {
       [5, 6]
     ])
     const result: number[] = []
-    collection.eachSpread((a, b) => {
+    collection.eachSpread((a: number, b: number) => {
       result.push(a + b)
       return a + b !== 7 // stop when sum equals 7
     })
@@ -30,9 +30,9 @@ describe('Collection eachSpread method', () => {
 
   it('should handle non-array items by passing them as single arguments', () => {
     const collection = collect([1, [2, 3], 4])
-    const result: any[] = []
-    collection.eachSpread((...args) => {
-      result.push(args)
+    const result: (number | number[])[] = []
+    collection.eachSpread((...args: (number | number[])[]) => {
+      result.push(args as unknown as number[])
     })
     expect(result).toEqual([[1], [2, 3], [4]])
   })
@@ -40,7 +40,9 @@ describe('Collection eachSpread method', () => {
   it('should work with an empty collection', () => {
     const collection = collect([])
     const result: number[] = []
-    collection.eachSpread((...args) => {
+    collection.eachSpread((...args: unknown[]) => {
+      // For an empty collection, this callback won't be invoked.
+      // Using unknown[] here is safer than any[] and satisfies ESLint rules.
       result.push(args.length)
     })
     expect(result).toEqual([])
@@ -51,9 +53,9 @@ describe('Collection eachSpread method', () => {
       { a: 1, b: 2 },
       { c: 3, d: 4 }
     ])
-    const result: any[] = []
-    collection.eachSpread((item) => {
-      result.push(item)
+    const result: object[] = []
+    collection.eachSpread((...args: { a?: number; b?: number; c?: number; d?: number }[]) => {
+      result.push(...args)
     })
     expect(result).toEqual([
       { a: 1, b: 2 },
@@ -67,7 +69,9 @@ describe('Collection eachSpread method', () => {
       [3, 4],
       [5, 6]
     ])
-    const result = collection.eachSpread((a, b) => a + b)
+    const result = collection.eachSpread((...args: number[]) => {
+      args.reduce((sum, num) => sum + num, 0)
+    })
     expect(result).toBe(collection)
   })
 })
