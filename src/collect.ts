@@ -2,7 +2,6 @@ import { ItemNotFoundException } from './exceptions/ItemNotFoundException'
 import { UnexpectedValueException } from './exceptions/UnexpectedValueException'
 import { Iteratee, Predicate, PredicateChunkWhile, PredicateContains } from './types/main'
 
-type EachSpreadArgs<T> = T extends Array<infer I> ? I[] : [T]
 type FlattenType<T> = T extends (infer U)[] ? FlattenType<U> : T
 
 export class Collection<T> {
@@ -359,12 +358,12 @@ export class Collection<T> {
     return this
   }
 
-  eachSpread(callback: (...args: EachSpreadArgs<T>) => void | boolean): this {
+  eachSpread(callback: (...args: T extends (infer R)[] ? R[] : T[]) => void | boolean): this {
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i]
-      // At runtime, if the item is an array, we spread it; otherwise we wrap it in an array.
+      // If the item is an array, spread it; otherwise, wrap it in an array.
       const args = Array.isArray(item) ? item : [item]
-      const result = callback(...(args as EachSpreadArgs<T>))
+      const result = callback(...(args as T extends (infer R)[] ? R[] : T[]))
       if (result === false) {
         break
       }
@@ -476,7 +475,7 @@ export class Collection<T> {
     const flattenHelper = (arr: unknown[], depth: number): unknown[] => {
       if (depth < 1) return arr
       return arr.reduce((acc: unknown[], val: unknown) => {
-        if (Array.isArray(val)) {
+        if (Array.isArray(val) && depth > 0) {
           acc.push(...flattenHelper(val, depth - 1))
         } else {
           acc.push(val)
@@ -501,14 +500,23 @@ export class Collection<T> {
     return new Collection([flippedItems])
   }
 
-  forget<K extends keyof T>(key: K): Collection<Omit<T, K>> {
-    return new Collection(
-      this.items.map((item) => {
-        const copy = { ...item }
-        delete copy[key]
-        return copy
-      }) as Omit<T, K>[]
-    )
+  forget(index: number | string): Collection<T> {
+    if (typeof index === 'number') {
+      if (index < 0 || index >= this.items.length) {
+        return new Collection(this.items)
+      }
+      const newItems = this.items.slice(0, index).concat(this.items.slice(index + 1))
+      return new Collection(newItems)
+    } else if (typeof index === 'string') {
+      return new Collection(
+        this.items.map((item) => {
+          const itemCopy = { ...item } as Record<string, unknown>
+          delete itemCopy[index]
+          return itemCopy as T
+        })
+      )
+    }
+    return new Collection(this.items)
   }
 
   forPage(page: number, perPage: number): Collection<T> {
