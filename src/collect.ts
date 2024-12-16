@@ -594,11 +594,25 @@ export class Collection<T> {
     return Object.keys(this.items) as (keyof T)[]
   }
 
-  last(): T | undefined {
-    return this.items[this.items.length - 1]
+  last(predicate?: (item: T, index: number) => boolean, errorFn?: () => void): T | undefined {
+    if (!predicate) {
+      return this.items[this.items.length - 1]
+    }
+
+    for (let i = this.items.length - 1; i >= 0; i--) {
+      if (predicate(this.items[i], i)) {
+        return this.items[i]
+      }
+    }
+
+    if (errorFn) {
+      errorFn()
+    }
+
+    return undefined
   }
 
-  make<U>(callback: (item: T) => U): Collection<U> {
+  make<U>(callback: (item: T, index: number, array: T[]) => U): Collection<U> {
     return new Collection(this.items.map(callback))
   }
 
