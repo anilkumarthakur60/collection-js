@@ -8,7 +8,8 @@ describe('Collection eachSpread method', () => {
       [5, 6]
     ])
     const result: number[] = []
-    collection.eachSpread((a, b) => {
+    collection.eachSpread((...args) => {
+      const [a, b] = args
       result.push(a + b)
     })
     expect(result).toEqual([3, 7, 11])
