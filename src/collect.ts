@@ -590,8 +590,29 @@ export class Collection<T> {
     )
   }
 
-  keys(): (keyof T)[] {
-    return Object.keys(this.items) as (keyof T)[]
+  keys(): (keyof T | string | number)[] {
+    if (Array.isArray(this.items)) {
+      // Check if it's an array of arrays or objects
+      if (this.items.every((item) => Array.isArray(item))) {
+        // If it's an array of arrays, return indices as keys
+        return this.items.map((_, index) => index.toString())
+      } else if (this.items.every((item) => typeof item === 'object' && item !== null)) {
+        // If it's an array of objects, merge keys from all objects
+        const mergedKeys = this.items.reduce((keys, item) => {
+          if (typeof item === 'object' && item !== null) {
+            return keys.concat(Object.keys(item))
+          }
+          return keys
+        }, [] as string[])
+        // Remove duplicates
+        return Array.from(new Set(mergedKeys)) as (keyof T)[]
+      }
+    } else if (typeof this.items === 'object' && this.items !== null) {
+      // If it's a single object, return its keys
+      return Object.keys(this.items) as (keyof T)[]
+    }
+    // Otherwise, return indices for primitives
+    return this.items.map((_, index) => index.toString())
   }
 
   last(predicate?: (item: T, index: number) => boolean, errorFn?: () => void): T | undefined {
