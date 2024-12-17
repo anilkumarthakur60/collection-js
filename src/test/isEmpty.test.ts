@@ -83,30 +83,28 @@ describe('isEmpty', () => {
 
   it('should return false for deeply nested empty collections', () => {
     const data = [collect([collect([])])]
-  
+
     const collection = collect(data)
     expect(collection.isEmpty()).toBe(false) // Outer collection is not empty
     expect(collection.all()[0].all()[0].isEmpty()).toBe(true) // Deeply nested collection is empty
   })
   it('should return true after all items are removed dynamically', () => {
     const data = [1, 2, 3]
-  
+
     const collection = collect(data)
     expect(collection.isEmpty()).toBe(false)
-  
+
     // Dynamically clear items
     while (!collection.isEmpty()) {
       collection.splice(0, 1) // Remove items one by one
     }
-  
+
     expect(collection.isEmpty()).toBe(true)
   })
   it('should return false for a collection with mixed types', () => {
     const data = [1, 'string', null, undefined, { id: 1 }, false]
-  
+
     const collection = collect(data)
     expect(collection.isEmpty()).toBe(false)
   })
-    
-  
 })

@@ -1,76 +1,77 @@
 import { collect } from '../collect'
 
 describe('Collection.intersectByKeys', () => {
-  it('should retain keys that exist in both the collection and the given object', () => {
+  it('should retain keys that exist in the provided object', () => {
     const data = [
-      { serial: 'UX301', type: 'screen', year: 2009 },
-      { serial: 'UX404', type: 'tab', year: 2011 }
-  ];
-  const other = [
-    { serial: 'UX301', type: 'screen', year: 2009 },
-    { serial: 'UX404', type: 'tab', year: 2011 }
-  ]
+      { id: 1, name: 'Alice', age: 25 },
+      { id: 2, name: 'Bob', age: 30 }
+    ]
+
+    const other = { name: '', age: '' }
 
     const collection = collect(data)
     const result = collection.intersectByKeys(other)
 
-    expect(result.toArray()).toEqual([{ type: 'screen', year: 2009 }])
+    expect(result.toArray()).toEqual([
+      { name: 'Alice', age: 25 },
+      { name: 'Bob', age: 30 }
+    ])
   })
 
-  it('should return an empty collection if no keys match', () => {
+  it('should return empty objects if no keys match', () => {
     const data = [
-      { serial: 'UX301', type: 'screen' },
-      { serial: 'UX404', type: 'tab' }
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' }
     ]
-    const other = [
-      { reference: 'UX404', name: 'tab' }
-    ]
+
+    const other = { non_existent_key: '' }
 
     const collection = collect(data)
     const result = collection.intersectByKeys(other)
 
-    expect(result.toArray()).toEqual([{}])
+    expect(result.toArray()).toEqual([{}, {}])
   })
 
-  it('should return the same collection if all keys match', () => {
+  it('should handle an empty provided object', () => {
     const data = [
-      { serial: 'UX301', type: 'screen', year: 2009 },
-      { serial: 'UX404', type: 'tab', year: 2011 }
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' }
     ]
-    const other = [
-      { serial: 'UX301', type: 'screen', year: 2009 },
-      { serial: 'UX404', type: 'tab', year: 2011 }
-    ]
+
+    const other = {}
 
     const collection = collect(data)
     const result = collection.intersectByKeys(other)
 
-    expect(result.toArray()).toEqual([{ serial: 'UX301', type: 'screen', year: 2009 }])
+    expect(result.toArray()).toEqual([{}, {}])
   })
 
-  it('should handle an empty given object and return an empty collection', () => {
-    const data = [
-      { serial: 'UX301', type: 'screen' },
-      { serial: 'UX404', type: 'tab' }
-    ]
-    const other = []
+  it('should handle an empty collection', () => {
+    // eslint-disable-next-line
+    const data: { [key: string]: any }[] = []
+
+    const other = { id: '', name: '' }
 
     const collection = collect(data)
     const result = collection.intersectByKeys(other)
 
-    expect(result.toArray()).toEqual([{}])
+    expect(result.toArray()).toEqual([])
   })
 
-  it('should handle an empty collection and return an empty collection', () => {
+  it('should retain keys for nested objects', () => {
     const data = [
-      { serial: 'UX301', type: 'screen' },
-      { serial: 'UX404', type: 'tab' }
+      { id: 1, details: { name: 'Alice', age: 25 } },
+      { id: 2, details: { name: 'Bob', age: 30 } }
     ]
-    const other = []
+
+    const other = { details: '' }
 
     const collection = collect(data)
     const result = collection.intersectByKeys(other)
 
-    expect(result.toArray()).toEqual([{}])
+    expect(result.toArray()).toEqual([
+      { details: { name: 'Alice', age: 25 } },
+      { details: { name: 'Bob', age: 30 } }
+    ])
   })
 })
