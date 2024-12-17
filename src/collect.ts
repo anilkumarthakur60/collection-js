@@ -562,11 +562,20 @@ export class Collection<T> {
     const intersectItems = this.items.filter((item) => values.includes(item))
     return new Collection(intersectItems)
   }
-
-  intersectByKeys<K extends keyof T>(keys: K[]): Collection<T> {
-    const intersectItems = this.items.filter((item) => keys.includes(item as unknown as K))
-    return new Collection(intersectItems)
+  intersectByKeys<U extends Record<string, never>>(other: U): Collection<Partial<T>> {
+    const intersectedItems = this.items.map((item) => {
+      const intersected: Partial<T> = {}
+      for (const key in item) {
+        if (key in other) {
+          intersected[key as keyof T] = item[key as keyof T]
+        }
+      }
+      return intersected
+    })
+    return new Collection(intersectedItems)
   }
+  
+  
 
   isEmpty(): boolean {
     return this.items.length === 0
