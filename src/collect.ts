@@ -1124,10 +1124,15 @@ export class Collection<T> {
     return new Collection([...this.items].sort(callback))
   }
 
-  splice(start: number, deleteCount: number, ...values: T[]): Collection<T> {
-    const copy = [...this.items]
-    copy.splice(start, deleteCount, ...values)
-    return new Collection(copy)
+  // splice(start: number, deleteCount: number, ...values: T[]): Collection<T> {
+  //   const copy = [...this.items]
+  //   copy.splice(start, deleteCount, ...values)
+  //   return new Collection(copy)
+  // }
+
+  splice(start: number, deleteCount: number, ...values: T[]): this {
+    this.items.splice(start, deleteCount, ...values)
+    return this
   }
 
   split(size: number): Collection<T[]> {
