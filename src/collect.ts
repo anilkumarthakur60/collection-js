@@ -576,18 +576,45 @@ export class Collection<T> {
     return this.items.length > 0
   }
 
-  join<K extends keyof T>(separator: string, key: K): string {
-    return this.items.map((item) => String(item[key])).join(separator)
+  join<K extends keyof T>(
+    separator: string,
+    keyOrCallback: K | ((item: T) => string | number | undefined)
+  ): string {
+    return this.items
+      .map((item) => {
+        if (typeof keyOrCallback === 'function') {
+          // Use the callback function to derive the value
+          return keyOrCallback(item)?.toString() ?? ''
+        } else if (item && typeof item === 'object' && keyOrCallback in item) {
+          // Use the key if it exists in the item
+          return String(item[keyOrCallback])
+        }
+        return '' // Fallback for missing keys or invalid items
+      })
+      .filter((value) => value !== '') // Filter out empty strings
+      .join(separator)
   }
 
-  keyBy<K extends keyof T>(key: K): Record<string, T> {
-    return this.items.reduce(
-      (result, item) => {
-        result[String(item[key])] = item
-        return result
-      },
-      {} as Record<string, T>
-    )
+  keyBy<K extends keyof T>(
+    key: K | ((item: T, index: number) => string | number)
+  ): Record<string, T> {
+    const result: Record<string, T> = {}
+
+    this.items.forEach((item, index) => {
+      let keyValue: string | undefined
+
+      if (typeof key === 'function') {
+        keyValue = key(item, index)?.toString()
+      } else if (item && typeof item === 'object' && key in item) {
+        keyValue = item[key]?.toString()
+      }
+
+      if (keyValue) {
+        result[keyValue] = item
+      }
+    })
+
+    return result
   }
 
   keys(): (keyof T | string | number)[] {
