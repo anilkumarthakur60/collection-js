@@ -26,7 +26,7 @@ describe('Collection', () => {
     })
 
     it('should return 0 for empty collection', () => {
-      const collection = new Collection()
+      const collection = new Collection([])
       expect(collection.average()).toBe(0)
     })
   })
@@ -57,7 +57,7 @@ describe('Collection', () => {
     })
 
     it('should throw ItemNotFoundException when empty', () => {
-      const collection = new Collection()
+      const collection = new Collection([])
       expect(() => collection.firstOrFail()).toThrow(ItemNotFoundException)
     })
 

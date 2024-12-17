@@ -7,7 +7,7 @@ type FlattenType<T> = T extends (infer U)[] ? FlattenType<U> : T
 export class Collection<T> {
   protected items: T[]
 
-  constructor(items: T[] = []) {
+  constructor(items: T[]) {
     this.items = items
   }
 
@@ -523,8 +523,19 @@ export class Collection<T> {
     return new Collection(this.items.slice((page - 1) * perPage, page * perPage))
   }
 
-  get(index: number): T | undefined {
-    return this.items[index]
+  get<U>(key: string | number, defaultValue?: U | (() => U)): T | U | undefined {
+    if (typeof this.items === 'object' && this.items !== null && !Array.isArray(this.items)) {
+      if (key in this.items) {
+        return this.items[key as keyof typeof this.items]
+      }
+    } else if (Array.isArray(this.items)) {
+      const index = Number(key)
+      if (!isNaN(index) && index >= 0 && index < this.items.length) {
+        return this.items[index]
+      }
+    }
+
+    return typeof defaultValue === 'function' ? (defaultValue as () => U)() : defaultValue
   }
 
   groupBy<K extends keyof T>(key: K): Record<string, T[]> {
@@ -568,7 +579,7 @@ export class Collection<T> {
       const intersected: Partial<T> = {}
 
       if (typeof item === 'object' && item !== null) {
-        (Object.keys(other) as (keyof U)[]).forEach((key) => {
+        ;(Object.keys(other) as (keyof U)[]).forEach((key) => {
           if (key in item) {
             intersected[key as keyof T] = item[key as keyof T]
           }
@@ -1343,8 +1354,10 @@ export class Collection<T> {
   }
 }
 
-function collect<T>(items: T[] = []): Collection<T> {
-  return new Collection(items)
+function collect<T>(items: T[] | Record<string, T> | T = []): Collection<T> {
+  if (Array.isArray(items) || typeof items === 'object') {
+    return new Collection(items as T[])
+  }
+  return new Collection([items])
 }
-
 export { collect, UnexpectedValueException }
