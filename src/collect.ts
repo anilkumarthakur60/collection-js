@@ -7,7 +7,7 @@ type FlattenType<T> = T extends (infer U)[] ? FlattenType<U> : T
 export class Collection<T> {
   protected items: T[]
 
-  constructor(items: T[]) {
+  constructor(items: T[] = []) {
     this.items = items
   }
 
@@ -579,7 +579,7 @@ export class Collection<T> {
       const intersected: Partial<T> = {}
 
       if (typeof item === 'object' && item !== null) {
-        ;(Object.keys(other) as (keyof U)[]).forEach((key) => {
+        Object.keys(other).forEach((key) => {
           if (key in item) {
             intersected[key as keyof T] = item[key as keyof T]
           }
