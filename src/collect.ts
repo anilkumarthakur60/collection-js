@@ -980,36 +980,115 @@ export class Collection<T> {
     )
   }
 
-  pad(size: number, value: T): Collection<T> {
-    const newItems = [...this.items]
-    while (newItems.length < size) {
-      newItems.push(value)
+  // eslint-disable-next-line
+  pad(size: number, value: any): Collection<T> {
+    const currentLength = this.items.length
+
+    // If the absolute value of size is less than or equal to the current length, return the collection as is
+    if (Math.abs(size) <= currentLength) {
+      return new Collection([...this.items])
     }
+
+    const newItems = [...this.items]
+
+    if (size > 0) {
+      // Pad to the right
+      while (newItems.length < size) {
+        newItems.push(value as T)
+      }
+    } else {
+      // Pad to the left
+      const padding = Array(Math.abs(size) - currentLength).fill(value) as T[]
+      return new Collection([...padding, ...newItems])
+    }
+
     return new Collection(newItems)
   }
 
-  partition(callback: (item: T) => boolean): [Collection<T>, Collection<T>] {
-    const [truthy, falsy] = this.items.reduce(
-      ([truthy, falsy], item) => {
-        if (callback(item)) {
-          truthy.push(item)
-        } else {
-          falsy.push(item)
-        }
-        return [truthy, falsy]
-      },
-      [[], []] as [T[], T[]]
-    )
+  partition(callback: (item: T, index: number) => boolean): [Collection<T>, Collection<T>] {
+    const truthy: T[] = []
+    const falsy: T[] = []
+
+    this.items.forEach((item, index) => {
+      if (callback(item, index)) {
+        truthy.push(item)
+      } else {
+        falsy.push(item)
+      }
+    })
+
     return [new Collection(truthy), new Collection(falsy)]
   }
 
-  percentage(callback: (item: T) => number): number {
-    return this.sum(callback) / this.items.length
-  }
+  percentage(callback: (item: T) => boolean, precision: number = 2): number {
+    const totalItems = this.items.length
+    if (totalItems === 0) return 0
 
-  pluck<K extends keyof T>(key: K): Collection<T[K]> {
-    return new Collection(this.items.map((item) => item[key]))
+    const passingItems = this.items.filter(callback).length
+    const result = (passingItems / totalItems) * 100
+
+    return Number(result.toFixed(precision))
   }
+  pipe<U>(callback: (collection: Collection<T>) => U): U {
+    return callback(this)
+  }
+  /* eslint-disable */
+  pluck<K extends keyof T | string, V = any>(
+    key: K
+  ): Collection<V | null>;
+
+pluck<K extends keyof T | string, V = any>(
+  key: K,
+  customKey: keyof T | string
+): Collection<Record<string, V | null>>;
+  
+pluck<K extends keyof T | string, V = any>(
+  key: K,
+  customKey?: keyof T | string
+): Collection<V | null> | Collection<Record<string, V | null>> {
+  // Helper function to resolve nested keys using dot notation
+  const resolveKey = (obj: any, path: string): V | null => {
+    return path.split('.').reduce<any>((value, part) => {
+      if (value && typeof value === 'object' && part in value) {
+        return value[part];
+      }
+      return null;
+    }, obj);
+  };
+
+  if (customKey) {
+    // When a custom key is provided, build a Record<string, V | null>
+    const keyedResult: Record<string, V | null> = {};
+
+    this.items.forEach(item => {
+      // Extract the plucked value using the provided key
+      const extractedValue: V | null = resolveKey(item, key as string);
+
+      // Extract the map key using the provided customKey
+      const mapKeyRaw = resolveKey(item, customKey as string);
+
+      // Convert mapKeyRaw to string if it's not null
+      const mapKey = mapKeyRaw !== null ? String(mapKeyRaw) : null;
+
+      // Only include the mapping if mapKey is valid
+      if (mapKey !== null) {
+        keyedResult[mapKey] = extractedValue;
+      }
+    });
+
+    // Return a Collection containing the keyedResult object
+    return new Collection([keyedResult]);
+  } else {
+    // When no custom key is provided, extract values into an array
+    const arrayResult: Array<V | null> = this.items.map(item => {
+      return resolveKey(item, key as string);
+    });
+
+    // Return a Collection of the extracted values, including nulls
+    return new Collection(arrayResult);
+  }
+}
+
 
   pop(): T | undefined {
     return this.items.pop()
