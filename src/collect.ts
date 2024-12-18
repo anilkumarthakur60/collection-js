@@ -202,12 +202,6 @@ export class Collection<T> {
     )
     return new Collection(uniqueItems)
   }
-  protected getArrayableItems(items: Collection<T> | T[]): T[] {
-    if (items instanceof Collection) {
-      return items.all()
-    }
-    return items
-  }
 
   isEqual(value: T, other: T): boolean {
     if (value === other) {
@@ -249,12 +243,14 @@ export class Collection<T> {
     )
     return new Collection(diffItems)
   }
+
   diffAssocUsing(values: T[], callback: (item: T) => unknown): Collection<T> {
     const diffItems = this.items.filter(
       (item) => !values.some((value) => callback(value) === callback(item))
     )
     return new Collection(diffItems)
   }
+
   diffKeys(values: Collection<T> | T[]): Collection<T> {
     const otherItems = this.getArrayableItems(values).reduce(
       (acc, item) => {
@@ -308,6 +304,7 @@ export class Collection<T> {
     console.log(this.items)
     return this.items
   }
+
   duplicates(key?: keyof T): Collection<T> {
     const seen = new Map<T[keyof T] | T, T>()
     const duplicates = new Set<T[keyof T] | T>()
@@ -415,6 +412,7 @@ export class Collection<T> {
     }
     return this.items.length > 0 ? this.items[0] : null
   }
+
   firstOrFail(predicate?: (item: T, index: number) => boolean): T {
     if (predicate) {
       for (let i = 0; i < this.items.length; i++) {
@@ -429,6 +427,7 @@ export class Collection<T> {
     }
     throw new ItemNotFoundException('No items found in the collection')
   }
+
   firstWhere<K extends keyof T>(key: K, value?: T[K], operator: string = '==='): T | null {
     if (arguments.length === 1) {
       for (const item of this.items) {
@@ -465,6 +464,7 @@ export class Collection<T> {
     }
     return null
   }
+
   flatMap<U>(callback: (item: T) => U[]): Collection<U> {
     const mapped = this.items.map(callback)
     const flattened = ([] as U[]).concat(...mapped)
@@ -746,6 +746,7 @@ export class Collection<T> {
       ? (Number(sorted[middle - 1]) + Number(sorted[middle])) / 2
       : Number(sorted[middle])
   }
+
   merge<U>(...args: (U[] | Collection<U>)[]): Collection<T | U> {
     // Flatten all arguments into a single array
     const mergedItems = args.reduce<(T | U)[]>(
@@ -1029,66 +1030,65 @@ export class Collection<T> {
 
     return Number(result.toFixed(precision))
   }
+
   pipe<U>(callback: (collection: Collection<T>) => U): U {
     return callback(this)
   }
+
   /* eslint-disable */
+  pluck<K extends keyof T | string, V = any>(key: K): Collection<V | null>
+
   pluck<K extends keyof T | string, V = any>(
-    key: K
-  ): Collection<V | null>;
+    key: K,
+    customKey: keyof T | string
+  ): Collection<Record<string, V | null>>
 
-pluck<K extends keyof T | string, V = any>(
-  key: K,
-  customKey: keyof T | string
-): Collection<Record<string, V | null>>;
-  
-pluck<K extends keyof T | string, V = any>(
-  key: K,
-  customKey?: keyof T | string
-): Collection<V | null> | Collection<Record<string, V | null>> {
-  // Helper function to resolve nested keys using dot notation
-  const resolveKey = (obj: any, path: string): V | null => {
-    return path.split('.').reduce<any>((value, part) => {
-      if (value && typeof value === 'object' && part in value) {
-        return value[part];
-      }
-      return null;
-    }, obj);
-  };
+  pluck<K extends keyof T | string, V = any>(
+    key: K,
+    customKey?: keyof T | string
+  ): Collection<V | null> | Collection<Record<string, V | null>> {
+    // Helper function to resolve nested keys using dot notation
+    const resolveKey = (obj: any, path: string): V | null => {
+      return path.split('.').reduce<any>((value, part) => {
+        if (value && typeof value === 'object' && part in value) {
+          return value[part]
+        }
+        return null
+      }, obj)
+    }
 
-  if (customKey) {
-    // When a custom key is provided, build a Record<string, V | null>
-    const keyedResult: Record<string, V | null> = {};
+    if (customKey) {
+      // When a custom key is provided, build a Record<string, V | null>
+      const keyedResult: Record<string, V | null> = {}
 
-    this.items.forEach(item => {
-      // Extract the plucked value using the provided key
-      const extractedValue: V | null = resolveKey(item, key as string);
+      this.items.forEach((item) => {
+        // Extract the plucked value using the provided key
+        const extractedValue: V | null = resolveKey(item, key as string)
 
-      // Extract the map key using the provided customKey
-      const mapKeyRaw = resolveKey(item, customKey as string);
+        // Extract the map key using the provided customKey
+        const mapKeyRaw = resolveKey(item, customKey as string)
 
-      // Convert mapKeyRaw to string if it's not null
-      const mapKey = mapKeyRaw !== null ? String(mapKeyRaw) : null;
+        // Convert mapKeyRaw to string if it's not null
+        const mapKey = mapKeyRaw !== null ? String(mapKeyRaw) : null
 
-      // Only include the mapping if mapKey is valid
-      if (mapKey !== null) {
-        keyedResult[mapKey] = extractedValue;
-      }
-    });
+        // Only include the mapping if mapKey is valid
+        if (mapKey !== null) {
+          keyedResult[mapKey] = extractedValue
+        }
+      })
 
-    // Return a Collection containing the keyedResult object
-    return new Collection([keyedResult]);
-  } else {
-    // When no custom key is provided, extract values into an array
-    const arrayResult: Array<V | null> = this.items.map(item => {
-      return resolveKey(item, key as string);
-    });
+      // Return a Collection containing the keyedResult object
+      return new Collection([keyedResult])
+    } else {
+      // When no custom key is provided, extract values into an array
+      const arrayResult: Array<V | null> = this.items.map((item) => {
+        return resolveKey(item, key as string)
+      })
 
-    // Return a Collection of the extracted values, including nulls
-    return new Collection(arrayResult);
+      // Return a Collection of the extracted values, including nulls
+      return new Collection(arrayResult)
+    }
   }
-}
-
 
   pop(): T | undefined {
     return this.items.pop()
@@ -1227,16 +1227,16 @@ pluck<K extends keyof T | string, V = any>(
     return new Collection([...this.items].sort(callback))
   }
 
+  splice(start: number, deleteCount: number, ...values: T[]): this {
+    this.items.splice(start, deleteCount, ...values)
+    return this
+  }
+
   // splice(start: number, deleteCount: number, ...values: T[]): Collection<T> {
   //   const copy = [...this.items]
   //   copy.splice(start, deleteCount, ...values)
   //   return new Collection(copy)
   // }
-
-  splice(start: number, deleteCount: number, ...values: T[]): this {
-    this.items.splice(start, deleteCount, ...values)
-    return this
-  }
 
   split(size: number): Collection<T[]> {
     const chunks: T[][] = []
@@ -1431,6 +1431,13 @@ pluck<K extends keyof T | string, V = any>(
     }
     return new Collection(zipped)
   }
+
+  protected getArrayableItems(items: Collection<T> | T[]): T[] {
+    if (items instanceof Collection) {
+      return items.all()
+    }
+    return items
+  }
 }
 
 function collect<T>(items: T[] | Record<string, T> | T = []): Collection<T> {
@@ -1439,4 +1446,5 @@ function collect<T>(items: T[] | Record<string, T> | T = []): Collection<T> {
   }
   return new Collection([items])
 }
+
 export { collect, UnexpectedValueException }

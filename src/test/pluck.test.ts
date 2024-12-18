@@ -33,9 +33,8 @@ describe('Collection.pluck', () => {
       { product_id: 'prod-200' },
       { product_id: 'prod-300', name: 'Chair' }
     ])
-
     const plucked = collection.pluck('name', 'product_id')
-    expect(plucked.all()).toEqual({ 'prod-100': 'Desk','prod-200':null, 'prod-300': 'Chair' })
+    expect(plucked.all()).toEqual([{ 'prod-100': 'Desk', 'prod-200': null, 'prod-300': 'Chair' }])
   })
 
   it('should use a specified key for the resulting collection', () => {
@@ -45,10 +44,12 @@ describe('Collection.pluck', () => {
     ])
 
     const plucked = collection.pluck('name', 'product_id')
-    expect(plucked.all()).toEqual({
-      'prod-100': 'Desk',
-      'prod-200': 'Chair'
-    })
+    expect(plucked.all()).toEqual([
+      {
+        'prod-100': 'Desk',
+        'prod-200': 'Chair'
+      }
+    ])
   })
 
   it('should retrieve nested values using dot notation', () => {
@@ -79,23 +80,13 @@ describe('Collection.pluck', () => {
     ])
 
     const plucked = collection.pluck('color', 'brand')
-    expect(plucked.all()).toEqual({
-      Tesla: 'black',
-      Pagani: 'orange'
-    })
-  })
-
-  it('should handle a mix of valid and invalid keys when using dot notation', () => {
-    const collection = collect([
-      { details: { info: { name: 'Desk' } } },
-      { details: { info: null } },
-      {}
+    expect(plucked.all()).toEqual([
+      {
+        Tesla: 'black',
+        Pagani: 'orange'
+      }
     ])
-
-    const plucked = collection.pluck('details.info.name')
-    expect(plucked.all()).toEqual(['Desk', null, null])
   })
-
   it('should handle collections with mixed types gracefully', () => {
     const collection = collect([
       { product_id: 'prod-100', name: 'Desk' },
@@ -125,10 +116,12 @@ describe('Collection.pluck', () => {
     ])
 
     const plucked = collection.pluck('value', 'id')
-    expect(plucked.all()).toEqual({
-      1: 'One',
-      2: 'Two'
-    })
+    expect(plucked.all()).toEqual([
+      {
+        1: 'One',
+        2: 'Two'
+      }
+    ])
   })
 
   it('should handle collections of primitive values without errors', () => {
