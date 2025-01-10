@@ -214,16 +214,6 @@ class Collection<T> {
     }
   }
 
-  // diff(values: T[]): Collection<T> {
-  //   const diffItems = this.items.filter((item) => !values.includes(item))
-  //   return new Collection(diffItems)
-  // }
-  // diff(other: T[] | Collection<T>): Collection<T> {
-  //   const otherItems = other instanceof Collection ? other.items : other;
-  //   const uniqueItems = this.items.filter(item => !otherItems.includes(item));
-  //   return new Collection(uniqueItems);
-  // }
-
   diff(other: T[] | Collection<T>): Collection<T> {
     const otherItems = other instanceof Collection ? other.items : other
     const uniqueItems = this.items.filter(
@@ -237,8 +227,6 @@ class Collection<T> {
     }
     return items
   }
-
-  // public isEqual(value: Record<string, unknown>, other: Record<string, unknown>): boolean {
 
   public isEqual(value: any, other: any): boolean {
     if (value === other) {
@@ -283,30 +271,26 @@ class Collection<T> {
     )
     return new Collection(diffItems)
   }
-
-  // diffKeys<K extends keyof T>(values: K[]): Collection<T> {
-  //   const diffItems = this.items.filter((item) => !values.includes(item as unknown as K))
-  //   return new Collection(diffItems)
-  // }
   diffKeys(values: Collection<T> | T[]): Collection<T> {
-    const otherItems = this.getArrayableItems(values).reduce((acc, item) => {
-      Object.keys(item as Record<string, any>).forEach(key => {
-        acc[key] = true;
-      });
-      return acc;
-    }, {} as Record<string, boolean>);
+    const otherItems = this.getArrayableItems(values).reduce(
+      (acc, item) => {
+        Object.keys(item as Record<string, any>).forEach((key) => {
+          acc[key] = true
+        })
+        return acc
+      },
+      {} as Record<string, boolean>
+    )
 
-    const diffItems = this.items.filter(item =>
-      !Object.keys(item as Record<string, any>).some(key => otherItems[key])
-    );
+    const diffItems = this.items.filter(
+      (item) => !Object.keys(item as Record<string, any>).some((key) => otherItems[key])
+    )
 
-    return new Collection(diffItems);
+    return new Collection(diffItems)
   }
 
-
-
-  doesntContain(callback: (item: T) => boolean): boolean {
-    return !this.contains(callback)
+  doesntContain(value: T | PredicateContains<T> | Partial<T>): boolean {
+    return !this.contains(value)
   }
 
   dot(): Record<string, T> {
