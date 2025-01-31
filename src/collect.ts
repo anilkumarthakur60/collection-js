@@ -1,6 +1,6 @@
 import { Iteratee, Predicate, PredicateChunkWhile, PredicateContains } from './types/main'
 
-class Collection<T> {
+export class Collection<T> {
   protected items: T[]
 
   constructor(items: T[] = []) {
@@ -346,8 +346,27 @@ class Collection<T> {
     return new Collection(result)
   }
 
-  duplicatesStrict(): Collection<T> {
-    return this.filter((item, index, array) => array.indexOf(item) !== index)
+  duplicatesStrict(key?: keyof T): Collection<T> {
+    const seen = new Map<any, T[]>()
+    const result: T[] = []
+
+    this.items.forEach((item) => {
+      const value = key ? (item as any)[key] : item
+
+      if (seen.has(value)) {
+        seen.get(value)!.push(item)
+      } else {
+        seen.set(value, [item])
+      }
+    })
+
+    seen.forEach((items) => {
+      if (items.length > 1) {
+        result.push(...items)
+      }
+    })
+
+    return new Collection(result)
   }
 
   each(callback: (item: T, index: number) => void): void {
