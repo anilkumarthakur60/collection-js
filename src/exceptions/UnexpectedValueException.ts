@@ -1,7 +1,6 @@
-export  class UnexpectedValueException extends Error {
+export class UnexpectedValueException extends Error {
   constructor(message: string) {
-    super(message);
-    this.name = 'UnexpectedValueException';
+    super(message)
+    this.name = 'UnexpectedValueException'
   }
 }
-
