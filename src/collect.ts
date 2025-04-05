@@ -1,4 +1,5 @@
 import { Iteratee, Predicate, PredicateChunkWhile, PredicateContains } from './types/main'
+import { UnexpectedValueException } from './exceptions/UnexpectedValueException.ts'
 
 export class Collection<T> {
   protected items: T[]
@@ -387,8 +388,19 @@ export class Collection<T> {
     }
     return this
   }
-  ensure(callback: (item: T) => boolean): Collection<T> {
-    return new Collection(this.items.filter(callback))
+  ensure(...types: Array<{ new (...args: any[]): any } | string>): this {
+    for (const item of this.items) {
+      const isValid = types.some((type) => {
+        if (typeof type === 'string') {
+          return typeof item === type
+        }
+        return item instanceof type
+      })
+      if (!isValid) {
+        throw new UnexpectedValueException(`Item ${item} is not of the expected type(s)`)
+      }
+    }
+    return this
   }
 
   every(callback: (item: T) => boolean): boolean {
@@ -1008,4 +1020,4 @@ function collect<T>(items: T[] = []): Collection<T> {
   return new Collection(items)
 }
 
-export { collect }
+export { collect, UnexpectedValueException }
