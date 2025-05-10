@@ -111,9 +111,6 @@ export class Collection<T> {
     return new Collection(flattened)
   }
 
-  // collect<U>(callback: (item: T, index: number) => U): Collection<U> {
-  //   return new Collection(this.items.map(callback))
-  // }
   collect(): Collection<T> {
     return new Collection(this.items)
   }
@@ -177,16 +174,6 @@ export class Collection<T> {
       return acc
     }, {})
   }
-
-  // crossJoin<U>(...values: U[]): Collection<[T, U]> {
-  //   const combined: [T, U][] = []
-  //   this.items.forEach((item) => {
-  //     values.forEach((value) => {
-  //       combined.push([item, value])
-  //     })
-  //   })
-  //   return new Collection(combined)
-  // }
 
   crossJoin<U>(...arrays: U[][]): Collection<(T | U)[]> {
     const result: (T | U)[][] = []
@@ -376,9 +363,6 @@ export class Collection<T> {
     return this
   }
 
-  // eachSpread(callback: (...args: T extends (infer I)[] ? I[] : never) => void): void {
-  //   this.items.forEach((item) => callback(...(item as T extends (infer I)[] ? I[] : never)))
-  // }
   eachSpread(callback: (...args: any[]) => void | boolean): this {
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i]
@@ -447,13 +431,46 @@ export class Collection<T> {
     }
     throw new ItemNotFoundException('No items found in the collection')
   }
-
-  firstWhere<K extends keyof T>(key: K, value: T[K]): T | undefined {
-    return this.items.find((item) => item[key] === value)
+  firstWhere<K extends keyof T>(key: K, value?: T[K], operator: string = '==='): T | null {
+    if (arguments.length === 1) {
+      for (const item of this.items) {
+        if (item[key]) {
+          return item
+        }
+      }
+    } else {
+      for (const item of this.items) {
+        if (value !== undefined && value !== null) {
+          switch (operator) {
+            case '===':
+              if (item[key] === value) return item
+              break
+            case '!==':
+              if (item[key] !== value) return item
+              break
+            case '<':
+              if (item[key] < value) return item
+              break
+            case '<=':
+              if (item[key] <= value) return item
+              break
+            case '>':
+              if (item[key] > value) return item
+              break
+            case '>=':
+              if (item[key] >= value) return item
+              break
+            // Add more operators as needed
+          }
+        }
+      }
+    }
+    return null
   }
-
   flatMap<U>(callback: (item: T) => U[]): Collection<U> {
-    return new Collection(this.items.flatMap(callback))
+    const mapped = this.items.map(callback)
+    const flattened = ([] as U[]).concat(...mapped)
+    return new Collection(flattened)
   }
 
   flatten<U>(): Collection<U> {
