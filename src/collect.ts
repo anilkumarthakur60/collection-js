@@ -1,6 +1,7 @@
-import { Iteratee, Predicate, PredicateChunkWhile, PredicateContains } from './types/main'
-import { UnexpectedValueException } from './exceptions/UnexpectedValueException.ts'
-import { ItemNotFoundException } from './exceptions/ItemNotFoundException.ts'
+import { ItemNotFoundException } from "./exceptions/ItemNotFoundException"
+import { UnexpectedValueException } from "./exceptions/UnexpectedValueException"
+import { Iteratee, Predicate, PredicateChunkWhile, PredicateContains } from "./types/main"
+
 
 export class Collection<T> {
   protected items: T[]
@@ -18,20 +19,13 @@ export class Collection<T> {
 
   after(item: T | string | Predicate<T>, strict: boolean = false): T | null {
     if (typeof item === 'function') {
-      const predicate = item as Predicate<T>
-      for (let i = 0; i < this.items.length; i++) {
-        if (predicate(this.items[i], i)) {
-          return this.items[i + 1] || null
-        }
-      }
-      return null
-    } else {
-      const index = this.items.findIndex((i) => (strict ? i === item : i == item))
-      if (index === -1 || index === this.items.length - 1) {
-        return null
-      }
-      return this.items[index + 1]
+      const predicate = item as Predicate<T>;
+      const index = this.items.findIndex((value, idx) => predicate(value, idx));
+      return index >= 0 && index < this.items.length - 1 ? this.items[index + 1] : null;
     }
+    
+    const index = this.items.findIndex((i) => strict ? i === item : i == item);
+    return index >= 0 && index < this.items.length - 1 ? this.items[index + 1] : null;
   }
 
   average(callback?: (item: T) => number): number {
@@ -166,13 +160,10 @@ export class Collection<T> {
 
   countBy(iteratee: Iteratee<T>): Record<string, number> {
     return this.items.reduce((acc: Record<string, number>, item: T) => {
-      const key = iteratee(item).toString()
-      if (!acc[key]) {
-        acc[key] = 0
-      }
-      acc[key]++
-      return acc
-    }, {})
+      const key = String(iteratee(item));
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
   }
 
   crossJoin<U>(...arrays: U[][]): Collection<(T | U)[]> {
@@ -217,7 +208,7 @@ export class Collection<T> {
     return items
   }
 
-  isEqual(value: any, other: any): boolean {
+  isEqual(value: T, other: T): boolean {
     if (value === other) {
       return true
     }
@@ -239,7 +230,7 @@ export class Collection<T> {
     }
 
     for (const key of keysA) {
-      if (!keysB.includes(key) || !this.isEqual(value[key], other[key])) {
+      if (!keysB.includes(key) || !this.isEqual(value[key as keyof T] as T, other[key as keyof T] as T)) {
         return false
       }
     }
@@ -263,7 +254,7 @@ export class Collection<T> {
   diffKeys(values: Collection<T> | T[]): Collection<T> {
     const otherItems = this.getArrayableItems(values).reduce(
       (acc, item) => {
-        Object.keys(item as Record<string, any>).forEach((key) => {
+        Object.keys(item as Record<string, T>).forEach((key) => {
           acc[key] = true
         })
         return acc
@@ -272,7 +263,7 @@ export class Collection<T> {
     )
 
     const diffItems = this.items.filter(
-      (item) => !Object.keys(item as Record<string, any>).some((key) => otherItems[key])
+      (item) => !Object.keys(item as Record<string, T>).some((key) => otherItems[key])
     )
 
     return new Collection(diffItems)
@@ -282,30 +273,30 @@ export class Collection<T> {
     return !this.contains(value)
   }
 
-  dot(): Record<string, any> {
-    const flatten = (obj: any, prefix = ''): Record<string, any> => {
+  dot(): Record<string, T> {
+    const flatten = (obj: Record<string, T>, prefix = ''): Record<string, T> => {
       return Object.keys(obj).reduce(
         (acc, k) => {
           const pre = prefix.length ? prefix + '.' : ''
           if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
-            Object.assign(acc, flatten(obj[k], pre + k))
+            Object.assign(acc, flatten(obj[k] as Record<string, T>, pre + k))
           } else {
             acc[pre + k] = obj[k]
           }
           return acc
         },
-        {} as Record<string, any>
+        {} as Record<string, T>
       )
     }
 
     return this.items.reduce(
       (acc, item) => {
         if (typeof item === 'object' && item !== null) {
-          Object.assign(acc, flatten(item))
+          Object.assign(acc, flatten(item as Record<string, T>))
         }
         return acc
       },
-      {} as Record<string, any>
+      {} as Record<string, T>
     )
   }
 
@@ -313,40 +304,41 @@ export class Collection<T> {
     console.log(this.items)
     return this.items
   }
-
   duplicates(key?: keyof T): Collection<T> {
-    const seen = new Map()
-    const duplicates = new Set()
-    const result: T[] = []
+    const seen = new Map<T[keyof T] | T, T>();
+    const duplicates = new Set<T[keyof T] | T>();
+    const result: T[] = [];
 
     this.items.forEach((item) => {
-      const value = key ? (item as any)[key] : item
-
+      const value = key ? item[key] : item;
+      
       if (seen.has(value)) {
         if (!duplicates.has(value)) {
-          duplicates.add(value)
-          result.push(seen.get(value))
+          duplicates.add(value);
+          const original = seen.get(value);
+          if (original) result.push(original);
         }
       } else {
-        seen.set(value, item)
+        seen.set(value, item);
       }
-    })
+    });
 
-    return new Collection(result)
+    return new Collection(result);
   }
 
   duplicatesStrict(key?: keyof T): Collection<T> {
-    const seen = new Map<any, T[]>()
+    const seen = new Map<T[keyof T], T[]>()
     const result: T[] = []
 
     this.items.forEach((item) => {
-      const value = key ? (item as any)[key] : item
+      const value = key ? item[key] : item
 
-      if (seen.has(value)) {
-        seen.get(value)!.push(item)
+      if (seen.has(value as T[keyof T])) {
+        seen.get(value as T[keyof T])!.push(item)
       } else {
-        seen.set(value, [item])
+        seen.set(value as T[keyof T], [item])
       }
+      
     })
 
     seen.forEach((items) => {
@@ -363,7 +355,7 @@ export class Collection<T> {
     return this
   }
 
-  eachSpread(callback: (...args: any[]) => void | boolean): this {
+  eachSpread(callback: (...args: T[]) => void | boolean): this {
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i]
       const result = callback(...(Array.isArray(item) ? item : [item]))
@@ -373,7 +365,8 @@ export class Collection<T> {
     }
     return this
   }
-  ensure(...types: Array<{ new (...args: any[]): any } | string>): this {
+
+  ensure(...types: Array<{ new (...args: T[]): T } | string>): this {
     for (const item of this.items) {
       const isValid = types.some((type) => {
         if (typeof type === 'string') {
