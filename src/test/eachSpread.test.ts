@@ -8,8 +8,7 @@ describe('Collection eachSpread method', () => {
       [5, 6]
     ])
     const result: number[] = []
-    collection.eachSpread((...args: number[]) => {
-      const [a, b] = args
+    collection.eachSpread((a: number, b: number) => {
       result.push(a + b)
     })
     expect(result).toEqual([3, 7, 11])
@@ -55,22 +54,23 @@ describe('Collection eachSpread method', () => {
       { c: 3, d: 4 }
     ])
     const result: object[] = []
-    collection.eachSpread((item: object) => {
-      result.push(item)
+    collection.eachSpread((...args: { a?: number; b?: number; c?: number; d?: number }[]) => {
+      result.push(...args)
     })
     expect(result).toEqual([
       { a: 1, b: 2 },
       { c: 3, d: 4 }
     ])
   })
+
   it('should allow method chaining', () => {
     const collection = collect([
       [1, 2],
       [3, 4],
       [5, 6]
     ])
-    const result = collection.eachSpread((a: number, b: number) => {
-      return a + b
+    const result = collection.eachSpread((...args: number[]) => {
+      args.reduce((sum, num) => sum + num, 0)
     })
     expect(result).toBe(collection)
   })

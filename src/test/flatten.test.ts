@@ -128,11 +128,9 @@ describe('flatten', () => {
     ])
     expect(collection.flatten(2).all()).toEqual([
       'Apple',
-      'iPhone 6S',
-      'Apple',
+      { name: 'iPhone 6S', brand: 'Apple' },
       'Samsung',
-      'Galaxy S7',
-      'Samsung'
+      { name: 'Galaxy S7', brand: 'Samsung' }
     ])
   })
 
@@ -155,11 +153,9 @@ describe('flatten', () => {
     ])
     expect(collection.flatten().all()).toEqual([
       'Apple',
-      'iPhone 6S',
-      'Apple',
+      { name: 'iPhone 6S', brand: 'Apple' },
       'Samsung',
-      'Galaxy S7',
-      'Samsung'
+      { name: 'Galaxy S7', brand: 'Samsung' }
     ])
   })
 })
