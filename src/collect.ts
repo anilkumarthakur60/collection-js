@@ -1,6 +1,8 @@
+import { ItemNotFoundException } from './exceptions/ItemNotFoundException'
+import { UnexpectedValueException } from './exceptions/UnexpectedValueException'
 import { Iteratee, Predicate, PredicateChunkWhile, PredicateContains } from './types/main'
-import { UnexpectedValueException } from './exceptions/UnexpectedValueException.ts'
-import { ItemNotFoundException } from './exceptions/ItemNotFoundException.ts'
+
+type FlattenType<T> = T extends (infer U)[] ? FlattenType<U> : T
 
 export class Collection<T> {
   protected items: T[]
@@ -19,19 +21,12 @@ export class Collection<T> {
   after(item: T | string | Predicate<T>, strict: boolean = false): T | null {
     if (typeof item === 'function') {
       const predicate = item as Predicate<T>
-      for (let i = 0; i < this.items.length; i++) {
-        if (predicate(this.items[i], i)) {
-          return this.items[i + 1] || null
-        }
-      }
-      return null
-    } else {
-      const index = this.items.findIndex((i) => (strict ? i === item : i == item))
-      if (index === -1 || index === this.items.length - 1) {
-        return null
-      }
-      return this.items[index + 1]
+      const index = this.items.findIndex((value, idx) => predicate(value, idx))
+      return index >= 0 && index < this.items.length - 1 ? this.items[index + 1] : null
     }
+
+    const index = this.items.findIndex((i) => (strict ? i === item : i == item))
+    return index >= 0 && index < this.items.length - 1 ? this.items[index + 1] : null
   }
 
   average(callback?: (item: T) => number): number {
@@ -166,11 +161,8 @@ export class Collection<T> {
 
   countBy(iteratee: Iteratee<T>): Record<string, number> {
     return this.items.reduce((acc: Record<string, number>, item: T) => {
-      const key = iteratee(item).toString()
-      if (!acc[key]) {
-        acc[key] = 0
-      }
-      acc[key]++
+      const key = String(iteratee(item))
+      acc[key] = (acc[key] || 0) + 1
       return acc
     }, {})
   }
@@ -217,7 +209,7 @@ export class Collection<T> {
     return items
   }
 
-  isEqual(value: any, other: any): boolean {
+  isEqual(value: T, other: T): boolean {
     if (value === other) {
       return true
     }
@@ -239,7 +231,10 @@ export class Collection<T> {
     }
 
     for (const key of keysA) {
-      if (!keysB.includes(key) || !this.isEqual(value[key], other[key])) {
+      if (
+        !keysB.includes(key) ||
+        !this.isEqual(value[key as keyof T] as T, other[key as keyof T] as T)
+      ) {
         return false
       }
     }
@@ -263,7 +258,7 @@ export class Collection<T> {
   diffKeys(values: Collection<T> | T[]): Collection<T> {
     const otherItems = this.getArrayableItems(values).reduce(
       (acc, item) => {
-        Object.keys(item as Record<string, any>).forEach((key) => {
+        Object.keys(item as Record<string, T>).forEach((key) => {
           acc[key] = true
         })
         return acc
@@ -272,7 +267,7 @@ export class Collection<T> {
     )
 
     const diffItems = this.items.filter(
-      (item) => !Object.keys(item as Record<string, any>).some((key) => otherItems[key])
+      (item) => !Object.keys(item as Record<string, T>).some((key) => otherItems[key])
     )
 
     return new Collection(diffItems)
@@ -282,30 +277,30 @@ export class Collection<T> {
     return !this.contains(value)
   }
 
-  dot(): Record<string, any> {
-    const flatten = (obj: any, prefix = ''): Record<string, any> => {
+  dot(): Record<string, T> {
+    const flatten = (obj: Record<string, T>, prefix = ''): Record<string, T> => {
       return Object.keys(obj).reduce(
         (acc, k) => {
           const pre = prefix.length ? prefix + '.' : ''
           if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
-            Object.assign(acc, flatten(obj[k], pre + k))
+            Object.assign(acc, flatten(obj[k] as Record<string, T>, pre + k))
           } else {
             acc[pre + k] = obj[k]
           }
           return acc
         },
-        {} as Record<string, any>
+        {} as Record<string, T>
       )
     }
 
     return this.items.reduce(
       (acc, item) => {
         if (typeof item === 'object' && item !== null) {
-          Object.assign(acc, flatten(item))
+          Object.assign(acc, flatten(item as Record<string, T>))
         }
         return acc
       },
-      {} as Record<string, any>
+      {} as Record<string, T>
     )
   }
 
@@ -313,19 +308,19 @@ export class Collection<T> {
     console.log(this.items)
     return this.items
   }
-
   duplicates(key?: keyof T): Collection<T> {
-    const seen = new Map()
-    const duplicates = new Set()
+    const seen = new Map<T[keyof T] | T, T>()
+    const duplicates = new Set<T[keyof T] | T>()
     const result: T[] = []
 
     this.items.forEach((item) => {
-      const value = key ? (item as any)[key] : item
+      const value = key ? item[key] : item
 
       if (seen.has(value)) {
         if (!duplicates.has(value)) {
           duplicates.add(value)
-          result.push(seen.get(value))
+          const original = seen.get(value)
+          if (original) result.push(original)
         }
       } else {
         seen.set(value, item)
@@ -336,16 +331,16 @@ export class Collection<T> {
   }
 
   duplicatesStrict(key?: keyof T): Collection<T> {
-    const seen = new Map<any, T[]>()
+    const seen = new Map<T[keyof T], T[]>()
     const result: T[] = []
 
     this.items.forEach((item) => {
-      const value = key ? (item as any)[key] : item
+      const value = key ? item[key] : item
 
-      if (seen.has(value)) {
-        seen.get(value)!.push(item)
+      if (seen.has(value as T[keyof T])) {
+        seen.get(value as T[keyof T])!.push(item)
       } else {
-        seen.set(value, [item])
+        seen.set(value as T[keyof T], [item])
       }
     })
 
@@ -363,17 +358,20 @@ export class Collection<T> {
     return this
   }
 
-  eachSpread(callback: (...args: any[]) => void | boolean): this {
+  eachSpread(callback: (...args: T extends (infer R)[] ? R[] : T[]) => void | boolean): this {
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i]
-      const result = callback(...(Array.isArray(item) ? item : [item]))
+      // If the item is an array, spread it; otherwise, wrap it in an array.
+      const args = Array.isArray(item) ? item : [item]
+      const result = callback(...(args as T extends (infer R)[] ? R[] : T[]))
       if (result === false) {
         break
       }
     }
     return this
   }
-  ensure(...types: Array<{ new (...args: any[]): any } | string>): this {
+
+  ensure(...types: Array<{ new (...args: T[]): T } | string>): this {
     for (const item of this.items) {
       const isValid = types.some((type) => {
         if (typeof type === 'string') {
@@ -473,16 +471,21 @@ export class Collection<T> {
     return new Collection(flattened)
   }
 
-  flatten<U>(): Collection<U> {
-    const flattened: U[] = []
-    this.items.forEach((item) => {
-      if (Array.isArray(item)) {
-        flattened.push(...(item as unknown as U[]))
-      } else {
-        flattened.push(item as unknown as U)
-      }
-    })
-    return new Collection(flattened)
+  flatten(depth: number = Infinity): Collection<FlattenType<T>> {
+    const flattenHelper = (arr: unknown[], depth: number): unknown[] => {
+      if (depth < 1) return arr
+      return arr.reduce((acc: unknown[], val: unknown) => {
+        if (Array.isArray(val) && depth > 0) {
+          acc.push(...flattenHelper(val, depth - 1))
+        } else {
+          acc.push(val)
+        }
+        return acc
+      }, [])
+    }
+
+    const flattenedItems = flattenHelper(this.items, depth) as FlattenType<T>[]
+    return new Collection<FlattenType<T>>(flattenedItems)
   }
 
   flip(): Collection<Record<string, number>> {
@@ -497,14 +500,23 @@ export class Collection<T> {
     return new Collection([flippedItems])
   }
 
-  forget<K extends keyof T>(key: K): Collection<Omit<T, K>> {
-    return new Collection(
-      this.items.map((item) => {
-        const copy = { ...item }
-        delete copy[key]
-        return copy
-      }) as Omit<T, K>[]
-    )
+  forget(index: number | string): Collection<T> {
+    if (typeof index === 'number') {
+      if (index < 0 || index >= this.items.length) {
+        return new Collection(this.items)
+      }
+      const newItems = this.items.slice(0, index).concat(this.items.slice(index + 1))
+      return new Collection(newItems)
+    } else if (typeof index === 'string') {
+      return new Collection(
+        this.items.map((item) => {
+          const itemCopy = { ...item } as Record<string, unknown>
+          delete itemCopy[index]
+          return itemCopy as T
+        })
+      )
+    }
+    return new Collection(this.items)
   }
 
   forPage(page: number, perPage: number): Collection<T> {
@@ -578,24 +590,63 @@ export class Collection<T> {
     )
   }
 
-  keys(): (keyof T)[] {
-    return Object.keys(this.items) as (keyof T)[]
+  keys(): (keyof T | string | number)[] {
+    if (Array.isArray(this.items)) {
+      // Check if it's an array of arrays or objects
+      if (this.items.every((item) => Array.isArray(item))) {
+        // If it's an array of arrays, return indices as keys
+        return this.items.map((_, index) => index.toString())
+      } else if (this.items.every((item) => typeof item === 'object' && item !== null)) {
+        // If it's an array of objects, merge keys from all objects
+        const mergedKeys = this.items.reduce((keys, item) => {
+          if (typeof item === 'object' && item !== null) {
+            return keys.concat(Object.keys(item))
+          }
+          return keys
+        }, [] as string[])
+        // Remove duplicates
+        return Array.from(new Set(mergedKeys)) as (keyof T)[]
+      }
+    } else if (typeof this.items === 'object' && this.items !== null) {
+      // If it's a single object, return its keys
+      return Object.keys(this.items) as (keyof T)[]
+    }
+    // Otherwise, return indices for primitives
+    return this.items.map((_, index) => index.toString())
   }
 
-  last(): T | undefined {
-    return this.items[this.items.length - 1]
+  last(predicate?: (item: T, index: number) => boolean, errorFn?: () => void): T | undefined {
+    if (!predicate) {
+      return this.items[this.items.length - 1]
+    }
+
+    for (let i = this.items.length - 1; i >= 0; i--) {
+      if (predicate(this.items[i], i)) {
+        return this.items[i]
+      }
+    }
+
+    if (errorFn) {
+      errorFn()
+    }
+
+    return undefined
   }
 
-  make<U>(callback: (item: T) => U): Collection<U> {
+  make<U>(callback: (item: T, index: number, array: T[]) => U): Collection<U> {
     return new Collection(this.items.map(callback))
   }
 
-  map<U>(callback: (item: T) => U): Collection<U> {
-    return new Collection(this.items.map(callback))
+  map<U>(callback: (item: T, index: number) => U): Collection<U> {
+    return new Collection(this.items.map((item, index) => callback(item, index)))
   }
 
-  mapInto<U>(classType: new () => U): Collection<U> {
-    return new Collection(this.items.map(() => new classType()))
+  mapInto<U>(ClassType: new (item: T) => U): Collection<U> {
+    try {
+      return new Collection(this.items.map((item) => new ClassType(item)))
+    } catch (error) {
+      throw new Error(`${ClassType.name} is not a valid constructor for the provided items.`)
+    }
   }
 
   mapSpread<U>(callback: (...args: T extends (infer I)[] ? I[] : never) => U): Collection<U> {
@@ -604,77 +655,275 @@ export class Collection<T> {
     )
   }
 
-  mapToGroups<K extends keyof T>(key: K): Record<string, T[]> {
-    return this.items.reduce(
-      (result, item) => {
-        const groupKey = String(item[key])
-        if (!result[groupKey]) {
-          result[groupKey] = []
-        }
-        result[groupKey].push(item)
-        return result
-      },
-      {} as Record<string, T[]>
-    )
-  }
-
-  mapWithKeys<K extends keyof T, U>(key: K, callback: (item: T) => U): Record<string, U> {
-    return this.items.reduce(
-      (result, item) => {
-        result[String(item[key])] = callback(item)
-        return result
-      },
-      {} as Record<string, U>
-    )
-  }
-
-  max(callback: (item: T) => number): number {
-    return Math.max(...this.items.map(callback))
-  }
-
-  median(callback: (item: T) => number): number {
-    const sorted = this.items.map(callback).sort((a, b) => a - b)
-    const middle = Math.floor(sorted.length / 2)
-    return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle]
-  }
-
-  merge<U>(values: U[]): Collection<T | U> {
-    return new Collection([...this.items, ...values])
-  }
-
-  mergeRecursive<U>(values: U[]): Collection<T | U> {
-    return new Collection([...this.items, ...values])
-  }
-
-  min(callback: (item: T) => number): number {
-    return Math.min(...this.items.map(callback))
-  }
-
-  mode(callback: (item: T) => number): number {
-    const counts = this.items.reduce(
-      (result, item) => {
-        const key = callback(item)
+  mapToGroups<K extends string, V>(callback: (item: T, index: number) => [K, V]): Record<K, V[]> {
+    return this.items.reduce<Record<K, V[]>>(
+      (result, item, index) => {
+        const [key, value] = callback(item, index)
         if (!result[key]) {
-          result[key] = 0
+          result[key] = []
         }
-        result[key]++
+        result[key].push(value)
         return result
       },
-      {} as Record<string, number>
+      {} as Record<K, V[]>
     )
-    const max = Math.max(...Object.values(counts))
-    return Number(Object.keys(counts).find((key) => counts[key] === max))
+  }
+
+  mapWithKeys<K extends string, V>(callback: (item: T, index: number) => [K, V]): Record<K, V> {
+    const result = {} as Record<K, V>
+    this.items.forEach((item, index) => {
+      const [key, value] = callback(item, index)
+      result[key] = value
+    })
+    return result
+  }
+
+  max(callback?: (item: T) => number): number {
+    if (callback) {
+      return Math.max(...this.items.map(callback))
+    }
+    return Math.max(...this.items.map((item) => Number(item)))
+  }
+
+  median(callback?: (item: T) => number): number {
+    const sorted = callback
+      ? this.items.map(callback).sort((a, b) => a - b)
+      : this.items.sort((a, b) => Number(a) - Number(b))
+    const middle = Math.floor(sorted.length / 2)
+    // return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle]
+    return sorted.length % 2 === 0
+      ? (Number(sorted[middle - 1]) + Number(sorted[middle])) / 2
+      : Number(sorted[middle])
+  }
+  merge<U>(...args: (U[] | Collection<U>)[]): Collection<T | U> {
+    // Flatten all arguments into a single array
+    const mergedItems = args.reduce<(T | U)[]>(
+      (acc, arg) => {
+        const items = arg instanceof Collection ? arg.toArray() : arg
+        return acc.concat(items as (T | U)[]) // Ensure type compatibility
+      },
+      [...this.items] as (T | U)[]
+    ) // Start with a copy of the original items
+
+    return new Collection<T | U>(mergedItems)
+  }
+
+  mergeRecursive<U>(...values: (U[] | Collection<U>)[]): Collection<T | U> {
+    const target = this.items.map(deepClone) // deep clone to avoid mutation
+    const arrays = values.map((val) =>
+      val instanceof Collection ? val.toArray().map(deepClone) : val.map(deepClone)
+    )
+
+    const mergedArray = arrays.reduce(
+      (acc, current) => {
+        return mergeArrays(acc, current)
+      },
+      target as (T | U)[]
+    )
+
+    return new Collection(mergedArray)
+
+    // Helper function to deeply merge two arrays
+    function mergeArrays<A>(arr1: A[], arr2: A[]): A[] {
+      if (
+        arr1.every((item) => typeof item !== 'object') &&
+        arr2.every((item) => typeof item !== 'object')
+      ) {
+        // If both arrays are flat arrays of primitives, concatenate them
+        return arr1.concat(arr2)
+      }
+
+      const result: A[] = []
+      const maxLength = Math.max(arr1.length, arr2.length)
+      for (let i = 0; i < maxLength; i++) {
+        const val1 = arr1[i]
+        const val2 = arr2[i]
+
+        if (i >= arr1.length) {
+          // arr1 is shorter, just push val2
+          result.push(val2)
+        } else if (i >= arr2.length) {
+          // arr2 is shorter, just push val1
+          result.push(val1)
+        } else {
+          // Both values exist
+          result.push(mergeValues(val1, val2))
+        }
+      }
+      return result
+    }
+
+    // Helper function to merge two values (primitives, objects, or arrays)
+    function mergeValues<V>(value1: V, value2: V): V {
+      // If both are arrays, merge element-wise
+      if (Array.isArray(value1) && Array.isArray(value2)) {
+        return mergeArrays(value1, value2) as V
+      }
+
+      // If both are objects (and not null), merge their keys
+      if (isObject(value1) && isObject(value2)) {
+        return mergeObjects(
+          value1 as Record<string, unknown>,
+          value2 as Record<string, unknown>
+        ) as V
+      }
+
+      // If types differ or are primitives, overwrite with value2
+      return value2
+    }
+
+    // Helper function to merge two objects deeply
+    function mergeObjects(
+      obj1: Record<string, unknown>,
+      obj2: Record<string, unknown>
+    ): Record<string, unknown> {
+      const result: Record<string, unknown> = { ...obj1 }
+      for (const key of Object.keys(obj2)) {
+        const val1 = result[key]
+        const val2 = obj2[key]
+
+        if (Array.isArray(val1) && Array.isArray(val2)) {
+          result[key] = mergeArrays(val1, val2)
+        } else if (isObject(val1) && isObject(val2)) {
+          result[key] = mergeObjects(
+            val1 as Record<string, unknown>,
+            val2 as Record<string, unknown>
+          )
+        } else {
+          // Overwrite with val2
+          result[key] = val2
+        }
+      }
+      return result
+    }
+
+    function isObject(value: unknown): value is Record<string, unknown> {
+      return value !== null && typeof value === 'object' && !Array.isArray(value)
+    }
+
+    function deepClone<T>(item: T): T {
+      if (item === null || typeof item !== 'object') {
+        return item
+      }
+
+      if (Array.isArray(item)) {
+        return item.map(deepClone) as unknown as T
+      }
+
+      const clonedObj: Record<string, unknown> = {}
+      for (const key of Object.keys(item as Record<string, unknown>)) {
+        clonedObj[key] = deepClone((item as Record<string, unknown>)[key])
+      }
+      return clonedObj as T
+    }
+  }
+
+  min(callback?: (item: T) => number): T | undefined {
+    if (this.items.length === 0) {
+      return undefined
+    }
+
+    if (callback) {
+      let minItem: T | undefined = undefined
+      let minValue = Infinity
+
+      for (const item of this.items) {
+        const value = callback(item)
+        if (value < minValue) {
+          minValue = value
+          minItem = item
+        }
+      }
+
+      return minItem
+    } else {
+      // Runtime type checks for non-callback scenario
+      let minItem = this.items[0]
+      const rest = this.items.slice(1)
+
+      for (const item of rest) {
+        if (
+          (typeof item === 'number' || typeof item === 'string') &&
+          (typeof minItem === 'number' || typeof minItem === 'string')
+        ) {
+          if (item < minItem) {
+            minItem = item
+          }
+        } else {
+          throw new Error('Items must be number or string if no callback is provided to min().')
+        }
+      }
+
+      return minItem
+    }
+  }
+
+  mode(callback?: (item: T) => unknown): T | undefined {
+    if (this.items.length === 0) {
+      return undefined
+    }
+
+    // Use a Map with string keys. We'll serialize non-primitive keys to ensure equality by value.
+    const counts = new Map<string, { count: number; item: T }>()
+
+    for (const item of this.items) {
+      const keyValue = callback ? callback(item) : item
+      let mapKey: string
+
+      if (typeof keyValue === 'object' && keyValue !== null) {
+        // Convert object keys to a JSON string for equality by value
+        mapKey = JSON.stringify(keyValue)
+      } else {
+        // Primitives can just be converted to string directly
+        mapKey = String(keyValue)
+      }
+
+      const entry = counts.get(mapKey)
+      if (entry) {
+        entry.count++
+      } else {
+        counts.set(mapKey, { count: 1, item })
+      }
+    }
+
+    let maxCount = -Infinity
+    let modeItem: T | undefined = undefined
+
+    // Find the first highest frequency item
+    for (const { count, item } of counts.values()) {
+      if (count > maxCount) {
+        maxCount = count
+        modeItem = item
+      }
+    }
+
+    return modeItem
   }
 
   nth(n: number): T | undefined {
+    if (n < 0) {
+      n = this.items.length + n
+    }
+
     return this.items[n]
   }
 
-  only<K extends keyof T>(keys: K[]): Collection<Pick<T, K>> {
+  only(keys: string[]): Collection<Record<string, T[keyof T] | undefined>> {
     return new Collection(
       this.items.map((item) => {
-        const copy = {} as Pick<T, K>
-        keys.forEach((key) => (copy[key] = item[key]))
+        const copy: Record<string, T[keyof T] | undefined> = {}
+        if (typeof item === 'object' && item !== null) {
+          // Safe to use `in` and indexing now
+          const record = item as Record<string, T[keyof T]>
+          keys.forEach((key) => {
+            copy[key] = key in record ? record[key] : undefined
+          })
+        } else {
+          // If item is not an object, all requested keys become undefined
+          keys.forEach((key) => {
+            copy[key] = undefined
+          })
+        }
         return copy
       })
     )
