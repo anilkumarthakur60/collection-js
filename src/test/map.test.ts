@@ -1,102 +1,105 @@
-import { collect } from '../collect'
+import { collect, Collection } from '../collect'
 
 describe('map', () => {
-  it('should map a collection of numbers by doubling their values', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    const result = collection.map((item: number) => item * 2)
-    expect(result.toArray()).toEqual([2, 4, 6, 8, 10])
+  it('transforms each item', () => {
+    expect(
+      collect([1, 2, 3])
+        .map((v) => v * 2)
+        .all()
+    ).toEqual([2, 4, 6])
   })
 
-  it('should map a collection of strings to their uppercase equivalents', () => {
-    const collection = collect(['apple', 'banana', 'cherry'])
-    const result = collection.map((item: string) => item.toUpperCase())
-    expect(result.toArray()).toEqual(['APPLE', 'BANANA', 'CHERRY'])
+  it('provides index to callback', () => {
+    expect(
+      collect(['a', 'b', 'c'])
+        .map((v, i) => `${i}:${v}`)
+        .all()
+    ).toEqual(['0:a', '1:b', '2:c'])
   })
 
-  it('should map a collection of objects by extracting a specific property', () => {
-    const collection = collect([
-      { id: 1, name: 'Alice' },
-      { id: 2, name: 'Bob' },
-      { id: 3, name: 'Charlie' }
-    ])
-    const result = collection.map((item: { id: number; name: string }) => item.name)
-    expect(result.toArray()).toEqual(['Alice', 'Bob', 'Charlie'])
+  it('returns empty collection for empty input', () => {
+    expect(
+      collect([])
+        .map((v: number) => v)
+        .all()
+    ).toEqual([])
   })
 
-  it('should map a collection of objects to new objects with modified properties', () => {
-    const collection = collect([
-      { id: 1, value: 10 },
-      { id: 2, value: 20 }
-    ])
-    const result = collection.map((item: { id: number; value: number }) => ({
-      id: item.id,
-      newValue: item.value * 2
-    }))
-    expect(result.toArray()).toEqual([
-      { id: 1, newValue: 20 },
-      { id: 2, newValue: 40 }
-    ])
+  it('returns Collection instance', () => {
+    expect(collect([1]).map((v) => v)).toBeInstanceOf(Collection)
   })
 
-  it('should handle an empty collection gracefully', () => {
-    const collection = collect([])
-    const result = collection.map((item: unknown) => item)
-    expect(result.toArray()).toEqual([])
+  it('can change the type', () => {
+    expect(
+      collect([1, 2, 3])
+        .map((v) => String(v))
+        .all()
+    ).toEqual(['1', '2', '3'])
+  })
+})
+
+describe('mapInto', () => {
+  it('maps each item into a class instance', () => {
+    class Wrapper {
+      value: number
+      constructor(v: number) {
+        this.value = v
+      }
+    }
+    const result = collect([1, 2, 3]).mapInto(Wrapper)
+    expect(result.all()[0]).toBeInstanceOf(Wrapper)
+    expect(result.all()[0].value).toBe(1)
   })
 
-  it('should map with an index as the second argument in the callback', () => {
-    const collection = collect(['a', 'b', 'c'])
-    const result = collection.map((item: string, index: number) => `${index}: ${item}`)
-    expect(result.toArray()).toEqual(['0: a', '1: b', '2: c'])
+  it('returns Collection instance', () => {
+    class Foo {
+      constructor(_v: number) {}
+    }
+    expect(collect([1]).mapInto(Foo)).toBeInstanceOf(Collection)
   })
+})
 
-  it('should handle collections with mixed types', () => {
-    const collection = collect([1, 'two', { key: 'three' }])
-    const result = collection.map((item: number | string | object) => {
-      if (typeof item === 'number') return item * 2
-      if (typeof item === 'string') return item.toUpperCase()
-      if (typeof item === 'object') return { ...item, addedKey: 'value' }
-    })
-    expect(result.toArray()).toEqual([2, 'TWO', { key: 'three', addedKey: 'value' }])
-  })
-
-  it('should not mutate the original collection', () => {
-    const collection = collect([1, 2, 3])
-    const result = collection.map((item: number) => item * 2)
-    expect(collection.toArray()).toEqual([1, 2, 3]) // Original remains unchanged
-    expect(result.toArray()).toEqual([2, 4, 6]) // Transformed collection
-  })
-
-  it('should return the same type for mapping arrays of arrays', () => {
-    const collection = collect([
+describe('mapSpread', () => {
+  it('spreads inner arrays as arguments to callback', () => {
+    const result = collect([
       [1, 2],
       [3, 4]
-    ])
-    const result = collection.map((item: number[]) => item.map((num) => num * 2))
-    expect(result.toArray()).toEqual([
-      [2, 4],
-      [6, 8]
-    ])
+    ]).mapSpread((a: number, b: number) => a + b)
+    expect(result.all()).toEqual([3, 7])
   })
 
-  it('should handle mapping to a constant value', () => {
-    const collection = collect([1, 2, 3])
-    const result = collection.map(() => 'constant')
-    expect(result.toArray()).toEqual(['constant', 'constant', 'constant'])
+  it('returns empty collection for empty input', () => {
+    expect(
+      collect([])
+        .mapSpread(() => 0)
+        .all()
+    ).toEqual([])
+  })
+})
+
+describe('mapToGroups', () => {
+  it('groups items by key-value pairs from callback', () => {
+    const result = collect([1, 2, 3, 4]).mapToGroups((v) => [v % 2 === 0 ? 'even' : 'odd', v])
+    expect(result['even']).toEqual([2, 4])
+    expect(result['odd']).toEqual([1, 3])
   })
 
-  it('should map nested objects in the collection', () => {
-    const collection = collect([
-      { user: { name: 'Alice', age: 25 } },
-      { user: { name: 'Bob', age: 30 } }
-    ])
-    const result = collection.map((item: { user: { name: string; age: number } }) => ({
-      ...item,
-      user: { ...item.user, age: item.user.age + 1 }
-    }))
-    expect(result.toArray()).toEqual([
-      { user: { name: 'Alice', age: 26 } },
-      { user: { name: 'Bob', age: 31 } }
-    ])
+  it('returns empty object for empty collection', () => {
+    expect(collect([]).mapToGroups((v: number) => ['key', v])).toEqual({})
+  })
+})
+
+describe('mapWithKeys', () => {
+  it('returns an object keyed by callback results', () => {
+    const items = [
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' }
+    ]
+    const result = collect(items).mapWithKeys((item) => [String(item.id), item.name])
+    expect(result).toEqual({ '1': 'Alice', '2': 'Bob' })
+  })
+
+  it('returns empty object for empty collection', () => {
+    expect(collect([]).mapWithKeys((_v: number) => ['k', 'v'])).toEqual({})
   })
 })

@@ -1,70 +1,93 @@
 import { collect } from '../collect'
 
 describe('flatMap', () => {
-  it('should apply the callback to each item and flatten the result by one level', () => {
-    const collection = collect([1, 2, 3])
-    const flatMapped = collection.flatMap((item) => [item, item * 2])
-
-    expect(flatMapped.toArray()).toEqual([1, 2, 2, 4, 3, 6])
+  it('maps and flattens one level', () => {
+    expect(
+      collect([1, 2, 3])
+        .flatMap((v) => [v, v * 2])
+        .all()
+    ).toEqual([1, 2, 2, 4, 3, 6])
   })
 
-  it('should handle nested arrays correctly', () => {
-    const collection = collect([1, 2, 3])
-    const flatMapped = collection.flatMap((item) => [[item], [item * 2]])
-
-    expect(flatMapped.toArray().flat()).toEqual([1, 2, 2, 4, 3, 6])
+  it('returns empty for empty collection', () => {
+    expect(
+      collect([])
+        .flatMap((v: number) => [v])
+        .all()
+    ).toEqual([])
   })
 
-  it('should return an empty collection when the original collection is empty', () => {
-    const collection = collect([])
-    const flatMapped = collection.flatMap((item) => [item, item * 2])
-
-    expect(flatMapped.toArray()).toEqual([])
+  it('can return empty arrays to filter items', () => {
+    expect(
+      collect([1, 2, 3])
+        .flatMap((v) => (v > 1 ? [v] : []))
+        .all()
+    ).toEqual([2, 3])
   })
 
-  it('should work with a collection of objects', () => {
-    const collection = collect([{ id: 1 }, { id: 2 }, { id: 3 }])
-    const flatMapped = collection.flatMap((item) => [item, { id: item.id * 2 }])
-
-    expect(flatMapped.toArray()).toEqual([
-      { id: 1 },
-      { id: 2 },
-      { id: 2 },
-      { id: 4 },
-      { id: 3 },
-      { id: 6 }
-    ])
+  it('works with strings', () => {
+    expect(
+      collect(['hello', 'world'])
+        .flatMap((v) => v.split(''))
+        .all()
+    ).toEqual(['h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd'])
   })
 
-  it('should work with a collection of strings', () => {
-    const collection = collect(['a', 'b', 'c'])
-    const flatMapped = collection.flatMap((item) => [item, item.toUpperCase()])
+  it('maps objects to arrays', () => {
+    const items = [{ values: [1, 2] }, { values: [3, 4] }]
+    expect(
+      collect(items)
+        .flatMap((v) => v.values)
+        .all()
+    ).toEqual([1, 2, 3, 4])
+  })
+})
 
-    expect(flatMapped.toArray()).toEqual(['a', 'A', 'b', 'B', 'c', 'C'])
+describe('flatten', () => {
+  it('flattens one level by default', () => {
+    expect(
+      collect([
+        [1, 2],
+        [3, [4, 5]]
+      ])
+        .flatten(1)
+        .all()
+    ).toEqual([1, 2, 3, [4, 5]])
   })
 
-  it('should handle complex nested arrays correctly', () => {
-    const collection = collect([1, 2, 3])
-    const flatMapped = collection.flatMap((item) => [[item], [item * 2], [[item * 3]]])
-
-    // Since we only flatten by one level, this should result in:
-    expect(flatMapped.toArray().flat()).toEqual([1, 2, [3], 2, 4, [6], 3, 6, [9]])
+  it('flattens all levels with Infinity', () => {
+    expect(
+      collect([[1, [2, [3]]]])
+        .flatten()
+        .all()
+    ).toEqual([1, 2, 3])
   })
 
-  it('should handle an array of arrays', () => {
-    const collection = collect([
-      [1, 2],
-      [3, 4]
-    ])
-    const flatMapped = collection.flatMap((item) => item)
-
-    expect(flatMapped.toArray()).toEqual([1, 2, 3, 4])
+  it('returns empty for empty collection', () => {
+    expect(collect([]).flatten().all()).toEqual([])
   })
 
-  it('should work with an array of objects containing arrays', () => {
-    const collection = collect([{ values: [1, 2] }, { values: [3, 4] }])
-    const flatMapped = collection.flatMap((item) => item.values)
+  it('does not flatten non-array items', () => {
+    expect(
+      collect([1, 2, 3] as unknown as number[][])
+        .flatten()
+        .all()
+    ).toEqual([1, 2, 3])
+  })
 
-    expect(flatMapped.toArray()).toEqual([1, 2, 3, 4])
+  it('flattens two levels', () => {
+    expect(
+      collect([[[1, 2]], [[3, 4]]])
+        .flatten(2)
+        .all()
+    ).toEqual([1, 2, 3, 4])
+  })
+
+  it('stops flattening at depth 0', () => {
+    expect(
+      collect([[1, 2]])
+        .flatten(0)
+        .all()
+    ).toEqual([[1, 2]])
   })
 })

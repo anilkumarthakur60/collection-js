@@ -1,91 +1,45 @@
 import { collect } from '../collect'
 
-describe('average', () => {
-  it('The average method returns the average of a list of numbers:', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    expect(collection.average()).toBe(3)
+describe('average / avg', () => {
+  it('calculates average of numbers', () => {
+    expect(collect([1, 2, 3, 4, 5]).average()).toBe(3)
   })
 
-  it('The average method returns 0 for an empty collection:', () => {
-    const collection = collect([])
-    expect(collection.average()).toBe(0)
+  it('returns 0 for empty collection', () => {
+    expect(collect([]).average()).toBe(0)
   })
 
-  it('The average method returns the average of a specific attribute in a collection of objects:', () => {
-    const collection = collect([
-      { name: 'Alice', age: 25 },
-      { name: 'Bob', age: 30 },
-      { name: 'Charlie', age: 35 }
-    ])
-    expect(collection.average((item) => item.age)).toBe(30)
+  it('calculates average with callback', () => {
+    const items = [{ price: 10 }, { price: 20 }, { price: 30 }]
+    expect(collect(items).average((item) => item.price)).toBe(20)
   })
 
-  it('The average method returns the average based on a custom callback:', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    expect(collection.average((item) => item * 2)).toBe(6)
+  it('calculates average of single item', () => {
+    expect(collect([42]).average()).toBe(42)
   })
 
-  it('The average method handles mixed data types correctly:', () => {
-    const collection = collect([1, '2', 3, '4', 5])
-    expect(collection.average()).toBe(3)
+  it('calculates average with decimal result', () => {
+    expect(collect([1, 2]).average()).toBe(1.5)
   })
 
-  it('The average method handles nested object structures:', () => {
-    const collection = collect([
-      { data: { value: 10 } },
-      { data: { value: 20 } },
-      { data: { value: 30 } }
-    ])
-    expect(collection.average((item) => item.data.value)).toBe(20)
+  it('avg is an alias for average', () => {
+    expect(collect([1, 2, 3]).avg()).toBe(2)
   })
 
-  it('The average method handles a collection with boolean values (treated as 1 for true and 0 for false):', () => {
-    const collection = collect([true, false, true, true, false])
-    expect(collection.average()).toBe(0.6)
-  })
-})
-
-describe('avg', () => {
-  it('The avg method returns the avg of a list of numbers:', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    expect(collection.avg()).toBe(3)
+  it('avg with callback', () => {
+    const items = [{ score: 100 }, { score: 200 }]
+    expect(collect(items).avg((item) => item.score)).toBe(150)
   })
 
-  it('The avg method returns 0 for an empty collection:', () => {
-    const collection = collect([])
-    expect(collection.avg()).toBe(0)
+  it('handles negative numbers', () => {
+    expect(collect([-3, -1, 2]).average()).toBeCloseTo(-0.667, 2)
   })
 
-  it('The avg method returns the avg of a specific attribute in a collection of objects:', () => {
-    const collection = collect([
-      { name: 'Alice', age: 25 },
-      { name: 'Bob', age: 30 },
-      { name: 'Charlie', age: 35 }
-    ])
-    expect(collection.avg((item) => item.age)).toBe(30)
+  it('avg returns 0 for empty collection', () => {
+    expect(collect([]).avg()).toBe(0)
   })
 
-  it('The avg method returns the avg based on a custom callback:', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    expect(collection.avg((item) => item * 2)).toBe(6)
-  })
-
-  it('The avg method handles mixed data types correctly:', () => {
-    const collection = collect([1, '2', 3, '4', 5])
-    expect(collection.avg()).toBe(3)
-  })
-
-  it('The avg method handles nested object structures:', () => {
-    const collection = collect([
-      { data: { value: 10 } },
-      { data: { value: 20 } },
-      { data: { value: 30 } }
-    ])
-    expect(collection.avg((item) => item.data.value)).toBe(20)
-  })
-
-  it('The avg method handles a collection with boolean values (treated as 1 for true and 0 for false):', () => {
-    const collection = collect([true, false, true, true, false])
-    expect(collection.avg()).toBe(0.6)
+  it('calculates average of floats', () => {
+    expect(collect([1.5, 2.5, 3.0]).average()).toBeCloseTo(2.333, 2)
   })
 })

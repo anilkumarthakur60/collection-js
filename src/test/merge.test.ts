@@ -1,84 +1,57 @@
 import { collect } from '../collect'
 
 describe('merge', () => {
-  it('should merge two flat arrays of primitives', () => {
-    const collection = collect([1, 2, 3])
-    const merged = collection.merge([4, 5, 6])
-    expect(merged.toArray()).toEqual([1, 2, 3, 4, 5, 6])
+  it('merges another array into the collection', () => {
+    expect(collect([1, 2]).merge([3, 4]).all()).toEqual([1, 2, 3, 4])
   })
 
-  it('should merge multiple arrays of primitives', () => {
-    const collection = collect([1, 2])
-    const merged = collection.merge([3, 4], [5, 6])
-    expect(merged.toArray()).toEqual([1, 2, 3, 4, 5, 6])
+  it('merges another Collection', () => {
+    expect(
+      collect([1, 2])
+        .merge(collect([3, 4]))
+        .all()
+    ).toEqual([1, 2, 3, 4])
   })
 
-  it('should handle merging with an empty array', () => {
-    const collection = collect([1, 2, 3])
-    const merged = collection.merge([])
-    expect(merged.toArray()).toEqual([1, 2, 3])
+  it('merges multiple arrays', () => {
+    expect(collect([1]).merge([2], [3], [4]).all()).toEqual([1, 2, 3, 4])
   })
 
-  it('should merge an array of objects', () => {
-    const collection = collect([{ a: 1 }, { b: 2 }])
-    const merged = collection.merge([{ a: 3 }, { b: 4 }])
-    expect(merged.toArray()).toEqual([{ a: 1 }, { b: 2 }, { a: 3 }, { b: 4 }])
+  it('returns same items when merging empty array', () => {
+    expect(collect([1, 2]).merge([]).all()).toEqual([1, 2])
   })
 
-  it('should merge a collection with another collection', () => {
-    const collection1 = collect([1, 2, 3])
-    const collection2 = collect([4, 5, 6])
-    const merged = collection1.merge(collection2)
-    expect(merged.toArray()).toEqual([1, 2, 3, 4, 5, 6])
+  it('merging into empty collection returns the merged items', () => {
+    expect(collect([]).merge([1, 2, 3]).all()).toEqual([1, 2, 3])
   })
 
-  it('should handle merging with nested arrays', () => {
-    const collection = collect([
-      [1, 2],
-      [3, 4]
-    ])
-    const merged = collection.merge([
-      [5, 6],
-      [7, 8]
-    ])
-    expect(merged.toArray()).toEqual([
-      [1, 2],
-      [3, 4],
-      [5, 6],
-      [7, 8]
-    ])
+  it('does not mutate original collection', () => {
+    const c = collect([1, 2])
+    c.merge([3])
+    expect(c.all()).toEqual([1, 2])
+  })
+})
+
+describe('mergeRecursive', () => {
+  it('merges arrays recursively', () => {
+    const result = collect([1, 2]).mergeRecursive([3, 4]).all()
+    expect(result).toEqual([1, 2, 3, 4])
   })
 
-  it('should handle merging collections of mixed types', () => {
-    const collection = collect([1, 'two', { three: 3 }])
-    const merged = collection.merge(['four', 5, { three: 6 }])
-    expect(merged.toArray()).toEqual([1, 'two', { three: 3 }, 'four', 5, { three: 6 }])
+  it('merges objects recursively', () => {
+    const a = [{ name: 'Alice', scores: [10] }]
+    const b = [{ name: 'Bob', scores: [20] }]
+    const result = collect(a).mergeRecursive(b).all()
+    expect(result[0]).toHaveProperty('name', 'Bob')
+    expect(result[0]).toHaveProperty('scores')
   })
 
-  it('should handle an empty collection gracefully', () => {
-    const collection = collect([])
-    const merged = collection.merge([1, 2, 3])
-    expect(merged.toArray()).toEqual([1, 2, 3])
+  it('merges empty array', () => {
+    expect(collect([1, 2]).mergeRecursive([]).all()).toEqual([1, 2])
   })
 
-  it('should merge multiple collections and arrays together', () => {
-    const collection1 = collect([1, 2])
-    const collection2 = collect([3, 4])
-    const merged = collection1.merge(collection2, [5, 6], [7, 8])
-    expect(merged.toArray()).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
-  })
-
-  it('should not mutate the original collection', () => {
-    const collection = collect([1, 2, 3])
-    const merged = collection.merge([4, 5, 6])
-    expect(collection.toArray()).toEqual([1, 2, 3]) // original stays the same
-    expect(merged.toArray()).toEqual([1, 2, 3, 4, 5, 6]) // merged result
-  })
-
-  it('should handle merging collections with different types of values', () => {
-    const collection1 = collect([{ id: 1 }, 42, 'string'])
-    const collection2 = collect([{ id: 2 }, 43, 'another string'])
-    const merged = collection1.merge(collection2)
-    expect(merged.toArray()).toEqual([{ id: 1 }, 42, 'string', { id: 2 }, 43, 'another string'])
+  it('merges with multiple arrays', () => {
+    const result = collect([1]).mergeRecursive([2], [3]).all()
+    expect(result).toEqual([1, 2, 3])
   })
 })

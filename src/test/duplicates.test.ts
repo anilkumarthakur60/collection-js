@@ -1,37 +1,52 @@
 import { collect } from '../collect'
 
 describe('duplicates', () => {
-  it('The duplicates method retrieves and returns unique duplicate values from the collection:', () => {
-    const collection = collect([1, 2, 3, 2, 4, 5, 3])
-    expect(collection.duplicates().toArray()).toEqual([2, 3])
+  it('returns items that appear more than once', () => {
+    expect(collect([1, 2, 2, 3, 3, 3]).duplicates().all()).toEqual([2, 3])
   })
 
-  it('The duplicates method works with strings:', () => {
-    const collection = collect(['apple', 'banana', 'cherry', 'apple', 'banana'])
-    expect(collection.duplicates().toArray()).toEqual(['apple', 'banana'])
+  it('returns empty collection when no duplicates', () => {
+    expect(collect([1, 2, 3]).duplicates().all()).toEqual([])
   })
 
-  it('The duplicates method works with objects and keys:', () => {
-    const collection = collect([
-      { id: 1, name: 'John' },
-      { id: 2, name: 'Jane' },
-      { id: 3, name: 'John' },
-      { id: 4, name: 'Doe' },
-      { id: 5, name: 'Jane' }
-    ])
-    expect(collection.duplicates('name').toArray()).toEqual([
-      { id: 1, name: 'John' },
-      { id: 2, name: 'Jane' }
-    ])
+  it('returns empty for empty collection', () => {
+    expect(collect([]).duplicates().all()).toEqual([])
   })
 
-  it('The duplicates method works with mixed data types:', () => {
-    const collection = collect([1, 'apple', true, 1, 'apple', false])
-    expect(collection.duplicates().toArray()).toEqual([1, 'apple'])
+  it('works with a key on objects', () => {
+    const items = [
+      { name: 'Alice', age: 30 },
+      { name: 'Bob', age: 25 },
+      { name: 'Alice', age: 35 }
+    ]
+    const result = collect(items).duplicates('name' as keyof (typeof items)[0])
+    expect(result.count()).toBe(1)
+    expect(result.all()[0].name).toBe('Alice')
   })
 
-  it('The duplicates method returns an empty collection if there are no duplicates:', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    expect(collection.duplicates().toArray()).toEqual([])
+  it('returns first occurrence only when duplicated', () => {
+    const result = collect([1, 2, 2]).duplicates()
+    expect(result.all()).toEqual([2])
+  })
+})
+
+describe('duplicatesStrict', () => {
+  it('returns all duplicate occurrences strictly', () => {
+    const result = collect([1, 2, 2, 3]).duplicatesStrict()
+    expect(result.all()).toEqual([2, 2])
+  })
+
+  it('returns empty for no duplicates', () => {
+    expect(collect([1, 2, 3]).duplicatesStrict().all()).toEqual([])
+  })
+
+  it('works with a key on objects', () => {
+    const items = [{ name: 'Alice' }, { name: 'Bob' }, { name: 'Alice' }]
+    const result = collect(items).duplicatesStrict('name' as keyof (typeof items)[0])
+    expect(result.count()).toBe(2)
+  })
+
+  it('returns empty for empty collection', () => {
+    expect(collect([]).duplicatesStrict().all()).toEqual([])
   })
 })

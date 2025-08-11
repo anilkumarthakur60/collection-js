@@ -7,12 +7,13 @@ var __getProtoOf = Object.getPrototypeOf
 var __hasOwnProp = Object.prototype.hasOwnProperty
 var __esm = (fn, res) =>
   function __init() {
-    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])((fn = 0))), res
+    return (fn && (res = (0, fn[__getOwnPropNames(fn)[0]])((fn = 0))), res)
   }
 var __commonJS = (cb, mod) =>
   function __require() {
     return (
-      mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports
+      mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod),
+      mod.exports
     )
   }
 var __copyProps = (to, from, except, desc) => {
@@ -557,12 +558,13 @@ var __getProtoOf2 = Object.getPrototypeOf
 var __hasOwnProp2 = Object.prototype.hasOwnProperty
 var __esm2 = (fn, res) =>
   function __init() {
-    return fn && (res = (0, fn[__getOwnPropNames2(fn)[0]])((fn = 0))), res
+    return (fn && (res = (0, fn[__getOwnPropNames2(fn)[0]])((fn = 0))), res)
   }
 var __commonJS2 = (cb, mod) =>
   function __require() {
     return (
-      mod || (0, cb[__getOwnPropNames2(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports
+      mod || (0, cb[__getOwnPropNames2(cb)[0]])((mod = { exports: {} }).exports, mod),
+      mod.exports
     )
   }
 var __copyProps2 = (to, from, except, desc) => {

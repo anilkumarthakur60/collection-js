@@ -1,118 +1,37 @@
 import { collect } from '../collect'
 
 describe('median', () => {
-  it('should return the median value in the collection', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    expect(collection.median()).toEqual(3)
+  it('returns median of odd-length collection', () => {
+    expect(collect([3, 1, 2]).median()).toBe(2)
   })
 
-  it('should return the median value in the collection using a callback', () => {
-    const collection = collect([
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 }
-    ])
-    expect(collection.median((item) => item.value)).toEqual(3)
+  it('returns average of two middle items for even-length', () => {
+    expect(collect([1, 2, 3, 4]).median()).toBe(2.5)
   })
 
-  it('should return the median value in the collection using a callback', () => {
-    const collection = collect([
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 }
-    ])
-    expect(collection.median((item) => item.value)).toEqual(3)
+  it('returns single item for single-item collection', () => {
+    expect(collect([42]).median()).toBe(42)
   })
 
-  it('should return the median value in the collection using a callback', () => {
-    const collection = collect([
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 }
-    ])
-    expect(collection.median((item) => item.value)).toEqual(3)
+  it('works with unsorted numbers', () => {
+    expect(collect([5, 1, 3]).median()).toBe(3)
   })
 
-  it('should return the median value in the collection using a callback', () => {
-    const collection = collect([
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 }
-    ])
-    expect(collection.median((item) => item.value)).toEqual(3)
+  it('works with callback', () => {
+    const items = [{ score: 10 }, { score: 30 }, { score: 20 }]
+    expect(collect(items).median((v) => v.score)).toBe(20)
   })
 
-  it('should return the median value in the collection using a callback', () => {
-    const collection = collect([
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 }
-    ])
-    expect(collection.median((item) => item.value)).toEqual(3)
+  it('even count with callback', () => {
+    const items = [{ v: 1 }, { v: 2 }, { v: 3 }, { v: 4 }]
+    expect(collect(items).median((item) => item.v)).toBe(2.5)
   })
 
-  it('should return the median value in the collection using a callback', () => {
-    const collection = collect([
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 }
-    ])
-    expect(collection.median((item) => item.value)).toEqual(3)
+  it('works with negative numbers', () => {
+    expect(collect([-3, -1, -2]).median()).toBe(-2)
   })
 
-  it('should return the median value in the collection using a callback', () => {
-    const collection = collect([
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 }
-    ])
-    expect(collection.median((item) => item.value)).toEqual(3)
-  })
-
-  it('should return the median value in the collection using a callback', () => {
-    const collection = collect([
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 }
-    ])
-    expect(collection.median((item) => item.value)).toEqual(3)
-  })
-
-  it('should return the median value in the collection using a callback', () => {
-    const collection = collect([
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 }
-    ])
-    expect(collection.median((item) => item.value)).toEqual(3)
-  })
-
-  it('should return the median value in the collection using a callback', () => {
-    const collection = collect([
-      { value: 1 },
-      { value: 2 },
-      { value: 3 },
-      { value: 4 },
-      { value: 5 }
-    ])
-    expect(collection.median((item) => item.value)).toEqual(3)
+  it('works with duplicate values', () => {
+    expect(collect([2, 2, 2]).median()).toBe(2)
   })
 })

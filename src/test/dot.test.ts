@@ -1,33 +1,67 @@
 import { collect } from '../collect'
 
 describe('dot', () => {
-  it('The dot method flattens a multi-dimensional collection into a single level collection that uses "dot" notation to indicate depth:', () => {
-    const collection = collect([{ a: { b: { c: 1 } } }])
-    expect(collection.dot()).toEqual({ 'a.b.c': 1 })
+  it('flattens nested objects to dot notation', () => {
+    const result = collect([{ name: { first: 'John', last: 'Doe' } }]).dot()
+    expect(result).toEqual({ 'name.first': 'John', 'name.last': 'Doe' })
   })
 
-  it('The dot method works with nested objects:', () => {
-    const collection = collect([{ a: { b: { c: 1, d: 2 }, e: 3 }, f: 4 }])
-    expect(collection.dot()).toEqual({ 'a.b.c': 1, 'a.b.d': 2, 'a.e': 3, f: 4 })
+  it('handles already flat object', () => {
+    const result = collect([{ a: 1, b: 2 }]).dot()
+    expect(result).toEqual({ a: 1, b: 2 })
   })
 
-  it('The dot method handles multiple items in the collection:', () => {
-    const collection = collect([{ a: { b: 1 } }, { c: { d: 2 } }])
-    expect(collection.dot()).toEqual({ 'a.b': 1, 'c.d': 2 })
+  it('handles deeply nested object', () => {
+    const result = collect([{ a: { b: { c: 42 } } }]).dot()
+    expect(result).toEqual({ 'a.b.c': 42 })
   })
 
-  it('The dot method works with arrays inside objects:', () => {
-    const collection = collect([{ a: { b: [1, 2, 3] } }])
-    expect(collection.dot()).toEqual({ 'a.b': [1, 2, 3] })
+  it('returns empty object for empty collection', () => {
+    expect(collect([]).dot()).toEqual({})
   })
 
-  it('The dot method works with mixed data types:', () => {
-    const collection = collect([{ a: { b: 'string' }, c: 10, d: true }])
-    expect(collection.dot()).toEqual({ 'a.b': 'string', c: 10, d: true })
+  it('merges multiple objects', () => {
+    const result = collect([{ a: 1 }, { b: 2 }]).dot()
+    expect(result).toEqual({ a: 1, b: 2 })
   })
 
-  it('The dot method returns an empty object if the collection is empty:', () => {
-    const collection = collect([])
-    expect(collection.dot()).toEqual({})
+  it('does not flatten arrays', () => {
+    const result = collect([{ items: [1, 2, 3] }]).dot()
+    expect(result).toEqual({ items: [1, 2, 3] })
+  })
+})
+
+describe('undot', () => {
+  it('expands dot notation keys to nested objects', () => {
+    const result = collect([{ 'name.first': 'Marie', 'name.last': 'Valentine' }])
+      .undot()
+      .all()
+    expect(result).toEqual([{ name: { first: 'Marie', last: 'Valentine' } }])
+  })
+
+  it('handles already expanded keys', () => {
+    const result = collect([{ a: 1, b: 2 }])
+      .undot()
+      .all()
+    expect(result).toEqual([{ a: 1, b: 2 }])
+  })
+
+  it('handles deeply nested dot keys', () => {
+    const result = collect([{ 'a.b.c': 42 }])
+      .undot()
+      .all()
+    expect(result).toEqual([{ a: { b: { c: 42 } } }])
+  })
+
+  it('returns collection with single empty object for empty input', () => {
+    const result = collect([]).undot().all()
+    expect(result).toEqual([{}])
+  })
+
+  it('merges multiple objects with dot keys', () => {
+    const result = collect([{ 'x.y': 1 }, { 'x.z': 2 }])
+      .undot()
+      .all()
+    expect(result).toEqual([{ x: { y: 1, z: 2 } }])
   })
 })

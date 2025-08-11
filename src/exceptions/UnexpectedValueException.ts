@@ -1,8 +1,7 @@
-class UnexpectedValueException extends Error {
+import { CollectionException } from './CollectionException'
+
+export class UnexpectedValueException extends CollectionException {
   constructor(message: string) {
-    super(message)
-    this.name = 'UnexpectedValueException'
+    super(message, 'UnexpectedValueException')
   }
 }
-
-export { UnexpectedValueException }

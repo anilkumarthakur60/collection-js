@@ -1,65 +1,56 @@
-import { collect } from '../collect'
+import { collect, Collection } from '../collect'
 
-describe('make', () => {
-  it('should apply a transformation to each item in the collection', () => {
-    const collection = collect([1, 2, 3, 4])
-    const result = collection.make((item: number) => item * 2)
-    expect(result.toArray()).toEqual([2, 4, 6, 8])
+describe('Collection.make (static)', () => {
+  it('creates a Collection from an array', () => {
+    const c = Collection.make([1, 2, 3])
+    expect(c.all()).toEqual([1, 2, 3])
   })
 
-  it('should handle an empty collection gracefully', () => {
-    const collection = collect([])
-    const result = collection.make((item: number) => item * 2)
-    expect(result.toArray()).toEqual([])
+  it('creates an empty Collection when no args', () => {
+    const c = Collection.make()
+    expect(c.all()).toEqual([])
   })
 
-  it('should allow transforming objects within a collection', () => {
-    const collection = collect([{ name: 'Alice' }, { name: 'Bob' }])
-    const result = collection.make((item: { name: string }) => ({
-      ...item,
-      name: item.name.toUpperCase()
-    }))
-    expect(result.toArray()).toEqual([{ name: 'ALICE' }, { name: 'BOB' }])
+  it('returns a Collection instance', () => {
+    expect(Collection.make([1, 2])).toBeInstanceOf(Collection)
   })
 
-  it('should allow transforming arrays within a collection', () => {
-    const collection = collect([
-      [1, 2],
-      [3, 4]
-    ])
-    const result = collection.make((item: number[]) => item.map((n) => n * 2))
-    expect(result.toArray()).toEqual([
-      [2, 4],
-      [6, 8]
-    ])
+  it('works with strings', () => {
+    const c = Collection.make(['a', 'b', 'c'])
+    expect(c.all()).toEqual(['a', 'b', 'c'])
   })
 
-  it('should not mutate the original collection', () => {
-    const collection = collect([1, 2, 3])
-    const result = collection.make((item: number) => item * 2)
-    expect(collection.toArray()).toEqual([1, 2, 3]) // Original collection remains unchanged
-    expect(result.toArray()).toEqual([2, 4, 6]) // Transformed result
+  it('works with objects', () => {
+    const c = Collection.make([{ id: 1 }, { id: 2 }])
+    expect(c.all()).toEqual([{ id: 1 }, { id: 2 }])
+  })
+})
+
+describe('make (instance method)', () => {
+  it('maps items using callback and returns new Collection', () => {
+    const result = collect([1, 2, 3]).make((v) => v * 10)
+    expect(result.all()).toEqual([10, 20, 30])
   })
 
-  it('should allow method chaining after make', () => {
-    const collection = collect([1, 2, 3, 4])
-    const result = collection.make((item: number) => item * 2).filter((item: number) => item > 4)
-    expect(result.toArray()).toEqual([6, 8])
+  it('returns a Collection instance', () => {
+    expect(collect([1, 2]).make((v) => v)).toBeInstanceOf(Collection)
   })
 
-  it('should handle mixed types in a collection', () => {
-    const collection = collect([1, 'string', { key: 'value' }])
-    const result = collection.make((item: number | string | object) => {
-      if (typeof item === 'number') return item * 2
-      if (typeof item === 'string') return item.toUpperCase()
-      return { ...item, transformed: true }
-    })
-    expect(result.toArray()).toEqual([2, 'STRING', { key: 'value', transformed: true }])
+  it('callback receives item, index, and array', () => {
+    const result = collect(['a', 'b']).make((item, index) => `${index}:${item}`)
+    expect(result.all()).toEqual(['0:a', '1:b'])
   })
 
-  it('should support transforming values with their index as an argument', () => {
-    const collection = collect(['a', 'b', 'c'])
-    const result = collection.make((item: string, index: number) => `${index}: ${item}`)
-    expect(result.toArray()).toEqual(['0: a', '1: b', '2: c'])
+  it('returns empty Collection for empty input', () => {
+    expect(
+      collect([])
+        .make((v) => v)
+        .all()
+    ).toEqual([])
+  })
+
+  it('can transform type', () => {
+    const result = collect([1, 2, 3]).make((v) => String(v))
+    expect(result.all()).toEqual(['1', '2', '3'])
   })
 })

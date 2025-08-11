@@ -1,35 +1,44 @@
 import { collect } from '../collect'
 
 describe('concat', () => {
-  it('The concat method appends the given array values onto the end of the collection:', () => {
-    const collection = collect(['John Doe'])
-    const concatenated = collection.concat(['Jane Doe']).concat(['Johnny Doe'])
-    expect(concatenated.all()).toEqual(['John Doe', 'Jane Doe', 'Johnny Doe'])
+  it('appends an array to the collection', () => {
+    expect(collect([1, 2]).concat([3, 4]).all()).toEqual([1, 2, 3, 4])
   })
 
-  it('The concat method appends the given collection values onto the end of the collection:', () => {
-    const collection = collect(['John Doe'])
-    const otherCollection = collect(['Jane Doe'])
-    const concatenated = collection.concat(otherCollection).concat(['Johnny Doe'])
-    expect(concatenated.all()).toEqual(['John Doe', 'Jane Doe', 'Johnny Doe'])
+  it('appends another Collection', () => {
+    expect(
+      collect([1, 2])
+        .concat(collect([3, 4]))
+        .all()
+    ).toEqual([1, 2, 3, 4])
   })
 
-  it('The concat method works correctly with an empty array:', () => {
-    const collection = collect(['John Doe'])
-    const concatenated = collection.concat([])
-    expect(concatenated.all()).toEqual(['John Doe'])
+  it('returns same items when appending empty array', () => {
+    expect(collect([1, 2, 3]).concat([]).all()).toEqual([1, 2, 3])
   })
 
-  it('The concat method works correctly with an empty collection:', () => {
-    const collection = collect(['John Doe'])
-    const otherCollection = collect<string>([])
-    const concatenated = collection.concat(otherCollection)
-    expect(concatenated.all()).toEqual(['John Doe'])
+  it('appending to empty collection returns the items', () => {
+    expect(collect([]).concat([1, 2, 3]).all()).toEqual([1, 2, 3])
   })
 
-  it('The concat method works correctly with different data types:', () => {
-    const collection = collect(['John Doe'])
-    const concatenated = collection.concat([123, true, 'Jane Doe'])
-    expect(concatenated.all()).toEqual(['John Doe', 123, true, 'Jane Doe'])
+  it('works with strings', () => {
+    expect(collect(['a', 'b']).concat(['c', 'd']).all()).toEqual(['a', 'b', 'c', 'd'])
+  })
+
+  it('does not mutate the original collection', () => {
+    const original = collect([1, 2])
+    const result = original.concat([3])
+    expect(original.all()).toEqual([1, 2])
+    expect(result.all()).toEqual([1, 2, 3])
+  })
+
+  it('can concat mixed types', () => {
+    const result = collect<number | string>([1, 2]).concat(['a', 'b'])
+    expect(result.all()).toEqual([1, 2, 'a', 'b'])
+  })
+
+  it('works with objects', () => {
+    const result = collect([{ id: 1 }]).concat([{ id: 2 }])
+    expect(result.all()).toEqual([{ id: 1 }, { id: 2 }])
   })
 })

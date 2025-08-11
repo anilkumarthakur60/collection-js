@@ -1,68 +1,71 @@
 import { collect } from '../collect'
 
-describe('Collection except method', () => {
-  it('should return all items except those with the specified keys', () => {
-    const collection = collect([
-      { id: 1, name: 'John', age: 30 },
-      { id: 2, name: 'Jane', age: 25 },
-      { id: 3, name: 'Doe', age: 35 }
-    ])
-    const result = collection.except(['age']).toArray()
-    expect(result).toEqual([
-      { id: 1, name: 'John' },
-      { id: 2, name: 'Jane' },
-      { id: 3, name: 'Doe' }
-    ])
+describe('except', () => {
+  it('removes specified keys from each object', () => {
+    const items = [{ id: 1, name: 'Alice', age: 30 }]
+    const result = collect(items).except(['age'])
+    expect(result.all()).toEqual([{ id: 1, name: 'Alice' }])
   })
 
-  it('should work with multiple keys', () => {
-    const collection = collect([
-      { id: 1, name: 'John', age: 30, gender: 'male' },
-      { id: 2, name: 'Jane', age: 25, gender: 'female' },
-      { id: 3, name: 'Doe', age: 35, gender: 'male' }
-    ])
-    const result = collection.except(['age', 'gender']).toArray()
-    expect(result).toEqual([
-      { id: 1, name: 'John' },
-      { id: 2, name: 'Jane' },
-      { id: 3, name: 'Doe' }
-    ])
+  it('removes multiple keys', () => {
+    const items = [{ a: 1, b: 2, c: 3 }]
+    const result = collect(items).except(['a', 'c'])
+    expect(result.all()).toEqual([{ b: 2 }])
   })
 
-  it('should work with an empty collection', () => {
-    const collection = collect([])
-    const result = collection.except(['age']).toArray()
-    expect(result).toEqual([])
+  it('returns unchanged objects when keys not present', () => {
+    const items = [{ id: 1, name: 'Alice' }]
+    const result = collect(items).except(['nonexistent' as keyof { id: number; name: string }])
+    expect(result.all()).toEqual([{ id: 1, name: 'Alice' }])
   })
 
-  it('should not modify the original collection', () => {
-    const collection = collect([
-      { id: 1, name: 'John', age: 30 },
-      { id: 2, name: 'Jane', age: 25 }
-    ])
-    const result = collection.except(['age']).toArray()
-    expect(collection.toArray()).toEqual([
-      { id: 1, name: 'John', age: 30 },
-      { id: 2, name: 'Jane', age: 25 }
-    ])
-    expect(result).toEqual([
-      { id: 1, name: 'John' },
-      { id: 2, name: 'Jane' }
-    ])
+  it('works with multiple items', () => {
+    const items = [
+      { id: 1, secret: 'x' },
+      { id: 2, secret: 'y' }
+    ]
+    const result = collect(items).except(['secret'])
+    expect(result.all()).toEqual([{ id: 1 }, { id: 2 }])
   })
 
-  it('should allow method chaining', () => {
-    const collection = collect([
-      { id: 1, name: 'John', age: 30 },
-      { id: 2, name: 'Jane', age: 25 }
-    ])
-    const result = collection
-      .except(['age'])
-      .each((item) => item)
-      .toArray()
-    expect(result).toEqual([
-      { id: 1, name: 'John' },
-      { id: 2, name: 'Jane' }
-    ])
+  it('returns empty collection for empty input', () => {
+    expect(
+      collect([])
+        .except(['a' as never])
+        .all()
+    ).toEqual([])
+  })
+})
+
+describe('only', () => {
+  it('returns only specified keys from each object', () => {
+    const items = [{ id: 1, name: 'Alice', age: 30 }]
+    const result = collect(items).only(['name'])
+    expect(result.all()).toEqual([{ name: 'Alice' }])
+  })
+
+  it('returns multiple specified keys', () => {
+    const items = [{ a: 1, b: 2, c: 3 }]
+    const result = collect(items).only(['a', 'c'])
+    expect(result.all()).toEqual([{ a: 1, c: 3 }])
+  })
+
+  it('returns undefined for keys not present in object', () => {
+    const items = [{ id: 1 }]
+    const result = collect(items).only(['id', 'name'])
+    expect(result.all()[0]).toEqual({ id: 1, name: undefined })
+  })
+
+  it('works with multiple items', () => {
+    const items = [
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' }
+    ]
+    const result = collect(items).only(['id'])
+    expect(result.all()).toEqual([{ id: 1 }, { id: 2 }])
+  })
+
+  it('returns empty collection for empty input', () => {
+    expect(collect([]).only(['a']).all()).toEqual([])
   })
 })
