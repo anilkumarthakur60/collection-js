@@ -6,7 +6,7 @@ export default defineConfig({
     build: {
         lib: {
             entry: path.resolve(__dirname, "src/index.ts"),
-            name: "match",
+            name: "collection",
             fileName: (format) => `index.${format}.js`,
         },
         sourcemap: true,

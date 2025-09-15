@@ -1,6 +1,10 @@
 import { Predicate } from '../types'
 
-export function before<T>(items: T[], item: T | string | Predicate<T>, strict: boolean = false): T | null {
+export function before<T>(
+  items: T[],
+  item: T | string | Predicate<T>,
+  strict: boolean = false
+): T | null {
   if (typeof item === 'function') {
     const predicate = item as Predicate<T>
     for (let i = 1; i < items.length; i++) {
