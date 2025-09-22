@@ -26,8 +26,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-package-lock.json
-yarn.lock
+# package-lock.json  # Committed for reproducible CI builds (npm ci)
 bun.lockb
 .idea
 
