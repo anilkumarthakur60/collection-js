@@ -89,7 +89,7 @@ export class LazyCollection<T> implements ILazyCollection<T> {
    * For async throttling pair this with an async generator pipeline.
    */
   throttle(_seconds: number): LazyCollection<T> {
-    void _seconds;
+    void _seconds
     return new LazyCollection<T>(this.generatorFn)
   }
 
