@@ -19,5 +19,10 @@ module.exports = {
   },
   rules: {
     "perfectionist/sort-interfaces": "error"
-  }
+  },
+  ignorePatterns: [
+    "docs/.vitepress/cache",
+    "docs/.vitepress/dist",
+    "docs/.vitepress/theme/"
+  ]
 }

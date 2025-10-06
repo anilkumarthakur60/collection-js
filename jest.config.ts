@@ -9,6 +9,7 @@ const config: Config.InitialOptions = {
         }],
     },
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+    testMatch: ['**/tests/**/*.test.ts'],
 };
 
 export default config;

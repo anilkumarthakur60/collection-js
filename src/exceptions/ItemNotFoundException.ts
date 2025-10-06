@@ -1,9 +1,7 @@
-class ItemNotFoundException extends Error {
+import { CollectionException } from './CollectionException'
+
+export class ItemNotFoundException extends CollectionException {
   constructor(message: string) {
-    super(message)
-    this.name = 'ItemNotFoundException'
-    Object.setPrototypeOf(this, ItemNotFoundException.prototype)
+    super(message, 'ItemNotFoundException')
   }
 }
-
-export { ItemNotFoundException }
