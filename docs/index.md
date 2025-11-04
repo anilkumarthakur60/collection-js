@@ -2,9 +2,9 @@
 layout: home
 
 hero:
-  name: "@anilkumarthakur/collection"
-  text: "Elegant Array Manipulation"
-  tagline: "A fluent, Laravel-inspired Collection library for JavaScript and TypeScript."
+  name: '@anilkumarthakur/collection'
+  text: 'Elegant Array Manipulation'
+  tagline: 'A fluent, Laravel-inspired Collection library for JavaScript and TypeScript.'
   actions:
     - theme: brand
       text: Get Started

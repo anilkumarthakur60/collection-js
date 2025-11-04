@@ -6,7 +6,9 @@ export function mapInto<T, U>(items: T[], ClassType: new (item: T) => U): U[] {
   try {
     return items.map((item) => new ClassType(item))
   } catch (error) {
-    throw new Error(`${ClassType.name} is not a valid constructor for the provided items.`)
+    throw new Error(`${ClassType.name} is not a valid constructor for the provided items.`, {
+      cause: error
+    })
   }
 }
 

@@ -1,6 +1,6 @@
 # API Reference
 
-The Collection class provides over 120 chainable methods for elegant array manipulation. 
+The Collection class provides over 120 chainable methods for elegant array manipulation.
 
 ::: tip
 Almost all methods return a **new** Collection instance. This means the original collection is not mutated unless specifically designated. To extract the raw JavaScript array, call `.all()` or `.toArray()` at the end of your chain.
@@ -27,11 +27,11 @@ Almost all methods return a **new** Collection instance. This means the original
 
 - **`filter(callback)`**: Filters the collection using the given callback, keeping items that return true.
 - **`reject(callback)`**: The inverse of filter. Keeps items that return false.
-- **`where(key, operator?, value?)`**: Filters the collection by a given key / value / operator. 
-  *Example:* `where('price', '>', 100)`
+- **`where(key, operator?, value?)`**: Filters the collection by a given key / value / operator.
+  _Example:_ `where('price', '>', 100)`
 - **`whereStrict(key, value)`**: Filters using strict equality (`===`).
 - **`whereBetween(key, [min, max])`**: Filters items where the predefined key is between two values.
-- **`whereNotBetween(key, [min, max])`**: Filters items where the predefined key is *not* between two values.
+- **`whereNotBetween(key, [min, max])`**: Filters items where the predefined key is _not_ between two values.
 - **`whereIn(key, values)`**: Filters down to items where the item's key value matches one in the provided array.
 - **`whereNotIn(key, values)`**: The inverse of `whereIn`.
 - **`whereNull(key)`**: Returns items where the given key is null or undefined.
@@ -146,7 +146,7 @@ Almost all methods return a **new** Collection instance. This means the original
 - **`pop(count?)`**: Removes and returns the last item from the collection.
 - **`shift(count?)`**: Removes and returns the first item from the collection.
 - **`pull(key, default?)`**: Removes and returns an item from the collection by its key.
-- **`forget(keys)`**: Removes an item from the collection by its key. 
+- **`forget(keys)`**: Removes an item from the collection by its key.
 - **`splice(offset, length?, replacement?)`**: Removes and returns a slice of items starting at the specified index.
 
 ## Conditional Operations
@@ -171,4 +171,4 @@ Almost all methods return a **new** Collection instance. This means the original
 - **`dump()`**: Dumps the collection's items.
 - **`dd()`**: Dumps the collection's items and halts execution (throws).
 
-*(For exact parameter types and full edge-case behavior, refer to the [Laravel Collection Documentation](https://laravel.com/docs/13.x/collections#available-methods) which this library meticulously mirrors).*
+_(For exact parameter types and full edge-case behavior, refer to the [Laravel Collection Documentation](https://laravel.com/docs/13.x/collections#available-methods) which this library meticulously mirrors)._

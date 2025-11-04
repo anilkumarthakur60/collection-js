@@ -2,7 +2,7 @@
 
 While standard Collections are fantastic for most use-cases, they keep the entire array in memory. If you are processing a file with 1,000,000 lines, or pulling 100,000 rows from a database, a standard Collection could easily crash your process or cause an Out of Memory (OOM) error.
 
-This is where `LazyCollection` comes in. 
+This is where `LazyCollection` comes in.
 
 Lazy Collections leverage JavaScript **Generators** (`function* () { yield x }`). Because generators yield data one item at a time, Lazy Collections allow you to work with massive (or even infinite!) datasets while keeping memory usage extraordinarily low.
 
@@ -41,15 +41,15 @@ const lazy = new LazyCollection(function* () {
 })
 
 const result = lazy
-  .filter(n => n % 2 === 0)
-  .map(n => n * 2)
+  .filter((n) => n % 2 === 0)
+  .map((n) => n * 2)
   .take(5)
   .all()
 
 // Result: [0, 4, 8, 12, 16]
 ```
 
-Because of the `take(5)` at the end of the chain, the `LazyCollection` only evaluated the massive generator up until it found 5 passing matches. 
+Because of the `take(5)` at the end of the chain, the `LazyCollection` only evaluated the massive generator up until it found 5 passing matches.
 **It never instantiated 1,000,000 items in memory.** It stopped processing entirely after `i = 8`!
 
 ## Converting to a Standard Collection

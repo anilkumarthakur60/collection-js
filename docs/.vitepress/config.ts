@@ -31,15 +31,13 @@ export default defineConfig({
           { text: 'G - M', link: '/api/g-m' },
           { text: 'N - R', link: '/api/n-r' },
           { text: 'S', link: '/api/s' },
-          { text: 'T - Z', link: '/api/t-z' },
+          { text: 'T - Z', link: '/api/t-z' }
         ]
       }
     ],
 
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/anilkumarthakur60/collection-js' }
-    ],
-    
+    socialLinks: [{ icon: 'github', link: 'https://github.com/anilkumarthakur60/collection-js' }],
+
     search: {
       provider: 'local'
     },

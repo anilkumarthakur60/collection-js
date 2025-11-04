@@ -53,7 +53,7 @@ describe('mapInto', () => {
 
   it('returns Collection instance', () => {
     class Foo {
-      constructor(_v: number) {}
+      constructor(public v: number) {}
     }
     expect(collect([1]).mapInto(Foo)).toBeInstanceOf(Collection)
   })
@@ -100,6 +100,6 @@ describe('mapWithKeys', () => {
   })
 
   it('returns empty object for empty collection', () => {
-    expect(collect([]).mapWithKeys((_v: number) => ['k', 'v'])).toEqual({})
+    expect(collect([]).mapWithKeys(() => ['k', 'v'])).toEqual({})
   })
 })
