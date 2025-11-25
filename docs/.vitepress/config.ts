@@ -1,37 +1,50 @@
 import { defineConfig } from 'vitepress'
 
-// https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: 'My Awesome Project',
-  description: 'A VitePress Site',
+  title: '@anilkumarthakur/collection',
+  description: 'A fluent, Laravel-inspired Collection library for JavaScript and TypeScript',
   cleanUrls: true,
 
   themeConfig: {
-    // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Example', link: '/markdown-examples' },
-      { text: 'Docs', link: '/docs' }
+      { text: 'Guide', link: '/guide/introduction' },
+      { text: 'API Reference', link: '/api/' }
     ],
 
     sidebar: [
       {
-        text: 'Examples',
+        text: 'Getting Started',
         items: [
-          { text: 'Markdown Examples', link: '/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/api-examples' }
+          { text: 'Introduction', link: '/guide/introduction' },
+          { text: 'Installation', link: '/guide/installation' },
+          { text: 'Usage', link: '/guide/usage' },
+          { text: 'Lazy Collections', link: '/guide/lazy-collections' }
         ]
       },
       {
-        text: 'Docs',
+        text: 'API Reference',
         items: [
-          { text: 'Introduction', link: '/docs' },
-          { text: 'Installation', link: '/docs/installation' },
-          { text: 'Usage', link: '/docs/usage' }
+          { text: 'Overview', link: '/api/' },
+          { text: 'A - C', link: '/api/a-c' },
+          { text: 'D - F', link: '/api/d-f' },
+          { text: 'G - M', link: '/api/g-m' },
+          { text: 'N - R', link: '/api/n-r' },
+          { text: 'S', link: '/api/s' },
+          { text: 'T - Z', link: '/api/t-z' }
         ]
       }
     ],
 
-    socialLinks: [{ icon: 'github', link: 'https://github.com/vuejs/vitepress' }]
+    socialLinks: [{ icon: 'github', link: 'https://github.com/anilkumarthakur60/collection-js' }],
+
+    search: {
+      provider: 'local'
+    },
+
+    footer: {
+      message: 'Released under the MIT License.',
+      copyright: 'Copyright © 2024-present Anil Kumar Thakur'
+    }
   }
 })
