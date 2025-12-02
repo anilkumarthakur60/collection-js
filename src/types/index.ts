@@ -5,7 +5,10 @@ export type {
   PredicateContains,
   Iteratee,
   MapCallback,
+  ReduceCallback,
   SortCallback,
-  GroupByCallback
+  GroupByCallback,
+  TapCallback,
+  ValueResolver
 } from './predicates'
 export type { IReadonlyCollection, ILazyCollection } from './collection'

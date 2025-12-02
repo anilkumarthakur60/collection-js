@@ -55,6 +55,11 @@ export function isDeepEqual<T>(value: T, other: T): boolean {
   if (typeof value !== 'object' || value === null || typeof other !== 'object' || other === null) {
     return false
   }
+  if (Array.isArray(value) && Array.isArray(other)) {
+    if (value.length !== other.length) return false
+    return value.every((v, i) => isDeepEqual(v, other[i]))
+  }
+  if (Array.isArray(value) !== Array.isArray(other)) return false
   const keysA = Object.keys(value as PlainObject)
   const keysB = Object.keys(other as PlainObject)
   if (keysA.length !== keysB.length) return false
@@ -67,4 +72,16 @@ export function isDeepEqual<T>(value: T, other: T): boolean {
     }
   }
   return true
+}
+
+export function getNestedValue(obj: unknown, path: string): unknown {
+  if (path === '') return obj
+  const parts = path.split('.')
+  let current: unknown = obj
+  for (const part of parts) {
+    if (current === null || current === undefined) return undefined
+    if (typeof current !== 'object') return undefined
+    current = (current as Record<string, unknown>)[part]
+  }
+  return current
 }

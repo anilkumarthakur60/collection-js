@@ -1,8 +1,5 @@
 import type { PlainObject } from '../types'
-
-function isObject(value: unknown): value is PlainObject {
-  return value !== null && typeof value === 'object' && !Array.isArray(value)
-}
+import { isObject } from './equality'
 
 export function flattenToDot(obj: PlainObject, prefix = ''): PlainObject {
   return Object.keys(obj).reduce((acc: PlainObject, k: string) => {
