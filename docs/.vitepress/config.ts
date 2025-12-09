@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: '@anilkumarthakur/collection',
+  title: '@anilkumarthakur/collection-js',
   description: 'A fluent, Laravel-inspired Collection library for JavaScript and TypeScript',
   cleanUrls: true,
 
