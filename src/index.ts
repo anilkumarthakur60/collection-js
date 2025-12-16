@@ -3,9 +3,10 @@ import collect from './collect'
 export { Collection } from './Collection'
 export { LazyCollection } from './LazyCollection'
 export { collect } from './collect'
-export { ItemNotFoundException } from './exceptions/ItemNotFoundException'
-export { UnexpectedValueException } from './exceptions/UnexpectedValueException'
 export { CollectionException } from './exceptions/CollectionException'
+export { ItemNotFoundException } from './exceptions/ItemNotFoundException'
+export { MultipleItemsFoundException } from './exceptions/MultipleItemsFoundException'
+export { UnexpectedValueException } from './exceptions/UnexpectedValueException'
 export type { FlattenType, PlainObject, Scalar, Operator, SortDirection } from './types/core'
 export type {
   Predicate,
@@ -13,8 +14,11 @@ export type {
   PredicateContains,
   Iteratee,
   MapCallback,
+  ReduceCallback,
   SortCallback,
-  GroupByCallback
+  GroupByCallback,
+  TapCallback,
+  ValueResolver
 } from './types/predicates'
 export type { IReadonlyCollection, ILazyCollection } from './types/collection'
 

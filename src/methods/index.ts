@@ -3,7 +3,7 @@ export { after } from './after'
 export { average } from './average'
 export { before } from './before'
 export { chunk } from './chunk'
-export { contains } from './contains'
+export { contains, containsBy, containsByStrict } from './contains'
 export { countBy } from './countBy'
 export { crossJoin } from './crossJoin'
 export { diff, diffAssoc, diffAssocUsing, diffKeys } from './diff'
@@ -16,7 +16,7 @@ export { flip } from './flip'
 export { forget } from './forget'
 export { groupBy } from './groupBy'
 export { implode } from './implode'
-export { intersect, intersectUsing, intersectAssocUsing } from './intersect'
+export { intersect, intersectUsing, intersectAssoc, intersectAssocUsing } from './intersect'
 export { join } from './join'
 export { keyBy } from './keyBy'
 export { last } from './last'
@@ -32,8 +32,10 @@ export {
   where,
   whereBetween,
   whereIn,
+  whereInStrict,
   whereNotBetween,
   whereNotIn,
+  whereNotInStrict,
   whereNotNull,
   whereNull
 } from './where'

@@ -15,3 +15,11 @@ export function contains<T>(items: T[], value: T | PredicateContains<T> | Partia
 
   return items.includes(value as T)
 }
+
+export function containsBy<T, K extends keyof T>(items: T[], key: K, value: T[K]): boolean {
+  return items.some((item) => item[key] == value)
+}
+
+export function containsByStrict<T, K extends keyof T>(items: T[], key: K, value: T[K]): boolean {
+  return items.some((item) => item[key] === value)
+}

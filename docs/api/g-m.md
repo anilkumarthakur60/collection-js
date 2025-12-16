@@ -261,7 +261,7 @@ Static method used to extend the `Collection` class with custom functions at run
 **Complex Example:**
 
 ```typescript
-import { Collection } from '@anilkumarthakur/collection'
+import { Collection } from '@anilkumarthakur/collection-js'
 
 Collection.macro('sumAndDouble', function () {
   return this.sum() * 2
