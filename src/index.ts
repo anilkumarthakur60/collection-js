@@ -6,10 +6,20 @@ import { collect } from './helpers/collect'
 // Classes
 export { Collection } from './collection/Collection'
 export { LazyCollection } from './collection/LazyCollection'
+export { AsyncCollection } from './async/AsyncCollection'
+export type { AsyncSource } from './async/AsyncCollection'
+export { mapWithConcurrency } from './async/concurrent'
 
 // Helpers
 export { collect } from './helpers/collect'
 export { lazy } from './helpers/lazy'
+
+// I/O
+export { parseCsv, toCsv } from './io/csv'
+export type { CsvParseOptions, CsvSerializeOptions } from './io/csv'
+export { parseJsonl, toJsonl, parseJsonlStream } from './io/jsonl'
+export { fromReadable, lines } from './io/streams'
+export type { FromReadableOptions, ReadableLike } from './io/streams'
 
 // Higher-order messaging primitive (so users can build their own proxies)
 export { createHigherOrderProxy, HIGHER_ORDER_TARGETS } from './collection/HigherOrderProxy'
