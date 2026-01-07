@@ -9,13 +9,13 @@ export interface CsvParseOptions {
 }
 
 export interface CsvSerializeOptions {
-  delimiter?: string
   /** Optional explicit column order. When omitted, keys are taken from the first row. */
   columns?: readonly string[]
-  /** Include the header row at the top of the output. Default true when input is objects. */
-  header?: boolean
+  delimiter?: string
   /** EOL sequence — defaults to \n. Use \r\n if Excel compat matters. */
   eol?: string
+  /** Include the header row at the top of the output. Default true when input is objects. */
+  header?: boolean
 }
 
 /**

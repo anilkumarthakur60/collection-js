@@ -63,9 +63,9 @@ export function flushMacros(target: Function): void {
  * Used by `Collection` and `LazyCollection`. Avoids inheritance gymnastics.
  */
 export interface MacroableTarget {
-  macro(name: string, fn: MacroFn): void
-  hasMacro(name: string): boolean
   flushMacros(): void
+  hasMacro(name: string): boolean
+  macro(name: string, fn: MacroFn): void
 }
 
 export function applyMacroable<C extends Function>(target: C): asserts target is C & MacroableTarget {

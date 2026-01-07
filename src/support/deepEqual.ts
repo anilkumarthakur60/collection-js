@@ -52,7 +52,7 @@ export function looseEqual(a: unknown, b: unknown): boolean {
     (typeof a === 'string' || typeof a === 'number' || typeof a === 'boolean') &&
     (typeof b === 'string' || typeof b === 'number' || typeof b === 'boolean')
   ) {
-    // eslint-disable-next-line eqeqeq
+     
     return a == b
   }
   return false
