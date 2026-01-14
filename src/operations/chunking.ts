@@ -13,7 +13,7 @@ export function chunkOf<T>(items: readonly T[], size: number): T[][] {
  */
 export function chunkWhileOf<T>(
   items: readonly T[],
-  predicate: (item: T, key: number, chunk: readonly T[]) => boolean,
+  predicate: (item: T, key: number, chunk: readonly T[]) => boolean
 ): T[][] {
   if (items.length === 0) return []
   const result: T[][] = []

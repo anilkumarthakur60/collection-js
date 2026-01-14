@@ -2,7 +2,11 @@ import { dataGet, dataSet } from '../support/dataGet'
 import { deepClone } from '../support/deepClone'
 import { isObjectLike, isPlainObject } from '../support/isObject'
 
-export function pluckOf<T>(items: readonly T[], key: string, keyBy?: string): unknown[] | Record<string, unknown> {
+export function pluckOf<T>(
+  items: readonly T[],
+  key: string,
+  keyBy?: string
+): unknown[] | Record<string, unknown> {
   if (keyBy === undefined) return items.map((item) => dataGet(item, key))
   const out: Record<string, unknown> = {}
   for (const item of items) {
@@ -12,7 +16,10 @@ export function pluckOf<T>(items: readonly T[], key: string, keyBy?: string): un
   return out
 }
 
-export function onlyOf<T extends object>(items: readonly T[], keys: readonly (keyof T | string)[]): Partial<T>[] {
+export function onlyOf<T extends object>(
+  items: readonly T[],
+  keys: readonly (keyof T | string)[]
+): Partial<T>[] {
   const set = new Set(keys.map(String))
   return items.map((item) => {
     if (!isObjectLike(item)) return {} as Partial<T>
@@ -24,7 +31,10 @@ export function onlyOf<T extends object>(items: readonly T[], keys: readonly (ke
   })
 }
 
-export function exceptOf<T extends object>(items: readonly T[], keys: readonly (keyof T | string)[]): Partial<T>[] {
+export function exceptOf<T extends object>(
+  items: readonly T[],
+  keys: readonly (keyof T | string)[]
+): Partial<T>[] {
   const set = new Set(keys.map(String))
   return items.map((item) => {
     if (!isObjectLike(item)) return item as unknown as Partial<T>
@@ -38,7 +48,7 @@ export function exceptOf<T extends object>(items: readonly T[], keys: readonly (
 
 export function selectOf<T extends object, K extends keyof T>(
   items: readonly T[],
-  keys: K | readonly K[],
+  keys: K | readonly K[]
 ): Pick<T, K>[] {
   const list: readonly K[] = Array.isArray(keys) ? (keys as readonly K[]) : [keys as K]
   return items.map((item) => {
@@ -58,7 +68,8 @@ export function keysOf<T>(items: readonly T[]): string[] {
   if (items.length === 0) return []
   if (items.every((item) => isPlainObject(item))) {
     const merged = new Set<string>()
-    for (const item of items) for (const k of Object.keys(item as Record<string, unknown>)) merged.add(k)
+    for (const item of items)
+      for (const k of Object.keys(item as Record<string, unknown>)) merged.add(k)
     return [...merged]
   }
   return items.map((_, i) => String(i))
@@ -79,7 +90,8 @@ export function dotOf(items: readonly unknown[]): Record<string, unknown> {
         out[prefix] = value
         return
       }
-      for (let i = 0; i < value.length; i++) helper(value[i], prefix === '' ? String(i) : `${prefix}.${i}`)
+      for (let i = 0; i < value.length; i++)
+        helper(value[i], prefix === '' ? String(i) : `${prefix}.${i}`)
     } else {
       out[prefix] = value
     }

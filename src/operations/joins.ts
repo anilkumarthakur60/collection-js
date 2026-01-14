@@ -4,7 +4,7 @@ export type JoinResult<L, R, M> = M extends (left: L, right: R) => infer U ? U :
 
 function bucketByKey<T, K extends PropertyKey>(
   items: readonly T[],
-  by: RetrieverInput<T, K>,
+  by: RetrieverInput<T, K>
 ): Map<K, T[]> {
   const get = valueRetriever<T, K>(by)
   const out = new Map<K, T[]>()
@@ -27,7 +27,7 @@ export function joinOnOf<L, R, K extends PropertyKey, M = [L, R]>(
   right: readonly R[],
   leftKey: RetrieverInput<L, K>,
   rightKey: RetrieverInput<R, K>,
-  merge?: (l: L, r: R) => M,
+  merge?: (l: L, r: R) => M
 ): M[] {
   const buckets = bucketByKey(right, rightKey)
   const getL = valueRetriever<L, K>(leftKey)
@@ -52,7 +52,7 @@ export function leftJoinOf<L, R, K extends PropertyKey, M = [L, R | undefined]>(
   right: readonly R[],
   leftKey: RetrieverInput<L, K>,
   rightKey: RetrieverInput<R, K>,
-  merge?: (l: L, r: R | undefined) => M,
+  merge?: (l: L, r: R | undefined) => M
 ): M[] {
   const buckets = bucketByKey(right, rightKey)
   const getL = valueRetriever<L, K>(leftKey)
@@ -75,7 +75,7 @@ export function rightJoinOf<L, R, K extends PropertyKey, M = [L | undefined, R]>
   right: readonly R[],
   leftKey: RetrieverInput<L, K>,
   rightKey: RetrieverInput<R, K>,
-  merge?: (l: L | undefined, r: R) => M,
+  merge?: (l: L | undefined, r: R) => M
 ): M[] {
   const buckets = bucketByKey(left, leftKey)
   const getR = valueRetriever<R, K>(rightKey)
@@ -84,7 +84,8 @@ export function rightJoinOf<L, R, K extends PropertyKey, M = [L | undefined, R]>
     const k = getR(right[i], i)
     const matches = buckets.get(k)
     if (matches && matches.length > 0) {
-      for (const l of matches) out.push(merge ? merge(l, right[i]) : ([l, right[i]] as unknown as M))
+      for (const l of matches)
+        out.push(merge ? merge(l, right[i]) : ([l, right[i]] as unknown as M))
     } else {
       out.push(merge ? merge(undefined, right[i]) : ([undefined, right[i]] as unknown as M))
     }
@@ -98,7 +99,7 @@ export function outerJoinOf<L, R, K extends PropertyKey, M = [L | undefined, R |
   right: readonly R[],
   leftKey: RetrieverInput<L, K>,
   rightKey: RetrieverInput<R, K>,
-  merge?: (l: L | undefined, r: R | undefined) => M,
+  merge?: (l: L | undefined, r: R | undefined) => M
 ): M[] {
   const rightBuckets = bucketByKey(right, rightKey)
   const getL = valueRetriever<L, K>(leftKey)

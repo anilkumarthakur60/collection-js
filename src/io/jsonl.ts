@@ -23,7 +23,9 @@ export function toJsonl<T>(items: ReadonlyArray<T>, eol: string = '\n'): string 
 }
 
 /** Parse a JSONL stream incrementally, yielding one object per line. */
-export async function* parseJsonlStream<T = unknown>(source: AsyncIterable<string>): AsyncGenerator<T> {
+export async function* parseJsonlStream<T = unknown>(
+  source: AsyncIterable<string>
+): AsyncGenerator<T> {
   let buffer = ''
   let lineNo = 0
   for await (const chunk of source) {
@@ -37,7 +39,9 @@ export async function* parseJsonlStream<T = unknown>(source: AsyncIterable<strin
       try {
         yield JSON.parse(line) as T
       } catch (err) {
-        throw new SyntaxError(`parseJsonlStream: invalid JSON on line ${lineNo}: ${(err as Error).message}`)
+        throw new SyntaxError(
+          `parseJsonlStream: invalid JSON on line ${lineNo}: ${(err as Error).message}`
+        )
       }
     }
   }
@@ -46,7 +50,9 @@ export async function* parseJsonlStream<T = unknown>(source: AsyncIterable<strin
     try {
       yield JSON.parse(buffer) as T
     } catch (err) {
-      throw new SyntaxError(`parseJsonlStream: invalid JSON on line ${lineNo}: ${(err as Error).message}`)
+      throw new SyntaxError(
+        `parseJsonlStream: invalid JSON on line ${lineNo}: ${(err as Error).message}`
+      )
     }
   }
 }

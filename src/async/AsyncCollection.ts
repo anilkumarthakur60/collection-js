@@ -1,10 +1,7 @@
 import { Collection } from '../collection/Collection'
 import { mapWithConcurrency } from './concurrent'
 
-export type AsyncSource<T> =
-  | AsyncIterable<T>
-  | Iterable<T>
-  | (() => AsyncIterable<T> | Iterable<T>)
+export type AsyncSource<T> = AsyncIterable<T> | Iterable<T> | (() => AsyncIterable<T> | Iterable<T>)
 
 function resolveSource<T>(source: AsyncSource<T>): () => AsyncIterable<T> {
   if (typeof source === 'function') {
@@ -82,7 +79,9 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
     return n
   }
 
-  async first(predicate?: (item: T, index: number) => boolean | Promise<boolean>): Promise<T | undefined> {
+  async first(
+    predicate?: (item: T, index: number) => boolean | Promise<boolean>
+  ): Promise<T | undefined> {
     let i = 0
     for await (const item of this.source()) {
       if (predicate === undefined || (await predicate(item, i))) return item
@@ -91,7 +90,9 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
     return undefined
   }
 
-  async last(predicate?: (item: T, index: number) => boolean | Promise<boolean>): Promise<T | undefined> {
+  async last(
+    predicate?: (item: T, index: number) => boolean | Promise<boolean>
+  ): Promise<T | undefined> {
     let last: T | undefined = undefined
     let i = 0
     for await (const item of this.source()) {
@@ -121,7 +122,7 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
 
   async reduce<R>(
     fn: (carry: R, item: T, index: number) => R | Promise<R>,
-    initial: R,
+    initial: R
   ): Promise<R> {
     let acc = initial
     let i = 0
@@ -146,7 +147,7 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
    */
   async eachAsync(
     fn: (item: T, index: number) => void | Promise<void>,
-    options: { concurrency?: number } = {},
+    options: { concurrency?: number } = {}
   ): Promise<void> {
     const c = options.concurrency ?? 1
     await mapWithConcurrency(this.source(), c, async (item, i) => {
@@ -173,7 +174,7 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
    */
   mapAsync<R>(
     fn: (item: T, index: number) => Promise<R> | R,
-    options: { concurrency?: number } = {},
+    options: { concurrency?: number } = {}
   ): AsyncCollection<R> {
     const concurrency = options.concurrency ?? 4
     const src = this.source
@@ -194,7 +195,7 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
         const idx = nextDispatch++
         pending.set(
           idx,
-          Promise.resolve(fn(next.value, idx)).then((value) => ({ index: idx, value })),
+          Promise.resolve(fn(next.value, idx)).then((value) => ({ index: idx, value }))
         )
       }
 
@@ -230,14 +231,16 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
   /** Concurrent filter — predicate runs in parallel; output stays in source order. */
   filterAsync(
     predicate: (item: T, index: number) => Promise<boolean> | boolean,
-    options: { concurrency?: number } = {},
+    options: { concurrency?: number } = {}
   ): AsyncCollection<T> {
     return this.mapAsync(async (item, i) => ({ item, keep: await predicate(item, i) }), options)
       .filter((entry) => entry.keep)
       .map((entry) => entry.item)
   }
 
-  flatMap<R>(fn: (item: T, index: number) => Iterable<R> | AsyncIterable<R> | Promise<Iterable<R>>): AsyncCollection<R> {
+  flatMap<R>(
+    fn: (item: T, index: number) => Iterable<R> | AsyncIterable<R> | Promise<Iterable<R>>
+  ): AsyncCollection<R> {
     const src = this.source
     return new AsyncCollection<R>(async function* () {
       let i = 0

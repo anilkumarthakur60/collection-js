@@ -6,12 +6,14 @@
 export async function mapWithConcurrency<T, R>(
   source: AsyncIterable<T> | Iterable<T>,
   concurrency: number,
-  fn: (item: T, index: number) => Promise<R> | R,
+  fn: (item: T, index: number) => Promise<R> | R
 ): Promise<R[]> {
   if (concurrency <= 0 || !Number.isFinite(concurrency)) {
     throw new RangeError(`concurrency must be a positive finite number (got ${concurrency})`)
   }
-  const iterator = isAsyncIterable(source) ? source[Symbol.asyncIterator]() : toAsyncIterator(source)
+  const iterator = isAsyncIterable(source)
+    ? source[Symbol.asyncIterator]()
+    : toAsyncIterator(source)
   const results: R[] = []
   const inflight = new Set<Promise<void>>()
   let nextIndex = 0

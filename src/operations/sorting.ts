@@ -9,12 +9,15 @@ const defaultCompare: Comparator<unknown> = (a, b) => {
   return String(a).localeCompare(String(b))
 }
 
-export function sortOf<T>(items: readonly T[], comparator: Comparator<T> = defaultCompare as Comparator<T>): T[] {
+export function sortOf<T>(
+  items: readonly T[],
+  comparator: Comparator<T> = defaultCompare as Comparator<T>
+): T[] {
   return [...items].sort(comparator)
 }
 
 export function sortDescOf<T>(items: readonly T[]): T[] {
-  return [...items].sort((a, b) => -(defaultCompare(a, b)))
+  return [...items].sort((a, b) => -defaultCompare(a, b))
 }
 
 export type SortBySpec<T> =
@@ -22,11 +25,16 @@ export type SortBySpec<T> =
   | readonly [RetrieverInput<T, unknown>, SortDirection]
   | Comparator<T>
 
-export function sortByOf<T>(items: readonly T[], spec: SortBySpec<T> | readonly SortBySpec<T>[], descending = false): T[] {
+export function sortByOf<T>(
+  items: readonly T[],
+  spec: SortBySpec<T> | readonly SortBySpec<T>[],
+  descending = false
+): T[] {
   // Normalize to an array of comparators applied in order.
-  const specs = Array.isArray(spec) && !isRetrieverTuple(spec)
-    ? (spec as readonly SortBySpec<T>[])
-    : [spec as SortBySpec<T>]
+  const specs =
+    Array.isArray(spec) && !isRetrieverTuple(spec)
+      ? (spec as readonly SortBySpec<T>[])
+      : [spec as SortBySpec<T>]
 
   const comparators: Comparator<T>[] = specs.map((s) => toComparator<T>(s, descending))
 
@@ -52,7 +60,10 @@ function toComparator<T>(spec: SortBySpec<T>, descending: boolean): Comparator<T
   return makeRetrieverComparator(spec as RetrieverInput<T>, descending)
 }
 
-function makeRetrieverComparator<T>(retriever: RetrieverInput<T>, descending: boolean): Comparator<T> {
+function makeRetrieverComparator<T>(
+  retriever: RetrieverInput<T>,
+  descending: boolean
+): Comparator<T> {
   const get = valueRetriever<T, unknown>(retriever)
   return (a, b) => {
     const av = get(a, 0)
@@ -77,7 +88,10 @@ export function sortKeysOf<T extends object>(items: readonly T[], descending = f
   })
 }
 
-export function sortKeysUsingOf<T extends object>(items: readonly T[], comparator: (a: string, b: string) => number): T[] {
+export function sortKeysUsingOf<T extends object>(
+  items: readonly T[],
+  comparator: (a: string, b: string) => number
+): T[] {
   return items.map((item) => {
     if (item === null || typeof item !== 'object') return item
     const keys = Object.keys(item).sort(comparator)

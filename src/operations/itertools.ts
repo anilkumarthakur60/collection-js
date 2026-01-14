@@ -5,7 +5,7 @@
 export function scanOf<T, R>(
   items: readonly T[],
   fn: (carry: R, item: T, index: number) => R,
-  initial: R,
+  initial: R
 ): R[] {
   const out: R[] = []
   let acc = initial

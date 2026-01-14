@@ -4,17 +4,7 @@ export type Scalar = string | number | bigint | boolean | symbol
 
 export type Comparable = string | number | bigint | boolean | Date
 
-export type Operator =
-  | '='
-  | '=='
-  | '==='
-  | '!='
-  | '!=='
-  | '<>'
-  | '<'
-  | '<='
-  | '>'
-  | '>='
+export type Operator = '=' | '==' | '===' | '!=' | '!==' | '<>' | '<' | '<=' | '>' | '>='
 
 export type SortDirection = 'asc' | 'desc'
 

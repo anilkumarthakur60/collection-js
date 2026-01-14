@@ -12,14 +12,14 @@ export function mapIntoOf<T, R>(items: readonly T[], Ctor: ClassConstructor<R, [
 
 export function mapSpreadOf<R>(
   items: ReadonlyArray<readonly unknown[]>,
-  fn: (...args: readonly unknown[]) => R,
+  fn: (...args: readonly unknown[]) => R
 ): R[] {
   return items.map((item) => fn(...item))
 }
 
 export function mapToGroupsOf<T, K extends PropertyKey, V>(
   items: readonly T[],
-  fn: (item: T, index: number) => readonly [K, V],
+  fn: (item: T, index: number) => readonly [K, V]
 ): Record<K, V[]> {
   const out = {} as Record<K, V[]>
   for (let i = 0; i < items.length; i++) {
@@ -32,7 +32,7 @@ export function mapToGroupsOf<T, K extends PropertyKey, V>(
 
 export function mapWithKeysOf<T, K extends PropertyKey, V>(
   items: readonly T[],
-  fn: (item: T, index: number) => readonly [K, V],
+  fn: (item: T, index: number) => readonly [K, V]
 ): Record<K, V> {
   const out = {} as Record<K, V>
   for (let i = 0; i < items.length; i++) {
@@ -42,7 +42,10 @@ export function mapWithKeysOf<T, K extends PropertyKey, V>(
   return out
 }
 
-export function flatMapOf<T, R>(items: readonly T[], fn: (item: T, index: number) => R | readonly R[]): R[] {
+export function flatMapOf<T, R>(
+  items: readonly T[],
+  fn: (item: T, index: number) => R | readonly R[]
+): R[] {
   const out: R[] = []
   for (let i = 0; i < items.length; i++) {
     const result = fn(items[i], i)

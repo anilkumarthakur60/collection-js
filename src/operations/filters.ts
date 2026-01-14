@@ -37,7 +37,7 @@ export function whereInOf<T>(
   items: readonly T[],
   key: string,
   values: readonly unknown[],
-  strict = false,
+  strict = false
 ): T[] {
   return items.filter((item) => {
     const got = dataGet(item, key)
@@ -49,7 +49,7 @@ export function whereNotInOf<T>(
   items: readonly T[],
   key: string,
   values: readonly unknown[],
-  strict = false,
+  strict = false
 ): T[] {
   return items.filter((item) => {
     const got = dataGet(item, key)
@@ -57,7 +57,11 @@ export function whereNotInOf<T>(
   })
 }
 
-export function whereBetweenOf<T>(items: readonly T[], key: string, range: readonly [unknown, unknown]): T[] {
+export function whereBetweenOf<T>(
+  items: readonly T[],
+  key: string,
+  range: readonly [unknown, unknown]
+): T[] {
   const [lo, hi] = range
   return items.filter((item) => {
     const got = dataGet(item, key)
@@ -65,7 +69,11 @@ export function whereBetweenOf<T>(items: readonly T[], key: string, range: reado
   })
 }
 
-export function whereNotBetweenOf<T>(items: readonly T[], key: string, range: readonly [unknown, unknown]): T[] {
+export function whereNotBetweenOf<T>(
+  items: readonly T[],
+  key: string,
+  range: readonly [unknown, unknown]
+): T[] {
   const [lo, hi] = range
   return items.filter((item) => {
     const got = dataGet(item, key)
@@ -83,7 +91,7 @@ export function whereNotNullOf<T>(items: readonly T[], key: string): T[] {
 
 export function whereInstanceOfOf<T, R>(
   items: readonly T[],
-  Ctor: ClassConstructor<R> | (abstract new (...args: never[]) => R),
+  Ctor: ClassConstructor<R> | (abstract new (...args: never[]) => R)
 ): R[] {
   return items.filter((item) => item instanceof (Ctor as Function)) as unknown as R[]
 }

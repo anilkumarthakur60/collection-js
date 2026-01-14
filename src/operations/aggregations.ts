@@ -44,7 +44,10 @@ export function minOf<T>(items: readonly T[], by?: RetrieverInput<T, number>): n
   return min === Infinity ? undefined : min
 }
 
-export function medianOf<T>(items: readonly T[], by?: RetrieverInput<T, number>): number | undefined {
+export function medianOf<T>(
+  items: readonly T[],
+  by?: RetrieverInput<T, number>
+): number | undefined {
   if (items.length === 0) return undefined
   const get = valueRetriever<T, number>(by)
   const values = items.map((item, i) => toNumber(get(item, i))).sort((a, b) => a - b)
@@ -52,7 +55,10 @@ export function medianOf<T>(items: readonly T[], by?: RetrieverInput<T, number>)
   return values.length % 2 === 0 ? (values[mid - 1] + values[mid]) / 2 : values[mid]
 }
 
-export function modeOf<T>(items: readonly T[], by?: RetrieverInput<T, unknown>): unknown[] | undefined {
+export function modeOf<T>(
+  items: readonly T[],
+  by?: RetrieverInput<T, unknown>
+): unknown[] | undefined {
   if (items.length === 0) return undefined
   const get = valueRetriever<T, unknown>(by)
   const counts = new Map<unknown, number>()
@@ -71,18 +77,18 @@ export function modeOf<T>(items: readonly T[], by?: RetrieverInput<T, unknown>):
 export function percentageOf<T>(
   items: readonly T[],
   predicate: (item: T, index: number) => boolean,
-  precision: number = 2,
+  precision: number = 2
 ): number {
   if (items.length === 0) return 0
   let count = 0
   for (let i = 0; i < items.length; i++) if (predicate(items[i], i)) count++
   const factor = 10 ** precision
-  return Math.round(((count / items.length) * 100) * factor) / factor
+  return Math.round((count / items.length) * 100 * factor) / factor
 }
 
 export function countByOf<T>(
   items: readonly T[],
-  by?: RetrieverInput<T, unknown>,
+  by?: RetrieverInput<T, unknown>
 ): Map<unknown, number> {
   const get = valueRetriever<T, unknown>(by)
   const counts = new Map<unknown, number>()

@@ -27,13 +27,7 @@ export type { HigherOrderTarget } from './collection/HigherOrderProxy'
 
 // Macroable primitive (so users can extend Collection from their own code,
 // even after installing this package from npm)
-export {
-  registerMacro,
-  hasMacro,
-  getMacro,
-  flushMacros,
-  applyMacroable,
-} from './macros/Macroable'
+export { registerMacro, hasMacro, getMacro, flushMacros, applyMacroable } from './macros/Macroable'
 export type { MacroableTarget } from './macros/Macroable'
 
 // Contracts
@@ -45,7 +39,7 @@ export {
   CollectionException,
   ItemNotFoundException,
   MultipleItemsFoundException,
-  UnexpectedValueException,
+  UnexpectedValueException
 } from './exceptions'
 
 // Types
@@ -58,7 +52,7 @@ export type {
   Predicate,
   Iteratee,
   Comparator,
-  ClassConstructor,
+  ClassConstructor
 } from './support/types'
 export type { RetrieverInput } from './support/valueRetriever'
 export type { LazySource } from './collection/LazyCollection'

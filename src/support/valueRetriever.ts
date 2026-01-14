@@ -1,9 +1,6 @@
 import { dataGet } from './dataGet'
 
-export type RetrieverInput<T, R = unknown> =
-  | ((item: T, index: number) => R)
-  | keyof T
-  | string
+export type RetrieverInput<T, R = unknown> = ((item: T, index: number) => R) | keyof T | string
 
 /**
  * Convert a key, dot-path, or function into a normalized accessor. Used by
@@ -11,7 +8,7 @@ export type RetrieverInput<T, R = unknown> =
  * either a callback or a property reference.
  */
 export function valueRetriever<T, R = unknown>(
-  source: RetrieverInput<T, R> | undefined,
+  source: RetrieverInput<T, R> | undefined
 ): (item: T, index: number) => R {
   if (source === undefined) {
     return (item: T) => item as unknown as R

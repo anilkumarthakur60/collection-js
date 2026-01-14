@@ -5,7 +5,11 @@ import { isObjectLike } from './isObject'
  * Laravel's `data_get` helper. Supports `*` to traverse arrays and produces
  * arrays of leaf values when wildcards are used.
  */
-export function dataGet(target: unknown, path: string | readonly string[], defaultValue?: unknown): unknown {
+export function dataGet(
+  target: unknown,
+  path: string | readonly string[],
+  defaultValue?: unknown
+): unknown {
   if (target == null) return defaultValue
   const segments = Array.isArray(path) ? [...path] : String(path).split('.')
 
@@ -44,7 +48,11 @@ export function dataGet(target: unknown, path: string | readonly string[], defau
 }
 
 /** Set a nested value via dot path; mutates and returns the target. */
-export function dataSet(target: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
+export function dataSet(
+  target: Record<string, unknown>,
+  path: string,
+  value: unknown
+): Record<string, unknown> {
   const segments = path.split('.')
   let cursor: Record<string, unknown> = target
   for (let i = 0; i < segments.length - 1; i++) {

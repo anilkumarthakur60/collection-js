@@ -4,5 +4,5 @@ export {
   getMacro,
   flushMacros,
   applyMacroable,
-  type MacroableTarget,
+  type MacroableTarget
 } from './Macroable'
