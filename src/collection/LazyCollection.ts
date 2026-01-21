@@ -319,10 +319,12 @@ export class LazyCollection<T> implements Enumerable<T> {
   whereInstanceOf<R>(
     Ctor: ClassConstructor<R> | (abstract new (...args: never[]) => R)
   ): LazyCollection<R> {
+    type AnyCtor = abstract new (...args: never[]) => unknown
+    const ctor = Ctor as AnyCtor
     const src = this.source
     return new LazyCollection<R>(function* () {
       for (const item of src()) {
-        if (item instanceof (Ctor as Function)) yield item as unknown as R
+        if (item instanceof ctor) yield item as unknown as R
       }
     })
   }

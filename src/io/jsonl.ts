@@ -1,7 +1,7 @@
 /**
  * Parse newline-delimited JSON. Empty lines are skipped. Each line must be
  * a complete JSON value; otherwise a SyntaxError is thrown with the line
- * number for diagnostics.
+ * number for diagnostics. The original parse error is attached as `cause`.
  */
 export function parseJsonl<T = unknown>(input: string): T[] {
   const out: T[] = []
@@ -12,7 +12,10 @@ export function parseJsonl<T = unknown>(input: string): T[] {
     try {
       out.push(JSON.parse(line) as T)
     } catch (err) {
-      throw new SyntaxError(`parseJsonl: invalid JSON on line ${i + 1}: ${(err as Error).message}`)
+      throw new SyntaxError(
+        `parseJsonl: invalid JSON on line ${i + 1}: ${(err as Error).message}`,
+        { cause: err }
+      )
     }
   }
   return out
@@ -40,7 +43,8 @@ export async function* parseJsonlStream<T = unknown>(
         yield JSON.parse(line) as T
       } catch (err) {
         throw new SyntaxError(
-          `parseJsonlStream: invalid JSON on line ${lineNo}: ${(err as Error).message}`
+          `parseJsonlStream: invalid JSON on line ${lineNo}: ${(err as Error).message}`,
+          { cause: err }
         )
       }
     }
@@ -51,7 +55,8 @@ export async function* parseJsonlStream<T = unknown>(
       yield JSON.parse(buffer) as T
     } catch (err) {
       throw new SyntaxError(
-        `parseJsonlStream: invalid JSON on line ${lineNo}: ${(err as Error).message}`
+        `parseJsonlStream: invalid JSON on line ${lineNo}: ${(err as Error).message}`,
+        { cause: err }
       )
     }
   }
