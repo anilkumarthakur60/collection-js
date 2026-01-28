@@ -1,4 +1,4 @@
-import { collect, Collection } from '../src/collect'
+import { collect, Collection } from '../src'
 
 describe('values', () => {
   it('returns a new Collection with same items', () => {
@@ -27,27 +27,20 @@ describe('values', () => {
 })
 
 describe('value', () => {
-  it('returns the first item when no key given', () => {
-    expect(collect([1, 2, 3]).value()).toBe(1)
-  })
-
   it('returns specific key from first item', () => {
     const items = [
       { id: 1, name: 'Alice' },
-      { id: 2, name: 'Bob' }
+      { id: 2, name: 'Bob' },
     ]
     expect(collect(items).value('name')).toBe('Alice')
   })
 
-  it('returns undefined for empty collection without key', () => {
-    expect(collect([]).value()).toBeUndefined()
+  it('returns undefined for empty collection', () => {
+    expect(collect([]).value('id')).toBeUndefined()
   })
 
-  it('returns undefined for empty collection with key', () => {
-    expect(collect([]).value('id' as never)).toBeUndefined()
-  })
-
-  it('returns first item object', () => {
-    expect(collect([{ id: 1 }]).value()).toEqual({ id: 1 })
+  it('returns nested values via dot path', () => {
+    const items = [{ user: { age: 30 } }]
+    expect(collect(items).value('user.age')).toBe(30)
   })
 })

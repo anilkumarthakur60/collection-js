@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('nth', () => {
   it('returns every nth element starting from 0', () => {

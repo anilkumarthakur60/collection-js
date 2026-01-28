@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('splice', () => {
   it('removes items from start to end', () => {

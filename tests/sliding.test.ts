@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('sliding', () => {
   it('creates sliding windows of given size', () => {

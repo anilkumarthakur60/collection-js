@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('tap', () => {
   it('calls the callback with the collection', () => {

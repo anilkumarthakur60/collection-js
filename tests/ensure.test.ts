@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('ensure', () => {
   it('does not throw when all items are of the expected primitive type', () => {

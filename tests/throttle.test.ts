@@ -1,4 +1,4 @@
-import { collect, LazyCollection } from '../src/collect'
+import { collect, LazyCollection } from '../src'
 
 describe('throttle', () => {
   it('returns all items unchanged', () => {

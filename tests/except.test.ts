@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('except', () => {
   it('removes specified keys from each object', () => {

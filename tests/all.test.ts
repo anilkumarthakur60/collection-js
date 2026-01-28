@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('all', () => {
   it('returns all items as an array', () => {
@@ -18,26 +18,14 @@ describe('all', () => {
     expect(collect(items).all()).toEqual([{ id: 1 }, { id: 2 }])
   })
 
-  it('filters items when predicate is provided', () => {
-    expect(collect([1, 2, 3, 4, 5]).all((item) => item > 2)).toEqual([3, 4, 5])
-  })
-
-  it('filters with predicate that matches none', () => {
-    expect(collect([1, 2, 3]).all((item) => item > 10)).toEqual([])
-  })
-
-  it('filters with predicate that matches all', () => {
-    expect(collect([1, 2, 3]).all((item) => item > 0)).toEqual([1, 2, 3])
-  })
-
-  it('predicate receives index as second argument', () => {
-    expect(collect(['a', 'b', 'c']).all((_item, index) => index >= 1)).toEqual(['b', 'c'])
-  })
-
-  it('returns same reference to internal array without predicate', () => {
+  it('returns same reference to internal array (filtering moved to .filter)', () => {
     const items = [1, 2, 3]
     const c = collect(items)
     expect(c.all()).toBe(items)
+  })
+
+  it('use .filter() for predicate-based filtering', () => {
+    expect(collect([1, 2, 3, 4, 5]).filter((item) => item > 2).all()).toEqual([3, 4, 5])
   })
 
   it('works with mixed type items', () => {
