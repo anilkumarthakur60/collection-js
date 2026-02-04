@@ -4,7 +4,6 @@ import { UnexpectedValueException } from '../exceptions/UnexpectedValueException
 import { applyMacroable, type MacroableTarget } from '../macros/Macroable'
 import * as ops from '../operations'
 import { deepClone } from '../support/deepClone'
-import { isPlainObject } from '../support/isObject'
 import { arrayWrap, ensureArray, toArray } from '../support/arrayWrap'
 import { valueRetriever } from '../support/valueRetriever'
 import type {
@@ -650,16 +649,9 @@ export class Collection<T> implements Enumerable<T> {
     return new Collection(ops.mergeRecursiveOf(this.items, ...lists))
   }
 
+  /** Append items from `other` that are not already present (deep-equality dedupe). */
   union(other: readonly T[] | Collection<T>): Collection<T> {
     const list = other instanceof Collection ? other.toArray() : other
-    if (this.items.every(isPlainObject)) {
-      return new Collection(
-        ops.unionObjectsOf(
-          this.items as unknown as readonly object[],
-          list as readonly object[]
-        ) as unknown as T[]
-      )
-    }
     return new Collection(ops.unionOf(this.items, list))
   }
 
@@ -855,7 +847,7 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   reduceSpread<R extends readonly unknown[]>(
-    fn: (carry: R, item: T, index: number) => R,
+    fn: (...args: readonly unknown[]) => R,
     ...initials: R
   ): R {
     return ops.reduceSpreadOf(this.items, fn, ...initials)

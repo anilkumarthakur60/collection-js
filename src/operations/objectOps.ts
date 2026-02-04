@@ -76,24 +76,26 @@ export function keysOf<T>(items: readonly T[]): string[] {
 }
 
 export function dotOf(items: readonly unknown[]): Record<string, unknown> {
+  if (items.length === 0) return {}
+
   const out: Record<string, unknown> = {}
   const helper = (value: unknown, prefix: string): void => {
     if (isPlainObject(value)) {
       const entries = Object.entries(value as Record<string, unknown>)
       if (entries.length === 0) {
-        out[prefix] = value
+        if (prefix !== '') out[prefix] = value
         return
       }
       for (const [k, v] of entries) helper(v, prefix === '' ? k : `${prefix}.${k}`)
     } else if (Array.isArray(value)) {
       if (value.length === 0) {
-        out[prefix] = value
+        if (prefix !== '') out[prefix] = value
         return
       }
       for (let i = 0; i < value.length; i++)
         helper(value[i], prefix === '' ? String(i) : `${prefix}.${i}`)
     } else {
-      out[prefix] = value
+      if (prefix !== '') out[prefix] = value
     }
   }
 

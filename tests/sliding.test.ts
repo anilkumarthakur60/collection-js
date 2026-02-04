@@ -1,48 +1,44 @@
 import { collect } from '../src'
 
+const flatten = <T>(c: { all(): { all(): T[] }[] }): T[][] => c.all().map((inner) => inner.all())
+
 describe('sliding', () => {
   it('creates sliding windows of given size', () => {
-    const result = collect([1, 2, 3, 4, 5]).sliding(3)
-    expect(result.all()).toEqual([
+    expect(flatten(collect([1, 2, 3, 4, 5]).sliding(3))).toEqual([
       [1, 2, 3],
       [2, 3, 4],
-      [3, 4, 5]
+      [3, 4, 5],
     ])
   })
 
   it('with step of 2', () => {
-    const result = collect([1, 2, 3, 4, 5]).sliding(2, 2)
-    expect(result.all()).toEqual([
+    expect(flatten(collect([1, 2, 3, 4, 5]).sliding(2, 2))).toEqual([
       [1, 2],
-      [3, 4]
+      [3, 4],
     ])
   })
 
   it('returns single window when size equals collection length', () => {
-    const result = collect([1, 2, 3]).sliding(3)
-    expect(result.all()).toEqual([[1, 2, 3]])
+    expect(flatten(collect([1, 2, 3]).sliding(3))).toEqual([[1, 2, 3]])
   })
 
   it('returns empty when size exceeds length', () => {
-    const result = collect([1, 2]).sliding(5)
-    expect(result.all()).toEqual([])
+    expect(flatten(collect([1, 2]).sliding(5))).toEqual([])
   })
 
   it('returns empty for empty collection', () => {
-    expect(collect([]).sliding(2).all()).toEqual([])
+    expect(flatten(collect([]).sliding(2))).toEqual([])
   })
 
-  it('window of size 1 returns each item as array', () => {
-    const result = collect([1, 2, 3]).sliding(1)
-    expect(result.all()).toEqual([[1], [2], [3]])
+  it('window of size 1 returns each item as a single-element window', () => {
+    expect(flatten(collect([1, 2, 3]).sliding(1))).toEqual([[1], [2], [3]])
   })
 
   it('step of 1 is default', () => {
-    const result = collect([1, 2, 3, 4]).sliding(2, 1)
-    expect(result.all()).toEqual([
+    expect(flatten(collect([1, 2, 3, 4]).sliding(2, 1))).toEqual([
       [1, 2],
       [2, 3],
-      [3, 4]
+      [3, 4],
     ])
   })
 })
