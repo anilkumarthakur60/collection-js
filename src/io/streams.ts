@@ -10,19 +10,23 @@ export interface ReadableLike<T> {
 }
 
 export interface FromReadableOptions {
-  /** Decode each chunk as UTF-8 (or another encoding). Set to `undefined` to disable. */
-  decodeAs?: 'utf8' | 'utf-8' | 'ascii' | 'latin1' | undefined
+  /**
+   * Decode each chunk as text using the given encoding, or pass `false` to
+   * keep raw byte chunks (yields stringified buffers — caller likely wants a
+   * different signature in that case). Defaults to `'utf-8'`.
+   */
+  decodeAs?: 'utf8' | 'utf-8' | 'ascii' | 'latin1' | false
 }
 
 /**
  * Wrap a Node `Readable` (or any `AsyncIterable<Buffer | Uint8Array | string>`)
- * into an `AsyncCollection<string>`. Pass `{decodeAs: undefined}` for raw bytes.
+ * into an `AsyncCollection<string>`. Pass `{decodeAs: false}` to skip decoding.
  */
 export function fromReadable(
   source: ReadableLike<Buffer | Uint8Array | string>,
   options: FromReadableOptions = {}
 ): AsyncCollection<string> {
-  const encoding = options.decodeAs === undefined ? null : options.decodeAs
+  const encoding = options.decodeAs === false ? null : (options.decodeAs ?? 'utf-8')
   const decoder = encoding ? new TextDecoder(encoding) : null
   return new AsyncCollection<string>(async function* () {
     for await (const chunk of source as AsyncIterable<Buffer | Uint8Array | string>) {
