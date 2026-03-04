@@ -1,50 +1,30 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('combine', () => {
-  it('combines keys with values as tuples', () => {
-    const result = collect(['name', 'age']).combine(['Alice', 30])
-    expect(result.all()).toEqual([
-      ['name', 'Alice'],
-      ['age', 30]
-    ])
+  it('combines keys with values into a record (Laravel parity)', () => {
+    expect(collect(['name', 'age']).combine(['Alice', 30])).toEqual({ name: 'Alice', age: 30 })
   })
 
-  it('returns empty collection for empty input', () => {
-    expect(collect([]).combine([]).all()).toEqual([])
+  it('returns empty record for empty input', () => {
+    expect(collect([]).combine([])).toEqual({})
   })
 
-  it('handles more keys than values', () => {
-    const result = collect(['a', 'b', 'c']).combine([1, 2])
-    expect(result.all()).toEqual([
-      ['a', 1],
-      ['b', 2],
-      ['c', undefined]
-    ])
+  it('drops extra keys when there are more keys than values', () => {
+    expect(collect(['a', 'b', 'c']).combine([1, 2])).toEqual({ a: 1, b: 2 })
   })
 
-  it('works with string keys and string values', () => {
-    const result = collect(['first', 'last']).combine(['John', 'Doe'])
-    expect(result.all()).toEqual([
-      ['first', 'John'],
-      ['last', 'Doe']
-    ])
+  it('works with string keys and values', () => {
+    expect(collect(['first', 'last']).combine(['John', 'Doe'])).toEqual({
+      first: 'John',
+      last: 'Doe',
+    })
   })
 
-  it('works with number keys', () => {
-    const result = collect([1, 2, 3]).combine(['a', 'b', 'c'])
-    expect(result.all()).toEqual([
-      [1, 'a'],
-      [2, 'b'],
-      [3, 'c']
-    ])
-  })
-
-  it('returns correct count', () => {
-    expect(collect(['x', 'y']).combine([10, 20]).count()).toBe(2)
+  it('works with numeric keys (coerced to string in record)', () => {
+    expect(collect([1, 2, 3]).combine(['a', 'b', 'c'])).toEqual({ '1': 'a', '2': 'b', '3': 'c' })
   })
 
   it('works with single pair', () => {
-    const result = collect(['key']).combine(['value'])
-    expect(result.all()).toEqual([['key', 'value']])
+    expect(collect(['key']).combine(['value'])).toEqual({ key: 'value' })
   })
 })

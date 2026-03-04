@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('collapse', () => {
   it('collapses nested arrays into a single flat collection', () => {

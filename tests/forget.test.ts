@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('forget', () => {
   it('removes item at given numeric index', () => {

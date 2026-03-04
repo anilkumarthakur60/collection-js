@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('multiply', () => {
   it('repeats the collection items N times', () => {

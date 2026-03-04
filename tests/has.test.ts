@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('has', () => {
   it('returns true when key exists in any item', () => {

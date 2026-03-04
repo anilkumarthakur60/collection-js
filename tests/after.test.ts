@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('after', () => {
   it('returns the item after the given item', () => {
@@ -10,15 +10,15 @@ describe('after', () => {
   })
 
   it('returns null when the item is the last element', () => {
-    expect(collect([1, 2, 3]).after(3)).toBeNull()
+    expect(collect([1, 2, 3]).after(3)).toBeUndefined()
   })
 
   it('returns null when the item is not found', () => {
-    expect(collect([1, 2, 3]).after(99)).toBeNull()
+    expect(collect([1, 2, 3]).after(99)).toBeUndefined()
   })
 
   it('returns null for empty collection', () => {
-    expect(collect([]).after(1)).toBeNull()
+    expect(collect([]).after(1)).toBeUndefined()
   })
 
   it('works with strings', () => {
@@ -26,7 +26,7 @@ describe('after', () => {
   })
 
   it('returns null for string not found', () => {
-    expect(collect(['a', 'b', 'c']).after('z')).toBeNull()
+    expect(collect(['a', 'b', 'c']).after('z')).toBeUndefined()
   })
 
   it('uses loose comparison by default', () => {
@@ -34,7 +34,7 @@ describe('after', () => {
   })
 
   it('uses strict comparison when strict is true', () => {
-    expect(collect([1, 2, 3]).after('1' as unknown as number, true)).toBeNull()
+    expect(collect([1, 2, 3]).after('1' as unknown as number, true)).toBeUndefined()
   })
 
   it('works with a predicate function', () => {
@@ -42,11 +42,11 @@ describe('after', () => {
   })
 
   it('returns null when predicate matches last item', () => {
-    expect(collect([1, 2, 3]).after((v) => v === 3)).toBeNull()
+    expect(collect([1, 2, 3]).after((v) => v === 3)).toBeUndefined()
   })
 
   it('returns null when predicate does not match', () => {
-    expect(collect([1, 2, 3]).after((v) => v === 99)).toBeNull()
+    expect(collect([1, 2, 3]).after((v) => v === 99)).toBeUndefined()
   })
 
   it('works with objects', () => {

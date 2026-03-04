@@ -1,7 +1,12 @@
 import { CollectionException } from './CollectionException'
 
 export class MultipleItemsFoundException extends CollectionException {
-  constructor(count: number) {
-    super(`${count} items were found.`, 'MultipleItemsFoundException')
+  public readonly count: number
+
+  constructor(count: number = 0, message?: string) {
+    super(message ?? `${count} items were found.`)
+    this.name = 'MultipleItemsFoundException'
+    this.count = count
+    Object.setPrototypeOf(this, new.target.prototype)
   }
 }

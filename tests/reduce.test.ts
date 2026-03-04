@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('reduce', () => {
   it('reduces collection to a single value', () => {

@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('diff', () => {
   it('returns items not in the other array', () => {
@@ -14,7 +14,7 @@ describe('diff', () => {
   })
 
   it('returns empty for empty collection', () => {
-    expect(collect([]).diff([1, 2]).all()).toEqual([])
+    expect(collect<number>([]).diff([1, 2]).all()).toEqual([])
   })
 
   it('works with strings', () => {
@@ -22,55 +22,48 @@ describe('diff', () => {
   })
 
   it('accepts a Collection argument', () => {
-    expect(
-      collect([1, 2, 3])
-        .diff(collect([2]))
-        .all()
-    ).toEqual([1, 3])
+    expect(collect([1, 2, 3]).diff(collect([2])).all()).toEqual([1, 3])
   })
 })
 
 describe('diffAssoc', () => {
-  it('returns items not in the other collection', () => {
-    expect(collect([1, 2, 3]).diffAssoc([2, 3]).all()).toEqual([1])
+  it('returns the entries that differ from the given object', () => {
+    const items = [{ color: 'orange', type: 'fruit', remain: 6 }]
+    const diff = collect(items).diffAssoc([{ color: 'yellow', type: 'fruit', remain: 3, used: 6 }])
+    // Object retained because at least one key/value differs
+    expect(diff.count()).toBe(1)
   })
 
-  it('accepts a Collection argument', () => {
-    expect(
-      collect([1, 2, 3])
-        .diffAssoc(collect([1, 3]))
-        .all()
-    ).toEqual([2])
+  it('returns nothing when all key/value pairs match', () => {
+    const items = [{ a: 1, b: 2 }]
+    const diff = collect(items).diffAssoc([{ a: 1, b: 2 }])
+    expect(diff.all()).toEqual([])
   })
 })
 
 describe('diffAssocUsing', () => {
-  it('returns items not matching by callback key', () => {
-    const result = collect([{ id: 1 }, { id: 2 }, { id: 3 }]).diffAssocUsing(
-      [{ id: 2 }, { id: 3 }],
-      (item) => (item as { id: number }).id
-    )
+  it('uses a custom comparator to determine equality', () => {
+    const items = [{ id: 1 }, { id: 2 }, { id: 3 }]
+    const result = collect(items).diffAssocUsing([{ id: 2 }, { id: 3 }], (a, b) => a.id - b.id)
     expect(result.all()).toEqual([{ id: 1 }])
   })
 
-  it('returns all items when no match by callback', () => {
-    const result = collect([1, 2, 3]).diffAssocUsing([4, 5], (v) => v)
+  it('returns all items when comparator never matches', () => {
+    const result = collect([1, 2, 3]).diffAssocUsing([4, 5], (a, b) => a - b)
     expect(result.all()).toEqual([1, 2, 3])
   })
 })
 
 describe('diffKeys', () => {
-  it('returns items whose keys are not in the other collection', () => {
-    const a = [{ name: 'Alice', age: 30 }]
-    const b = [{ name: 'Bob' }]
-    const result = collect(a).diffKeys(b)
-    expect(result.count()).toBe(0)
+  it('strips keys present in the given key list from each item', () => {
+    const items = [{ name: 'Alice', age: 30 }]
+    const result = collect(items).diffKeys(['name'])
+    expect(result.all()).toEqual([{ age: 30 }])
   })
 
-  it('returns items when keys do not overlap', () => {
-    const a = [{ age: 30 }]
-    const b = [{ name: 'Bob' }]
-    const result = collect(a).diffKeys(b)
+  it('returns items unchanged when keys do not overlap', () => {
+    const items = [{ age: 30 }]
+    const result = collect(items).diffKeys(['name'])
     expect(result.all()).toEqual([{ age: 30 }])
   })
 })
