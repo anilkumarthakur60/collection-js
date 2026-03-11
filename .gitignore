@@ -6,33 +6,48 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-task.md
-createTestFile.sh
-index.html
-coverage
 
+# Dependencies
 node_modules
+
+# Build output
 dist
 dist-ssr
+coverage
+*.tsbuildinfo
+
+# Environment
+.env
+.env.*
+!.env.example
 *.local
 
-# Editor directories and files
+# Lockfiles
+# package-lock.json  # Committed for reproducible CI builds (npm ci)
+bun.lockb
+
+# Editor / OS
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-# package-lock.json  # Committed for reproducible CI builds (npm ci)
-bun.lockb
-.idea
 
-# ESLint
+# Caches
 .eslintcache
+.cache
+.turbo
 
 # VitePress
-docs/.vitepress/dist
-docs/.vitepress/cache
+**/.vitepress/dist
+**/.vitepress/cache
+
+# Project-local scratch
+task.md
+createTestFile.sh
+index.html
