@@ -25,7 +25,13 @@ export default defineConfig({
       {
         text: 'API Reference',
         items: [
-          { text: 'Overview', link: '/api/' }
+          { text: 'Overview', link: '/api/' },
+          { text: 'A - C', link: '/api/a-c' },
+          { text: 'D - F', link: '/api/d-f' },
+          { text: 'G - M', link: '/api/g-m' },
+          { text: 'N - R', link: '/api/n-r' },
+          { text: 'S', link: '/api/s' },
+          { text: 'T - Z', link: '/api/t-z' },
         ]
       }
     ],
