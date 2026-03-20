@@ -52,12 +52,7 @@ export function mergeValues<T>(v1: T, v2: T): T {
 
 export function isDeepEqual<T>(value: T, other: T): boolean {
   if (value === other) return true
-  if (
-    typeof value !== 'object' ||
-    value === null ||
-    typeof other !== 'object' ||
-    other === null
-  ) {
+  if (typeof value !== 'object' || value === null || typeof other !== 'object' || other === null) {
     return false
   }
   const keysA = Object.keys(value as PlainObject)
@@ -66,10 +61,7 @@ export function isDeepEqual<T>(value: T, other: T): boolean {
   for (const key of keysA) {
     if (
       !keysB.includes(key) ||
-      !isDeepEqual(
-        (value as PlainObject)[key] as T,
-        (other as PlainObject)[key] as T
-      )
+      !isDeepEqual((value as PlainObject)[key] as T, (other as PlainObject)[key] as T)
     ) {
       return false
     }

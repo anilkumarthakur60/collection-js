@@ -6,6 +6,6 @@ export type {
   Iteratee,
   MapCallback,
   SortCallback,
-  GroupByCallback,
+  GroupByCallback
 } from './predicates'
 export type { IReadonlyCollection, ILazyCollection } from './collection'
