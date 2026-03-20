@@ -7,18 +7,23 @@ The package is published natively on npm and requires **Node.js 16+**.
 Install the `@anilkumarthakur/collection` package via your preferred package manager:
 
 ::: code-group
+
 ```bash [npm]
 npm install @anilkumarthakur/collection
 ```
+
 ```bash [yarn]
 yarn add @anilkumarthakur/collection
 ```
+
 ```bash [pnpm]
 pnpm add @anilkumarthakur/collection
 ```
+
 ```bash [bun]
 bun add @anilkumarthakur/collection
 ```
+
 :::
 
 ## Importing

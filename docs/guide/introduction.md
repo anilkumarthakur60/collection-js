@@ -2,7 +2,7 @@
 
 Welcome to **@anilkumarthakur/collection**!
 
-This library provides a fluent, highly readable, and chainable API for working with arrays of data in JavaScript and TypeScript. 
+This library provides a fluent, highly readable, and chainable API for working with arrays of data in JavaScript and TypeScript.
 
 It is heavily inspired by the beloved and incredibly powerful **Laravel Collection** API, bringing over 120+ methods of data-manipulation joy to the JavaScript ecosystem.
 
@@ -13,6 +13,7 @@ Native JavaScript array methods like `map`, `filter`, and `reduce` are great, bu
 This library solves that by providing an elegant, chainable wrapper around your arrays:
 
 ### Native JS Approach (Clunky)
+
 ```typescript
 const users = [
   { name: 'Alice', age: 25, active: true },
@@ -21,22 +22,19 @@ const users = [
 ]
 
 const activeNames = users
-  .filter(user => user.active)
+  .filter((user) => user.active)
   .sort((a, b) => b.age - a.age)
-  .map(user => user.name)
+  .map((user) => user.name)
 
 // Result: ['Charlie', 'Alice']
 ```
 
 ### Collection Approach (Fluent & Elegant)
+
 ```typescript
 import collect from '@anilkumarthakur/collection'
 
-const activeNames = collect(users)
-  .where('active', true)
-  .sortByDesc('age')
-  .pluck('name')
-  .all()
+const activeNames = collect(users).where('active', true).sortByDesc('age').pluck('name').all()
 
 // Result: ['Charlie', 'Alice']
 ```
