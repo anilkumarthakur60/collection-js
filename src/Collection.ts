@@ -1,10 +1,10 @@
-import { isDeepEqual, deepClone, mergeArrays } from './internals/equality'
-import { flattenHelper } from './internals/flatten'
-import { ItemNotFoundException } from './exceptions/ItemNotFoundException'
-import { UnexpectedValueException } from './exceptions/UnexpectedValueException'
+import { isDeepEqual, deepClone, mergeArrays } from './internals'
+import { flattenHelper } from './internals'
+import { ItemNotFoundException } from './exceptions'
+import { UnexpectedValueException } from './exceptions'
 import { LazyCollection } from './LazyCollection'
-import type { FlattenType } from './types/core'
-import type { Predicate, PredicateChunkWhile, PredicateContains, Iteratee } from './types/predicates'
+import type { FlattenType } from './types'
+import type { Predicate, PredicateChunkWhile, PredicateContains, Iteratee } from './types'
 
 export class Collection<T> {
   protected items: T[]

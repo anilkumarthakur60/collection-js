@@ -1,4 +1,4 @@
-import type { PlainObject } from '../types/core'
+import type { PlainObject } from '../types'
 
 function isObject(value: unknown): value is PlainObject {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
