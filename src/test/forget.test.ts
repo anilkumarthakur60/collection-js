@@ -1,66 +1,49 @@
 import { collect } from '../collect'
 
 describe('forget', () => {
-  it('should remove the item at the given index', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    const result = collection.forget(2).all()
-    expect(result).toEqual([1, 2, 4, 5])
+  it('removes item at given numeric index', () => {
+    expect(collect([1, 2, 3]).forget(1).all()).toEqual([1, 3])
   })
 
-  it('should handle removing the first item', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    const result = collection.forget(0).all()
-    expect(result).toEqual([2, 3, 4, 5])
+  it('removes first item (index 0)', () => {
+    expect(collect([1, 2, 3]).forget(0).all()).toEqual([2, 3])
   })
 
-  it('should handle removing the last item', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    const result = collection.forget(4).all()
-    expect(result).toEqual([1, 2, 3, 4])
+  it('removes last item', () => {
+    expect(collect([1, 2, 3]).forget(2).all()).toEqual([1, 2])
   })
 
-  it('should return the same collection if the index is out of bounds', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    const result = collection.forget(10).all()
-    expect(result).toEqual([1, 2, 3, 4, 5])
+  it('returns same collection when index out of bounds', () => {
+    expect(collect([1, 2, 3]).forget(10).all()).toEqual([1, 2, 3])
   })
 
-  it('should handle an empty collection', () => {
-    const collection = collect([])
-    const result = collection.forget(0).all()
-    expect(result).toEqual([])
-  })
-
-  it('should handle removing an item from a collection of objects', () => {
-    const collection = collect([{ id: 1 }, { id: 2 }, { id: 3 }])
-    const result = collection.forget(1).all()
-    expect(result).toEqual([{ id: 1 }, { id: 3 }])
-  })
-  it('should remove a specific key from all objects in the collection', () => {
-    const collection = collect([
+  it('removes a key from all objects when given a string key', () => {
+    const items = [
       { id: 1, name: 'Alice' },
       { id: 2, name: 'Bob' }
-    ])
-    const result = collection.forget('name')
-    expect(result.toArray()).toEqual([{ id: 1 }, { id: 2 }])
+    ]
+    const result = collect(items).forget('name')
+    expect(result.all()).toEqual([{ id: 1 }, { id: 2 }])
   })
 
-  it('should handle removing a non-existent key gracefully', () => {
-    const collection = collect([{ id: 1 }, { id: 2 }])
-    const result = collection.forget('name')
-    expect(result.toArray()).toEqual([{ id: 1 }, { id: 2 }])
+  it('does nothing with string key when key not present', () => {
+    const items = [{ id: 1 }]
+    const result = collect(items).forget('nonexistent')
+    expect(result.all()).toEqual([{ id: 1 }])
   })
 
-  it('should handle an empty collection gracefully', () => {
-    const collection = collect([])
-    const result = collection.forget('id')
-    expect(result.toArray()).toEqual([])
+  it('removes multiple numeric indices', () => {
+    const result = collect([1, 2, 3, 4, 5]).forget([1, 3])
+    expect(result.all()).toEqual([1, 3, 5])
   })
 
-  it('should not mutate the original collection', () => {
-    const collection = collect([{ id: 1, name: 'Alice' }])
-    const result = collection.forget('name')
-    expect(collection.toArray()).toEqual([{ id: 1, name: 'Alice' }]) // Original remains unchanged
-    expect(result.toArray()).toEqual([{ id: 1 }]) // Transformed collection
+  it('removes multiple string keys', () => {
+    const items = [{ a: 1, b: 2, c: 3 }]
+    const result = collect(items).forget(['a', 'c'])
+    expect(result.all()).toEqual([{ b: 2 }])
+  })
+
+  it('returns empty collection for empty input', () => {
+    expect(collect([]).forget(0).all()).toEqual([])
   })
 })

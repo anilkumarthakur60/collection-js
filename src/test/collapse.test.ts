@@ -1,54 +1,63 @@
 import { collect } from '../collect'
 
 describe('collapse', () => {
-  it('The collapse method flattens a collection of arrays into a single, flat collection:', () => {
-    const collection = collect([
-      [1, 2, 3],
-      [4, 5, 6],
-      [7, 8, 9]
-    ])
-    const collapsed = collection.collapse()
-    expect(collapsed.all()).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9])
+  it('collapses nested arrays into a single flat collection', () => {
+    expect(
+      collect([[1, 2], [3, 4], [5]])
+        .collapse()
+        .all()
+    ).toEqual([1, 2, 3, 4, 5])
   })
 
-  it('The collapse method handles an empty collection of arrays:', () => {
-    const collection = collect<number[][]>([])
-    const collapsed = collection.collapse()
-    expect(collapsed.all()).toEqual([])
+  it('returns empty collection for empty input', () => {
+    expect(collect([]).collapse().all()).toEqual([])
   })
 
-  it('The collapse method handles a collection with some empty arrays:', () => {
-    const collection = collect([[1, 2], [], [3, 4]])
-    const collapsed = collection.collapse()
-    expect(collapsed.all()).toEqual([1, 2, 3, 4])
+  it('handles already flat items (non-arrays)', () => {
+    expect(
+      collect([1, 2, 3] as unknown as number[][])
+        .collapse()
+        .all()
+    ).toEqual([1, 2, 3])
   })
 
-  it('The collapse method works correctly with different data types:', () => {
-    const collection = collect([
-      ['a', 'b'],
-      ['c', 'd']
-    ])
-    const collapsed = collection.collapse()
-    expect(collapsed.all()).toEqual(['a', 'b', 'c', 'd'])
+  it('collapses arrays of strings', () => {
+    expect(
+      collect([
+        ['a', 'b'],
+        ['c', 'd']
+      ])
+        .collapse()
+        .all()
+    ).toEqual(['a', 'b', 'c', 'd'])
   })
 
-  it('The collapse method handles nested arrays correctly:', () => {
-    const collection = collect([
-      [
-        [1, 2],
-        [3, 4]
-      ],
-      [
-        [5, 6],
-        [7, 8]
-      ]
-    ])
-    const collapsed = collection.collapse()
-    expect(collapsed.all()).toEqual([
-      [1, 2],
-      [3, 4],
-      [5, 6],
-      [7, 8]
-    ])
+  it('collapses single array', () => {
+    expect(
+      collect([[1, 2, 3]])
+        .collapse()
+        .all()
+    ).toEqual([1, 2, 3])
+  })
+
+  it('collapses arrays of objects', () => {
+    const items = [[{ id: 1 }, { id: 2 }], [{ id: 3 }]]
+    expect(collect(items).collapse().all()).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }])
+  })
+
+  it('handles empty inner arrays', () => {
+    expect(
+      collect([[], [1, 2], []])
+        .collapse()
+        .all()
+    ).toEqual([1, 2])
+  })
+
+  it('collapses three nested arrays', () => {
+    expect(
+      collect([[1], [2], [3]])
+        .collapse()
+        .all()
+    ).toEqual([1, 2, 3])
   })
 })

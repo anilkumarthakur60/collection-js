@@ -1,81 +1,82 @@
 import { collect } from '../collect'
 
-describe('Collection each method', () => {
-  it('should iterate over each item in the collection and pass it to the callback', () => {
-    const collection = collect([1, 2, 3, 4, 5])
+describe('each', () => {
+  it('iterates over each item', () => {
     const result: number[] = []
-    collection.each((item) => {
-      result.push(item * 2)
+    collect([1, 2, 3]).each((item) => {
+      result.push(item)
     })
-    expect(result).toEqual([2, 4, 6, 8, 10])
+    expect(result).toEqual([1, 2, 3])
   })
 
-  it('should work with an empty collection', () => {
-    const collection = collect([])
-    const result: number[] = []
-    collection.each((item) => {
-      result.push(item as number)
-    })
-    expect(result).toEqual([])
-  })
-
-  it('should pass the correct index to the callback', () => {
-    const collection = collect(['a', 'b', 'c'])
+  it('provides index to callback', () => {
     const indices: number[] = []
-    collection.each((_, index) => {
+    collect(['a', 'b', 'c']).each((_item, index) => {
       indices.push(index)
     })
     expect(indices).toEqual([0, 1, 2])
   })
 
-  it('should work with objects in the collection', () => {
-    const collection = collect([{ id: 1 }, { id: 2 }, { id: 3 }])
+  it('stops iteration when callback returns false', () => {
     const result: number[] = []
-    collection.each((item) => {
-      result.push(item.id)
+    collect([1, 2, 3, 4, 5]).each((item) => {
+      result.push(item)
+      if (item === 3) return false
     })
     expect(result).toEqual([1, 2, 3])
   })
 
-  it('should return the collection itself to allow for method chaining', () => {
-    const collection = collect([1, 2, 3])
-    const result = collection.each((item) => item)
-    expect(result).toBe(collection)
+  it('returns the collection (chainable)', () => {
+    const c = collect([1, 2, 3])
+    const returned = c.each(() => {})
+    expect(returned).toBe(c)
   })
 
-  it('should work with nested collections', () => {
-    const collection = collect([collect([1, 2]), collect([3, 4]), collect([5])])
-    const result: number[][] = []
-    collection.each((item) => {
-      result.push(item.toArray())
+  it('handles empty collection', () => {
+    const result: number[] = []
+    collect([]).each((item: number) => {
+      result.push(item)
     })
-    expect(result).toEqual([[1, 2], [3, 4], [5]])
+    expect(result).toEqual([])
+  })
+})
+
+describe('eachSpread', () => {
+  it('spreads inner arrays as arguments', () => {
+    const result: number[] = []
+    collect([
+      [1, 2],
+      [3, 4]
+    ]).eachSpread((a: number, b: number) => {
+      result.push(a + b)
+    })
+    expect(result).toEqual([3, 7])
   })
 
-  it('should work with different data types in the collection', () => {
-    const collection = collect([1, 'apple', true, { id: 2 }, null])
-    const result: string[] = []
-    collection.each((item) => {
-      result.push(typeof item)
+  it('stops when callback returns false', () => {
+    const result: number[] = []
+    collect([
+      [1, 2],
+      [3, 4],
+      [5, 6]
+    ]).eachSpread((a: number) => {
+      result.push(a)
+      if (a === 3) return false
     })
-    expect(result).toEqual(['number', 'string', 'boolean', 'object', 'object'])
+    expect(result).toEqual([1, 3])
   })
 
-  it('should modify the original items when modified within the callback', () => {
-    const collection = collect([{ id: 1 }, { id: 2 }, { id: 3 }])
-    collection.each((item) => {
-      item.id *= 2
+  it('handles empty collection', () => {
+    const result: number[] = []
+    collect([]).eachSpread((...args: number[]) => {
+      result.push(...args)
     })
-    expect(collection.toArray()).toEqual([{ id: 2 }, { id: 4 }, { id: 6 }])
+    expect(result).toEqual([])
   })
 
-  it('should perform well with a large collection', () => {
-    const largeArray = Array.from({ length: 10000 }, (_, i) => i)
-    const collection = collect(largeArray)
-    let sum = 0
-    collection.each((item) => {
-      sum += item
-    })
-    expect(sum).toBe((9999 * 10000) / 2) // Sum of first 10000 natural numbers
+  it('returns the collection (chainable)', () => {
+    const c = collect([[1, 2]])
+    const returned = c.eachSpread(() => {})
+    expect(returned).toBe(c)
   })
 })

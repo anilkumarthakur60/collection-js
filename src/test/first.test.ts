@@ -1,52 +1,77 @@
 import { collect } from '../collect'
+import { ItemNotFoundException } from '../exceptions/ItemNotFoundException'
 
 describe('first', () => {
-  it('should return the first item in the collection when no predicate is provided', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    const firstItem = collection.first()
-
-    expect(firstItem).toBe(1)
+  it('returns the first item', () => {
+    expect(collect([1, 2, 3]).first()).toBe(1)
   })
 
-  it('should return null if the collection is empty and no predicate is provided', () => {
-    const collection = collect([])
-    const firstItem = collection.first()
-
-    expect(firstItem).toBeNull()
+  it('returns null for empty collection', () => {
+    expect(collect([]).first()).toBeNull()
   })
 
-  it('should return the first item that matches the predicate', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    const firstItem = collection.first((item) => item > 3)
-
-    expect(firstItem).toBe(4)
+  it('returns first matching item with predicate', () => {
+    expect(collect([1, 2, 3, 4]).first((v) => v > 2)).toBe(3)
   })
 
-  it('should return null if no items match the predicate', () => {
-    const collection = collect([1, 2, 3])
-    const firstItem = collection.first((item) => item > 5)
-
-    expect(firstItem).toBeNull()
+  it('returns null when predicate matches nothing', () => {
+    expect(collect([1, 2, 3]).first((v) => v > 10)).toBeNull()
   })
 
-  it('should work with a collection of objects', () => {
-    const collection = collect([{ id: 1 }, { id: 2 }, { id: 3 }])
-    const firstItem = collection.first((item) => item.id === 2)
+  it('returns single item for single-item collection', () => {
+    expect(collect([42]).first()).toBe(42)
+  })
+})
 
-    expect(firstItem).toEqual({ id: 2 })
+describe('firstOrFail', () => {
+  it('returns the first item', () => {
+    expect(collect([1, 2, 3]).firstOrFail()).toBe(1)
   })
 
-  it('should work with a collection of strings', () => {
-    const collection = collect(['a', 'b', 'c'])
-    const firstItem = collection.first((item) => item === 'b')
-
-    expect(firstItem).toBe('b')
+  it('throws ItemNotFoundException for empty collection', () => {
+    expect(() => collect([]).firstOrFail()).toThrow(ItemNotFoundException)
   })
 
-  it('should return null if the collection is empty and a predicate is provided', () => {
-    const collection = collect([])
-    const firstItem = collection.first((item) => item === 1)
+  it('returns first matching item with predicate', () => {
+    expect(collect([1, 2, 3]).firstOrFail((v) => v > 1)).toBe(2)
+  })
 
-    expect(firstItem).toBeNull()
+  it('throws ItemNotFoundException when predicate matches nothing', () => {
+    expect(() => collect([1, 2, 3]).firstOrFail((v) => v > 10)).toThrow(ItemNotFoundException)
+  })
+})
+
+describe('firstWhere', () => {
+  it('finds first item by key-value', () => {
+    const items = [
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' }
+    ]
+    expect(collect(items).firstWhere('name', 'Bob')).toEqual({ id: 2, name: 'Bob' })
+  })
+
+  it('returns null when no match', () => {
+    const items = [{ id: 1 }, { id: 2 }]
+    expect(collect(items).firstWhere('id', 99)).toBeNull()
+  })
+
+  it('returns first truthy value for key when only key given', () => {
+    const items = [{ id: 0 }, { id: 1 }, { id: 2 }]
+    expect(collect(items).firstWhere('id')).toEqual({ id: 1 })
+  })
+
+  it('supports < operator', () => {
+    const items = [{ age: 30 }, { age: 20 }, { age: 25 }]
+    expect(collect(items).firstWhere('age', 25, '<')).toEqual({ age: 20 })
+  })
+
+  it('supports > operator', () => {
+    const items = [{ age: 20 }, { age: 30 }, { age: 25 }]
+    expect(collect(items).firstWhere('age', 25, '>')).toEqual({ age: 30 })
+  })
+
+  it('supports !== operator', () => {
+    const items = [{ id: 1 }, { id: 2 }, { id: 3 }]
+    expect(collect(items).firstWhere('id', 1, '!==')).toEqual({ id: 2 })
   })
 })

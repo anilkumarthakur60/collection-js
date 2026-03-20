@@ -1,35 +1,49 @@
 import { collect } from '../collect'
 
 describe('chunk', () => {
-  it('The chunk method splits the collection into chunks of the specified size:', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    const chunks = collection.chunk(2)
-    expect(chunks.all().map((chunk) => chunk.all())).toEqual([[1, 2], [3, 4], [5]])
+  it('breaks collection into chunks of given size', () => {
+    const result = collect([1, 2, 3, 4, 5]).chunk(2)
+    expect(result.count()).toBe(3)
+    expect(result.all()[0].all()).toEqual([1, 2])
+    expect(result.all()[1].all()).toEqual([3, 4])
+    expect(result.all()[2].all()).toEqual([5])
   })
 
-  it('The chunk method handles cases where the last chunk is smaller than the specified size:', () => {
-    const collection = collect([1, 2, 3, 4, 5, 6, 7])
-    const chunks = collection.chunk(3)
-    expect(chunks.all().map((chunk) => chunk.all())).toEqual([[1, 2, 3], [4, 5, 6], [7]])
+  it('returns single chunk when size equals length', () => {
+    const result = collect([1, 2, 3]).chunk(3)
+    expect(result.count()).toBe(1)
+    expect(result.all()[0].all()).toEqual([1, 2, 3])
   })
 
-  it('The chunk method returns an empty collection when the size is zero or negative:', () => {
-    const collection = collect([1, 2, 3, 4, 5])
-    expect(collection.chunk(0).all()).toEqual([])
-    expect(collection.chunk(-1).all()).toEqual([])
+  it('returns empty collection when size is 0', () => {
+    expect(collect([1, 2, 3]).chunk(0).count()).toBe(0)
   })
 
-  it('The chunk method works correctly with different data types:', () => {
-    const collection = collect(['a', 'b', 'c', 'd'])
-    const chunks = collection.chunk(2)
-    expect(chunks.all().map((chunk) => chunk.all())).toEqual([
-      ['a', 'b'],
-      ['c', 'd']
-    ])
+  it('returns empty collection for empty input', () => {
+    expect(collect([]).chunk(2).count()).toBe(0)
   })
 
-  it('The chunk method handles an empty collection correctly:', () => {
-    const collection = collect([])
-    expect(collection.chunk(2).all()).toEqual([])
+  it('returns one chunk per item when size is 1', () => {
+    const result = collect([1, 2, 3]).chunk(1)
+    expect(result.count()).toBe(3)
+    expect(result.all()[0].all()).toEqual([1])
+    expect(result.all()[1].all()).toEqual([2])
+    expect(result.all()[2].all()).toEqual([3])
+  })
+
+  it('returns single chunk when size is larger than collection', () => {
+    const result = collect([1, 2, 3]).chunk(10)
+    expect(result.count()).toBe(1)
+    expect(result.all()[0].all()).toEqual([1, 2, 3])
+  })
+
+  it('chunks strings', () => {
+    const result = collect(['a', 'b', 'c', 'd']).chunk(2)
+    expect(result.all()[0].all()).toEqual(['a', 'b'])
+    expect(result.all()[1].all()).toEqual(['c', 'd'])
+  })
+
+  it('returns negative size as empty collection', () => {
+    expect(collect([1, 2, 3]).chunk(-1).count()).toBe(0)
   })
 })
