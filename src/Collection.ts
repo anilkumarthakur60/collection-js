@@ -4,6 +4,9 @@ import { ItemNotFoundException } from './exceptions'
 import { UnexpectedValueException } from './exceptions'
 import { LazyCollection } from './LazyCollection'
 import type { FlattenType } from './types'
+import { all } from './methods/all'
+import { after } from './methods/after'
+import { before } from './methods/before'
 import type { Predicate, PredicateChunkWhile, PredicateContains, Iteratee } from './types'
 
 export class Collection<T> {
@@ -70,21 +73,11 @@ export class Collection<T> {
   // ─── Instance Methods ─────────────────────────────────────────────────────────
 
   all(predicate?: Predicate<T>): T[] {
-    if (predicate) {
-      return this.items.filter((item, index) => predicate(item, index))
-    }
-    return this.items
+    return all(this.items, predicate)
   }
 
   after(item: T | string | Predicate<T>, strict: boolean = false): T | null {
-    if (typeof item === 'function') {
-      const predicate = item as Predicate<T>
-      const index = this.items.findIndex((value, idx) => predicate(value, idx))
-      return index >= 0 && index < this.items.length - 1 ? this.items[index + 1] : null
-    }
-
-    const index = this.items.findIndex((i) => (strict ? i === item : i == item))
-    return index >= 0 && index < this.items.length - 1 ? this.items[index + 1] : null
+    return after(this.items, item, strict)
   }
 
   average(callback?: (item: T) => number): number {
@@ -103,21 +96,7 @@ export class Collection<T> {
   }
 
   before(item: T | string | Predicate<T>, strict: boolean = false): T | null {
-    if (typeof item === 'function') {
-      const predicate = item as Predicate<T>
-      for (let i = 1; i < this.items.length; i++) {
-        if (predicate(this.items[i], i)) {
-          return this.items[i - 1]
-        }
-      }
-      return null
-    } else {
-      const index = this.items.findIndex((i) => (strict ? i === item : i == item))
-      if (index === -1 || index === 0) {
-        return null
-      }
-      return this.items[index - 1]
-    }
+    return before(this.items, item, strict)
   }
 
   chunk(size: number): Collection<Collection<T>> {
