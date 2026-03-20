@@ -6,6 +6,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+task.md
+createTestFile.sh
+index.html
+coverage
 
 node_modules
 dist
@@ -22,7 +26,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-package-lock.json
-yarn.lock
+# package-lock.json  # Committed for reproducible CI builds (npm ci)
 bun.lockb
 .idea
+
+# ESLint
+.eslintcache
+
+# VitePress
+docs/.vitepress/dist
+docs/.vitepress/cache
