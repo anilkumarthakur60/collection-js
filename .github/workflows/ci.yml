@@ -81,11 +81,3 @@ jobs:
         with:
           name: dist
           path: dist/
-
-      - name: Check package size
-        run: |
-          echo "📦 Package contents:"
-          npx npm-packlist
-          echo ""
-          echo "📏 Packed size:"
-          npm pack --dry-run 2>&1
