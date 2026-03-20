@@ -4,7 +4,7 @@ export {
   mergeObjects,
   mergeArrays,
   mergeValues,
-  isObject,
+  isObject
 } from './equality'
 export { flattenHelper } from './flatten'
 export { flattenToDot, expandFromDot } from './dotNotation'

@@ -1,10 +1,88 @@
 import { isDeepEqual, deepClone, mergeArrays } from './internals'
 import { flattenHelper } from './internals'
-import { ItemNotFoundException } from './exceptions'
 import { UnexpectedValueException } from './exceptions'
 import { LazyCollection } from './LazyCollection'
 import type { FlattenType } from './types'
 import type { Predicate, PredicateChunkWhile, PredicateContains, Iteratee } from './types'
+
+// Import extracted method implementations
+import { all } from './methods/all'
+import { after } from './methods/after'
+import { average as averageFn } from './methods/average'
+import { before } from './methods/before'
+import { chunk as chunkFn } from './methods/chunk'
+import { contains as containsFn } from './methods/contains'
+import { countBy as countByFn } from './methods/countBy'
+import { crossJoin as crossJoinFn } from './methods/crossJoin'
+import {
+  diff as diffFn,
+  diffAssoc as diffAssocFn,
+  diffAssocUsing as diffAssocUsingFn,
+  diffKeys as diffKeysFn
+} from './methods/diff'
+import { dot as dotFn } from './methods/dot'
+import {
+  duplicates as duplicatesFn,
+  duplicatesStrict as duplicatesStrictFn
+} from './methods/duplicates'
+import { each as eachFn, eachSpread as eachSpreadFn } from './methods/each'
+import { filter as filterFn } from './methods/filter'
+import {
+  first as firstFn,
+  firstOrFail as firstOrFailFn,
+  firstWhere as firstWhereFn
+} from './methods/first'
+import { flip as flipFn } from './methods/flip'
+import { forget as forgetFn } from './methods/forget'
+import { groupBy as groupByFn } from './methods/groupBy'
+import { implode as implodeFn } from './methods/implode'
+import {
+  intersect as intersectFn,
+  intersectUsing as intersectUsingFn,
+  intersectAssocUsing as intersectAssocUsingFn
+} from './methods/intersect'
+import { join as joinFn } from './methods/join'
+import { keyBy as keyByFn } from './methods/keyBy'
+import { last as lastFn } from './methods/last'
+import {
+  map as mapFn,
+  mapInto as mapIntoFn,
+  mapSpread as mapSpreadFn,
+  mapToGroups as mapToGroupsFn,
+  mapWithKeys as mapWithKeysFn,
+  flatMap as flatMapFn
+} from './methods/map'
+import {
+  max as maxFn,
+  min as minFn,
+  median as medianFn,
+  mode as modeFn,
+  sum as sumFn,
+  percentage as percentageFn
+} from './methods/math'
+import { pluck as pluckFn, pluckWithKey } from './methods/pluck'
+import { sole as soleFn } from './methods/sole'
+import {
+  sort as sortFn,
+  sortBy as sortByFn,
+  sortByDesc as sortByDescFn,
+  sortDesc as sortDescFn,
+  sortKeys as sortKeysFn,
+  sortKeysDesc as sortKeysDescFn,
+  sortKeysUsing as sortKeysUsingFn
+} from './methods/sort'
+import { undot as undotFn } from './methods/undot'
+import { union as unionFn } from './methods/union'
+import { unique as uniqueFn } from './methods/unique'
+import {
+  where as whereFn,
+  whereBetween as whereBetweenFn,
+  whereIn as whereInFn,
+  whereNotBetween as whereNotBetweenFn,
+  whereNotIn as whereNotInFn,
+  whereNotNull as whereNotNullFn,
+  whereNull as whereNullFn
+} from './methods/where'
 
 export class Collection<T> {
   protected items: T[]
@@ -70,32 +148,15 @@ export class Collection<T> {
   // ─── Instance Methods ─────────────────────────────────────────────────────────
 
   all(predicate?: Predicate<T>): T[] {
-    if (predicate) {
-      return this.items.filter((item, index) => predicate(item, index))
-    }
-    return this.items
+    return all(this.items, predicate)
   }
 
   after(item: T | string | Predicate<T>, strict: boolean = false): T | null {
-    if (typeof item === 'function') {
-      const predicate = item as Predicate<T>
-      const index = this.items.findIndex((value, idx) => predicate(value, idx))
-      return index >= 0 && index < this.items.length - 1 ? this.items[index + 1] : null
-    }
-
-    const index = this.items.findIndex((i) => (strict ? i === item : i == item))
-    return index >= 0 && index < this.items.length - 1 ? this.items[index + 1] : null
+    return after(this.items, item, strict)
   }
 
   average(callback?: (item: T) => number): number {
-    if (this.items.length === 0) {
-      return 0
-    }
-    if (callback) {
-      return this.sum(callback) / this.items.length
-    }
-
-    return this.sum((item) => Number(item)) / this.items.length
+    return averageFn(this.items, callback)
   }
 
   avg(callback?: (item: T) => number): number {
@@ -103,39 +164,17 @@ export class Collection<T> {
   }
 
   before(item: T | string | Predicate<T>, strict: boolean = false): T | null {
-    if (typeof item === 'function') {
-      const predicate = item as Predicate<T>
-      for (let i = 1; i < this.items.length; i++) {
-        if (predicate(this.items[i], i)) {
-          return this.items[i - 1]
-        }
-      }
-      return null
-    } else {
-      const index = this.items.findIndex((i) => (strict ? i === item : i == item))
-      if (index === -1 || index === 0) {
-        return null
-      }
-      return this.items[index - 1]
-    }
+    return before(this.items, item, strict)
   }
 
   chunk(size: number): Collection<Collection<T>> {
-    if (size <= 0) return new Collection<Collection<T>>([])
-    const chunks: Collection<T>[] = []
-    for (let i = 0; i < this.items.length; i += size) {
-      chunks.push(new Collection(this.items.slice(i, i + size)))
-    }
-
-    return new Collection(chunks)
+    return new Collection(chunkFn(this.items, size).map((c) => new Collection(c)))
   }
 
   chunkWhile(predicate: PredicateChunkWhile<T>): Collection<Collection<T>> {
     if (this.items.length === 0) return new Collection<Collection<T>>([])
-
     const chunks: Collection<T>[] = []
     let currentChunk: T[] = []
-
     for (let i = 0; i < this.items.length; i++) {
       if (i === 0 || predicate(this.items[i], i, this.items)) {
         currentChunk.push(this.items[i])
@@ -144,11 +183,9 @@ export class Collection<T> {
         currentChunk = [this.items[i]]
       }
     }
-
     if (currentChunk.length > 0) {
       chunks.push(new Collection(currentChunk))
     }
-
     return new Collection(chunks)
   }
 
@@ -195,27 +232,11 @@ export class Collection<T> {
   }
 
   contains(value: T | PredicateContains<T> | Partial<T>): boolean {
-    if (typeof value === 'function') {
-      return this.items.some(value as Predicate<T>)
-    }
-
-    if (typeof value === 'object' && value !== null) {
-      return this.items.some((item) =>
-        Object.keys(value as Record<string, unknown>).every(
-          (key) =>
-            (item as Record<string, unknown>)[key] ===
-            (value as Record<string, unknown>)[key]
-        )
-      )
-    }
-
-    return this.items.includes(value as T)
+    return containsFn(this.items, value)
   }
 
   containsOneItem(callback?: PredicateContains<T>): boolean {
-    if (callback) {
-      return this.items.filter(callback).length === 1
-    }
+    if (callback) return this.items.filter(callback).length === 1
     return this.items.length === 1
   }
 
@@ -228,39 +249,11 @@ export class Collection<T> {
   }
 
   countBy(iteratee?: Iteratee<T>): Record<string, number> {
-    if (!iteratee) {
-      return this.items.reduce((acc: Record<string, number>, item: T) => {
-        const key = String(item)
-        acc[key] = (acc[key] || 0) + 1
-        return acc
-      }, {})
-    }
-    return this.items.reduce((acc: Record<string, number>, item: T) => {
-      const key = String(iteratee(item))
-      acc[key] = (acc[key] || 0) + 1
-      return acc
-    }, {})
+    return countByFn(this.items, iteratee)
   }
 
   crossJoin<U>(...arrays: U[][]): Collection<(T | U)[]> {
-    const result: (T | U)[][] = []
-
-    const helper = (current: (T | U)[], depth: number): void => {
-      if (depth === arrays.length) {
-        result.push(current)
-        return
-      }
-
-      for (const value of arrays[depth]) {
-        helper([...current, value], depth + 1)
-      }
-    }
-
-    for (const item of this.items) {
-      helper([item], 0)
-    }
-
-    return new Collection<(T | U)[]>(result)
+    return new Collection<(T | U)[]>(crossJoinFn(this.items, ...arrays))
   }
 
   dd(): void {
@@ -272,16 +265,11 @@ export class Collection<T> {
 
   diff(other: T[] | Collection<T>): Collection<T> {
     const otherItems = other instanceof Collection ? other.items : other
-    const uniqueItems = this.items.filter(
-      (item) => !otherItems.some((otherItem) => this.isEqual(item, otherItem))
-    )
-    return new Collection(uniqueItems)
+    return new Collection(diffFn(this.items, otherItems))
   }
 
   protected getArrayableItems(items: Collection<T> | T[]): T[] {
-    if (items instanceof Collection) {
-      return items.all()
-    }
+    if (items instanceof Collection) return items.all()
     return items
   }
 
@@ -290,18 +278,11 @@ export class Collection<T> {
   }
 
   diffAssoc(values: Collection<T> | T[]): Collection<T> {
-    const arrayableValues = this.getArrayableItems(values)
-    const diffItems = this.items.filter(
-      (item) => !arrayableValues.some((value) => this.isEqual(item, value))
-    )
-    return new Collection(diffItems)
+    return new Collection(diffAssocFn(this.items, this.getArrayableItems(values)))
   }
 
   diffAssocUsing(values: T[], callback: (item: T) => unknown): Collection<T> {
-    const diffItems = this.items.filter(
-      (item) => !values.some((value) => callback(value) === callback(item))
-    )
-    return new Collection(diffItems)
+    return new Collection(diffAssocUsingFn(this.items, values, callback))
   }
 
   diffKeys(values: Collection<T> | T[]): Collection<T> {
@@ -314,12 +295,7 @@ export class Collection<T> {
       },
       {} as Record<string, boolean>
     )
-
-    const diffItems = this.items.filter(
-      (item) => !Object.keys(item as Record<string, T>).some((key) => otherItems[key])
-    )
-
-    return new Collection(diffItems)
+    return new Collection(diffKeysFn(this.items, otherItems))
   }
 
   doesntContain(value: T | PredicateContains<T> | Partial<T>): boolean {
@@ -331,30 +307,7 @@ export class Collection<T> {
   }
 
   dot(): Record<string, unknown> {
-    const flatten = (obj: Record<string, unknown>, prefix = ''): Record<string, unknown> => {
-      return Object.keys(obj).reduce(
-        (acc, k) => {
-          const pre = prefix.length ? prefix + '.' : ''
-          if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
-            Object.assign(acc, flatten(obj[k] as Record<string, unknown>, pre + k))
-          } else {
-            acc[pre + k] = obj[k]
-          }
-          return acc
-        },
-        {} as Record<string, unknown>
-      )
-    }
-
-    return this.items.reduce(
-      (acc, item) => {
-        if (typeof item === 'object' && item !== null) {
-          Object.assign(acc, flatten(item as Record<string, unknown>))
-        }
-        return acc
-      },
-      {} as Record<string, unknown>
-    )
+    return dotFn(this.items)
   }
 
   dump(): T[] {
@@ -363,75 +316,27 @@ export class Collection<T> {
   }
 
   duplicates(key?: keyof T): Collection<T> {
-    const seen = new Map<T[keyof T] | T, T>()
-    const duplicates = new Set<T[keyof T] | T>()
-    const result: T[] = []
-
-    this.items.forEach((item) => {
-      const value = key ? item[key] : item
-
-      if (seen.has(value)) {
-        if (!duplicates.has(value)) {
-          duplicates.add(value)
-          const original = seen.get(value)
-          if (original) result.push(original)
-        }
-      } else {
-        seen.set(value, item)
-      }
-    })
-
-    return new Collection(result)
+    return new Collection(duplicatesFn(this.items, key))
   }
 
   duplicatesStrict(key?: keyof T): Collection<T> {
-    const seen = new Map<T[keyof T], T[]>()
-    const result: T[] = []
-
-    this.items.forEach((item) => {
-      const value = key ? item[key] : item
-
-      if (seen.has(value as T[keyof T])) {
-        seen.get(value as T[keyof T])!.push(item)
-      } else {
-        seen.set(value as T[keyof T], [item])
-      }
-    })
-
-    seen.forEach((items) => {
-      if (items.length > 1) {
-        result.push(...items)
-      }
-    })
-
-    return new Collection(result)
+    return new Collection(duplicatesStrictFn(this.items, key))
   }
 
   each(callback: (item: T, index: number) => void | boolean): this {
-    for (let i = 0; i < this.items.length; i++) {
-      if (callback(this.items[i], i) === false) break
-    }
+    eachFn(this.items, callback)
     return this
   }
 
   eachSpread(callback: (...args: T extends (infer R)[] ? R[] : T[]) => void | boolean): this {
-    for (let i = 0; i < this.items.length; i++) {
-      const item = this.items[i]
-      const args = Array.isArray(item) ? item : [item]
-      const result = callback(...(args as T extends (infer R)[] ? R[] : T[]))
-      if (result === false) {
-        break
-      }
-    }
+    eachSpreadFn(this.items, callback)
     return this
   }
 
   ensure(...types: Array<{ new (...args: T[]): T } | string>): this {
     for (const item of this.items) {
       const isValid = types.some((type) => {
-        if (typeof type === 'string') {
-          return typeof item === type
-        }
+        if (typeof type === 'string') return typeof item === type
         return item instanceof type
       })
       if (!isValid) {
@@ -456,79 +361,23 @@ export class Collection<T> {
   }
 
   filter(callback?: (item: T, index: number, array: T[]) => boolean): Collection<T> {
-    if (!callback) {
-      return new Collection(this.items.filter(Boolean))
-    }
-    return new Collection(this.items.filter(callback))
+    return new Collection(filterFn(this.items, callback))
   }
 
   first(predicate?: (item: T, index: number) => boolean): T | null {
-    if (predicate) {
-      for (let i = 0; i < this.items.length; i++) {
-        if (predicate(this.items[i], i)) {
-          return this.items[i]
-        }
-      }
-      return null
-    }
-    return this.items.length > 0 ? this.items[0] : null
+    return firstFn(this.items, predicate)
   }
 
   firstOrFail(predicate?: (item: T, index: number) => boolean): T {
-    if (predicate) {
-      for (let i = 0; i < this.items.length; i++) {
-        if (predicate(this.items[i], i)) {
-          return this.items[i]
-        }
-      }
-      throw new ItemNotFoundException('No items found that match the predicate')
-    }
-    if (this.items.length > 0) {
-      return this.items[0]
-    }
-    throw new ItemNotFoundException('No items found in the collection')
+    return firstOrFailFn(this.items, predicate)
   }
 
   firstWhere<K extends keyof T>(key: K, value?: T[K], operator: string = '==='): T | null {
-    if (arguments.length === 1) {
-      for (const item of this.items) {
-        if (item[key]) {
-          return item
-        }
-      }
-    } else {
-      for (const item of this.items) {
-        if (value !== undefined && value !== null) {
-          switch (operator) {
-            case '===':
-              if (item[key] === value) return item
-              break
-            case '!==':
-              if (item[key] !== value) return item
-              break
-            case '<':
-              if (item[key] < value) return item
-              break
-            case '<=':
-              if (item[key] <= value) return item
-              break
-            case '>':
-              if (item[key] > value) return item
-              break
-            case '>=':
-              if (item[key] >= value) return item
-              break
-          }
-        }
-      }
-    }
-    return null
+    return firstWhereFn(this.items, key, value, operator)
   }
 
   flatMap<U>(callback: (item: T) => U[]): Collection<U> {
-    const mapped = this.items.map(callback)
-    const flattened = ([] as U[]).concat(...mapped)
-    return new Collection(flattened)
+    return new Collection(flatMapFn(this.items, callback))
   }
 
   flatten(depth: number = Infinity): Collection<FlattenType<T>> {
@@ -537,51 +386,11 @@ export class Collection<T> {
   }
 
   flip(): Collection<Record<string, number>> {
-    const flippedItems: Record<string, number> = {}
-    this.items.forEach((value, index) => {
-      if (typeof value === 'string' || typeof value === 'number') {
-        flippedItems[String(value)] = index
-      } else {
-        throw new Error('Collection items must be of type string or number to flip.')
-      }
-    })
-    return new Collection([flippedItems])
+    return new Collection([flipFn(this.items)])
   }
 
   forget(index: number | string | (number | string)[]): Collection<T> {
-    if (Array.isArray(index)) {
-      const indices = index
-      if (typeof indices[0] === 'number') {
-        const numIndices = indices as number[]
-        return new Collection(this.items.filter((_, i) => !numIndices.includes(i)))
-      } else {
-        const strKeys = indices as string[]
-        return new Collection(
-          this.items.map((item) => {
-            const itemCopy = { ...item } as Record<string, unknown>
-            strKeys.forEach((k) => delete itemCopy[k])
-            return itemCopy as T
-          })
-        )
-      }
-    }
-
-    if (typeof index === 'number') {
-      if (index < 0 || index >= this.items.length) {
-        return new Collection(this.items)
-      }
-      const newItems = this.items.slice(0, index).concat(this.items.slice(index + 1))
-      return new Collection(newItems)
-    } else if (typeof index === 'string') {
-      return new Collection(
-        this.items.map((item) => {
-          const itemCopy = { ...item } as Record<string, unknown>
-          delete itemCopy[index]
-          return itemCopy as T
-        })
-      )
-    }
-    return new Collection(this.items)
+    return new Collection(forgetFn(this.items, index))
   }
 
   forPage(page: number, perPage: number): Collection<T> {
@@ -592,42 +401,15 @@ export class Collection<T> {
   get(index: number, defaultValue: T): T
   get(index: number, defaultValue: () => T): T
   get(index: number, defaultValue?: T | (() => T)): T | undefined {
-    if (index >= 0 && index < this.items.length) {
-      return this.items[index]
-    }
+    if (index >= 0 && index < this.items.length) return this.items[index]
     if (defaultValue !== undefined) {
       return typeof defaultValue === 'function' ? (defaultValue as () => T)() : defaultValue
     }
     return undefined
   }
 
-  groupBy<K extends keyof T>(
-    key: K | ((item: T, index: number) => string)
-  ): Record<string, T[]> {
-    if (typeof key === 'function') {
-      return this.items.reduce(
-        (result, item, index) => {
-          const groupKey = key(item, index)
-          if (!result[groupKey]) {
-            result[groupKey] = []
-          }
-          result[groupKey].push(item)
-          return result
-        },
-        {} as Record<string, T[]>
-      )
-    }
-    return this.items.reduce(
-      (result, item) => {
-        const groupKey = String(item[key])
-        if (!result[groupKey]) {
-          result[groupKey] = []
-        }
-        result[groupKey].push(item)
-        return result
-      },
-      {} as Record<string, T[]>
-    )
+  groupBy<K extends keyof T>(key: K | ((item: T, index: number) => string)): Record<string, T[]> {
+    return groupByFn(this.items, key)
   }
 
   has<K extends keyof T>(key: K | K[]): boolean {
@@ -642,70 +424,40 @@ export class Collection<T> {
   }
 
   hasMany(callback?: (item: T) => boolean): boolean {
-    if (callback) {
-      return this.items.filter(callback).length > 1
-    }
+    if (callback) return this.items.filter(callback).length > 1
     return this.items.length > 1
   }
 
   hasSole(callback?: (item: T) => boolean): boolean {
-    if (callback) {
-      return this.items.filter(callback).length === 1
-    }
+    if (callback) return this.items.filter(callback).length === 1
     return this.items.length === 1
   }
 
   implode(glue: string | ((item: T, index: number) => string), key?: keyof T): string {
-    if (typeof glue === 'function') {
-      return this.items.map(glue).join(key ? String(key) : '')
-    }
-    if (key !== undefined) {
-      return this.items.map((item) => String(item[key])).join(glue)
-    }
-    return this.items.map(String).join(glue)
+    return implodeFn(this.items, glue, key)
   }
 
   intersect(values: T[]): Collection<T> {
-    const intersectItems = this.items.filter((item) => values.includes(item))
-    return new Collection(intersectItems)
+    return new Collection(intersectFn(this.items, values))
   }
 
   intersectUsing(values: T[], callback: (a: T, b: T) => number): Collection<T> {
-    return new Collection(
-      this.items.filter((item) => values.some((value) => callback(item, value) === 0))
-    )
+    return new Collection(intersectUsingFn(this.items, values, callback))
   }
 
   intersectAssoc(values: T[]): Collection<T> {
-    const intersectItems = this.items.filter((item) => values.includes(item))
-    return new Collection(intersectItems)
+    return new Collection(intersectFn(this.items, values))
   }
 
   intersectAssocUsing(
     values: Record<string, unknown>,
     callback: (a: string, b: string) => number
   ): Collection<Record<string, unknown>> {
-    const merged: Record<string, unknown> = {}
-    for (const item of this.items) {
-      if (typeof item === 'object' && item !== null) {
-        Object.assign(merged, item)
-      }
-    }
-
-    const result: Record<string, unknown> = {}
-    for (const [key, value] of Object.entries(merged)) {
-      for (const [vKey, vValue] of Object.entries(values)) {
-        if (callback(key, vKey) === 0 && value === vValue) {
-          result[key] = value
-        }
-      }
-    }
-    return new Collection([result])
+    return new Collection([intersectAssocUsingFn(this.items, values, callback)])
   }
 
   intersectByKeys<K extends keyof T>(keys: K[]): Collection<T> {
-    const intersectItems = this.items.filter((item) => keys.includes(item as unknown as K))
-    return new Collection(intersectItems)
+    return new Collection(this.items.filter((item) => keys.includes(item as unknown as K)))
   }
 
   isEmpty(): boolean {
@@ -717,34 +469,11 @@ export class Collection<T> {
   }
 
   join(separator: string, finalSeparator?: string): string {
-    if (!finalSeparator) {
-      return this.items.map(String).join(separator)
-    }
-    if (this.items.length === 0) return ''
-    if (this.items.length === 1) return String(this.items[0])
-    const init = this.items.slice(0, -1).map(String).join(separator)
-    return init + finalSeparator + String(this.items[this.items.length - 1])
+    return joinFn(this.items, separator, finalSeparator)
   }
 
-  keyBy<K extends keyof T>(
-    key: K | ((item: T, index: number) => string)
-  ): Record<string, T> {
-    if (typeof key === 'function') {
-      return this.items.reduce(
-        (result, item, index) => {
-          result[key(item, index)] = item
-          return result
-        },
-        {} as Record<string, T>
-      )
-    }
-    return this.items.reduce(
-      (result, item) => {
-        result[String(item[key])] = item
-        return result
-      },
-      {} as Record<string, T>
-    )
+  keyBy<K extends keyof T>(key: K | ((item: T, index: number) => string)): Record<string, T> {
+    return keyByFn(this.items, key)
   }
 
   keys(): (keyof T | string | number)[] {
@@ -766,25 +495,8 @@ export class Collection<T> {
     return this.items.map((_, index) => index.toString())
   }
 
-  last(
-    predicate?: (item: T, index: number) => boolean,
-    errorFn?: () => void
-  ): T | undefined {
-    if (!predicate) {
-      return this.items[this.items.length - 1]
-    }
-
-    for (let i = this.items.length - 1; i >= 0; i--) {
-      if (predicate(this.items[i], i)) {
-        return this.items[i]
-      }
-    }
-
-    if (errorFn) {
-      errorFn()
-    }
-
-    return undefined
+  last(predicate?: (item: T, index: number) => boolean, errorFn?: () => void): T | undefined {
+    return lastFn(this.items, predicate, errorFn)
   }
 
   lazy(): LazyCollection<T> {
@@ -796,68 +508,31 @@ export class Collection<T> {
   }
 
   map<U>(callback: (item: T, index: number) => U): Collection<U> {
-    return new Collection(this.items.map((item, index) => callback(item, index)))
+    return new Collection(mapFn(this.items, callback))
   }
 
   mapInto<U>(ClassType: new (item: T) => U): Collection<U> {
-    try {
-      return new Collection(this.items.map((item) => new ClassType(item)))
-    } catch (error) {
-      throw new Error(`${ClassType.name} is not a valid constructor for the provided items.`)
-    }
+    return new Collection(mapIntoFn(this.items, ClassType))
   }
 
   mapSpread<U>(callback: (...args: T extends (infer I)[] ? I[] : never) => U): Collection<U> {
-    return new Collection(
-      this.items.map((item) => callback(...(item as T extends (infer I)[] ? I[] : never)))
-    )
+    return new Collection(mapSpreadFn(this.items, callback))
   }
 
-  mapToGroups<K extends string, V>(
-    callback: (item: T, index: number) => [K, V]
-  ): Record<K, V[]> {
-    return this.items.reduce<Record<K, V[]>>(
-      (result, item, index) => {
-        const [key, value] = callback(item, index)
-        if (!result[key]) {
-          result[key] = []
-        }
-        result[key].push(value)
-        return result
-      },
-      {} as Record<K, V[]>
-    )
+  mapToGroups<K extends string, V>(callback: (item: T, index: number) => [K, V]): Record<K, V[]> {
+    return mapToGroupsFn(this.items, callback)
   }
 
-  mapWithKeys<K extends string, V>(
-    callback: (item: T, index: number) => [K, V]
-  ): Record<K, V> {
-    const result = {} as Record<K, V>
-    this.items.forEach((item, index) => {
-      const [key, value] = callback(item, index)
-      result[key] = value
-    })
-    return result
+  mapWithKeys<K extends string, V>(callback: (item: T, index: number) => [K, V]): Record<K, V> {
+    return mapWithKeysFn(this.items, callback)
   }
 
   max(callback?: ((item: T) => number) | keyof T): number {
-    if (typeof callback === 'function') {
-      return Math.max(...this.items.map(callback))
-    }
-    if (callback !== undefined) {
-      return Math.max(...this.items.map((item) => Number(item[callback])))
-    }
-    return Math.max(...this.items.map((item) => Number(item)))
+    return maxFn(this.items, callback)
   }
 
   median(callback?: (item: T) => number): number {
-    const sorted = callback
-      ? this.items.map(callback).sort((a, b) => a - b)
-      : [...this.items].sort((a, b) => Number(a) - Number(b))
-    const middle = Math.floor(sorted.length / 2)
-    return sorted.length % 2 === 0
-      ? (Number(sorted[middle - 1]) + Number(sorted[middle])) / 2
-      : Number(sorted[middle])
+    return medianFn(this.items, callback)
   }
 
   merge<U>(...args: (U[] | Collection<U>)[]): Collection<T | U> {
@@ -868,7 +543,6 @@ export class Collection<T> {
       },
       [...this.items] as (T | U)[]
     )
-
     return new Collection<T | U>(mergedItems)
   }
 
@@ -877,115 +551,30 @@ export class Collection<T> {
     const arrays = values.map((val) =>
       val instanceof Collection ? val.toArray().map(deepClone) : val.map(deepClone)
     )
-
     const mergedArray = arrays.reduce(
-      (acc, current) => {
-        return mergeArrays(acc, current)
-      },
+      (acc, current) => mergeArrays(acc, current),
       target as (T | U)[]
     )
-
     return new Collection(mergedArray)
   }
 
   min(callback?: ((item: T) => number) | keyof T): T | number | undefined {
-    if (this.items.length === 0) {
-      return undefined
-    }
-
-    if (typeof callback === 'function') {
-      let minItem: T | undefined = undefined
-      let minValue = Infinity
-
-      for (const item of this.items) {
-        const value = callback(item)
-        if (value < minValue) {
-          minValue = value
-          minItem = item
-        }
-      }
-
-      return minItem
-    }
-
-    if (callback !== undefined) {
-      return Math.min(...this.items.map((item) => Number(item[callback])))
-    }
-
-    let minItem = this.items[0]
-    const rest = this.items.slice(1)
-
-    for (const item of rest) {
-      if (
-        (typeof item === 'number' || typeof item === 'string') &&
-        (typeof minItem === 'number' || typeof minItem === 'string')
-      ) {
-        if (item < minItem) {
-          minItem = item
-        }
-      } else {
-        throw new Error('Items must be number or string if no callback is provided to min().')
-      }
-    }
-
-    return minItem
+    return minFn(this.items, callback)
   }
 
   mode(callback?: (item: T) => unknown): T | T[] | undefined {
-    if (this.items.length === 0) {
-      return undefined
-    }
-
-    const counts = new Map<string, { count: number; item: T }>()
-
-    for (const item of this.items) {
-      const keyValue = callback ? callback(item) : item
-      let mapKey: string
-
-      if (typeof keyValue === 'object' && keyValue !== null) {
-        mapKey = JSON.stringify(keyValue)
-      } else {
-        mapKey = String(keyValue)
-      }
-
-      const entry = counts.get(mapKey)
-      if (entry) {
-        entry.count++
-      } else {
-        counts.set(mapKey, { count: 1, item })
-      }
-    }
-
-    let maxCount = -Infinity
-    for (const { count } of counts.values()) {
-      if (count > maxCount) {
-        maxCount = count
-      }
-    }
-
-    const modeItems: T[] = []
-    for (const { count, item } of counts.values()) {
-      if (count === maxCount) {
-        modeItems.push(item)
-      }
-    }
-
-    return modeItems.length === 1 ? modeItems[0] : modeItems
+    return modeFn(this.items, callback)
   }
 
   multiply(count: number): Collection<T> {
     const result: T[] = []
-    for (let i = 0; i < count; i++) {
-      result.push(...this.items)
-    }
+    for (let i = 0; i < count; i++) result.push(...this.items)
     return new Collection(result)
   }
 
   nth(n: number, offset: number = 0): Collection<T> {
     const result: T[] = []
-    for (let i = offset; i < this.items.length; i += n) {
-      result.push(this.items[i])
-    }
+    for (let i = offset; i < this.items.length; i += n) result.push(this.items[i])
     return new Collection(result)
   }
 
@@ -1012,13 +601,9 @@ export class Collection<T> {
     const newItems = [...this.items]
     if (size < 0) {
       const absSize = Math.abs(size)
-      while (newItems.length < absSize) {
-        newItems.unshift(value)
-      }
+      while (newItems.length < absSize) newItems.unshift(value)
     } else {
-      while (newItems.length < size) {
-        newItems.push(value)
-      }
+      while (newItems.length < size) newItems.push(value)
     }
     return new Collection(newItems)
   }
@@ -1026,11 +611,8 @@ export class Collection<T> {
   partition(callback: (item: T) => boolean): [Collection<T>, Collection<T>] {
     const [truthy, falsy] = this.items.reduce(
       ([trueArr, falseArr], item) => {
-        if (callback(item)) {
-          trueArr.push(item)
-        } else {
-          falseArr.push(item)
-        }
+        if (callback(item)) trueArr.push(item)
+        else falseArr.push(item)
         return [trueArr, falseArr]
       },
       [[], []] as [T[], T[]]
@@ -1039,10 +621,7 @@ export class Collection<T> {
   }
 
   percentage(callback: (item: T) => boolean, precision: number = 2): number {
-    if (this.items.length === 0) return 0
-    const count = this.items.filter(callback).length
-    const result = (count / this.items.length) * 100
-    return parseFloat(result.toFixed(precision))
+    return percentageFn(this.items, callback, precision)
   }
 
   pipe<U>(callback: (collection: Collection<T>) => U): U {
@@ -1063,14 +642,8 @@ export class Collection<T> {
     key: K,
     keyBy?: J
   ): Collection<T[K]> | Record<string, T[K]> {
-    if (keyBy !== undefined) {
-      const result: Record<string, T[K]> = {}
-      this.items.forEach((item) => {
-        result[String(item[keyBy])] = item[key]
-      })
-      return result
-    }
-    return new Collection(this.items.map((item) => item[key]))
+    if (keyBy !== undefined) return pluckWithKey(this.items, key, keyBy)
+    return new Collection(pluckFn(this.items, key))
   }
 
   pop(): T | undefined
@@ -1113,15 +686,12 @@ export class Collection<T> {
     if (count === undefined) {
       return this.items[Math.floor(Math.random() * this.items.length)]
     }
-
     const n = typeof count === 'function' ? count(this) : count
-
     if (n > this.items.length) {
       throw new Error(
         `You requested ${n} items, but the collection only contains ${this.items.length} items.`
       )
     }
-
     const shuffled = [...this.items].sort(() => Math.random() - 0.5)
     return new Collection(shuffled.slice(0, n))
   }
@@ -1137,10 +707,7 @@ export class Collection<T> {
     initialValue?: U
   ): U | T {
     if (initialValue !== undefined) {
-      return this.items.reduce(
-        callback as (acc: U, item: T, index: number) => U,
-        initialValue
-      )
+      return this.items.reduce(callback as (acc: U, item: T, index: number) => U, initialValue)
     }
     return this.items.reduce(callback as (acc: T, item: T, index: number) => T)
   }
@@ -1237,9 +804,7 @@ export class Collection<T> {
   }
 
   slice(start: number, length?: number): Collection<T> {
-    if (length !== undefined) {
-      return new Collection(this.items.slice(start, start + length))
-    }
+    if (length !== undefined) return new Collection(this.items.slice(start, start + length))
     return new Collection(this.items.slice(start))
   }
 
@@ -1252,30 +817,7 @@ export class Collection<T> {
   }
 
   sole(key?: keyof T | ((item: T, index: number) => boolean), value?: T[keyof T]): T {
-    if (key === undefined) {
-      if (this.items.length !== 1) {
-        throw new Error(
-          this.items.length === 0
-            ? 'No items found in the collection'
-            : 'Multiple items found in the collection'
-        )
-      }
-      return this.items[0]
-    }
-
-    let matches: T[]
-
-    if (typeof key === 'function') {
-      matches = this.items.filter(key)
-    } else if (value !== undefined) {
-      matches = this.items.filter((item) => item[key] === value)
-    } else {
-      matches = this.items.filter((item) => item[key])
-    }
-
-    if (matches.length === 0) throw new ItemNotFoundException('No items match the given criteria')
-    if (matches.length > 1) throw new Error('Multiple items match the given criteria')
-    return matches[0]
+    return soleFn(this.items, key, value)
   }
 
   some(callback: (item: T) => boolean): boolean {
@@ -1283,16 +825,7 @@ export class Collection<T> {
   }
 
   sort(callback?: (a: T, b: T) => number): Collection<T> {
-    if (callback) {
-      return new Collection([...this.items].sort(callback))
-    }
-    return new Collection(
-      [...this.items].sort((a, b) => {
-        if (a < b) return -1
-        if (a > b) return 1
-        return 0
-      })
-    )
+    return new Collection(sortFn(this.items, callback))
   }
 
   sortBy<K extends keyof T>(
@@ -1301,135 +834,33 @@ export class Collection<T> {
       | ((item: T, index: number) => unknown)
       | Array<[K, 'asc' | 'desc'] | ((a: T, b: T) => number)>
   ): Collection<T> {
-    if (Array.isArray(key)) {
-      const sortOps = key as Array<[K, 'asc' | 'desc'] | ((a: T, b: T) => number)>
-      return new Collection(
-        [...this.items].sort((a, b) => {
-          for (const op of sortOps) {
-            if (typeof op === 'function') {
-              const result = op(a, b)
-              if (result !== 0) return result
-            } else {
-              const [sortKey, direction] = op
-              const aVal = a[sortKey]
-              const bVal = b[sortKey]
-              const cmp = aVal > bVal ? 1 : aVal < bVal ? -1 : 0
-              if (cmp !== 0) return direction === 'desc' ? -cmp : cmp
-            }
-          }
-          return 0
-        })
-      )
-    }
-
-    if (typeof key === 'function') {
-      const fn = key as (item: T, index: number) => unknown
-      return new Collection(
-        [...this.items].sort((a, b) => {
-          const aVal = fn(a, 0) as string | number
-          const bVal = fn(b, 0) as string | number
-          return aVal > bVal ? 1 : aVal < bVal ? -1 : 0
-        })
-      )
-    }
-
-    return new Collection([...this.items].sort((a, b) => (a[key] > b[key] ? 1 : -1)))
+    return new Collection(sortByFn(this.items, key))
   }
 
-  sortByDesc<K extends keyof T>(
-    key: K | ((item: T, index: number) => unknown)
-  ): Collection<T> {
-    if (typeof key === 'function') {
-      const fn = key as (item: T, index: number) => unknown
-      return new Collection(
-        [...this.items].sort((a, b) => {
-          const aVal = fn(a, 0) as string | number
-          const bVal = fn(b, 0) as string | number
-          return aVal > bVal ? -1 : aVal < bVal ? 1 : 0
-        })
-      )
-    }
-    return new Collection([...this.items].sort((a, b) => (a[key] > b[key] ? -1 : 1)))
+  sortByDesc<K extends keyof T>(key: K | ((item: T, index: number) => unknown)): Collection<T> {
+    return new Collection(sortByDescFn(this.items, key))
   }
 
   sortDesc(): Collection<T> {
-    return new Collection(
-      [...this.items].sort((a, b) => {
-        if (a > b) return -1
-        if (a < b) return 1
-        return 0
-      })
-    )
+    return new Collection(sortDescFn(this.items))
   }
 
   sortKeys(): Collection<T> {
-    return new Collection(
-      this.items.map((item) => {
-        if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
-          const sorted = Object.keys(item as Record<string, unknown>)
-            .sort()
-            .reduce(
-              (acc, k) => {
-                acc[k] = (item as Record<string, unknown>)[k]
-                return acc
-              },
-              {} as Record<string, unknown>
-            )
-          return sorted as unknown as T
-        }
-        return item
-      })
-    )
+    return new Collection(sortKeysFn(this.items))
   }
 
   sortKeysDesc(): Collection<T> {
-    return new Collection(
-      this.items.map((item) => {
-        if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
-          const sorted = Object.keys(item as Record<string, unknown>)
-            .sort()
-            .reverse()
-            .reduce(
-              (acc, k) => {
-                acc[k] = (item as Record<string, unknown>)[k]
-                return acc
-              },
-              {} as Record<string, unknown>
-            )
-          return sorted as unknown as T
-        }
-        return item
-      })
-    )
+    return new Collection(sortKeysDescFn(this.items))
   }
 
   sortKeysUsing(callback: (a: string, b: string) => number): Collection<T> {
-    return new Collection(
-      this.items.map((item) => {
-        if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
-          const sorted = Object.keys(item as Record<string, unknown>)
-            .sort(callback)
-            .reduce(
-              (acc, k) => {
-                acc[k] = (item as Record<string, unknown>)[k]
-                return acc
-              },
-              {} as Record<string, unknown>
-            )
-          return sorted as unknown as T
-        }
-        return item
-      })
-    )
+    return new Collection(sortKeysUsingFn(this.items, callback))
   }
 
   splice(start: number, deleteCount?: number, ...values: T[]): Collection<T> {
     const copy = [...this.items]
-    if (deleteCount !== undefined) {
-      copy.splice(start, deleteCount, ...values)
-    } else {
-      copy.splice(start)
-    }
+    if (deleteCount !== undefined) copy.splice(start, deleteCount, ...values)
+    else copy.splice(start)
     return new Collection(copy)
   }
 
@@ -1444,29 +875,15 @@ export class Collection<T> {
   }
 
   splitIn(numberOfGroups: number): Collection<T[]> {
-    if (this.items.length === 0) return new Collection<T[]>([])
-    const size = Math.ceil(this.items.length / numberOfGroups)
-    const chunks: T[][] = []
-    for (let i = 0; i < this.items.length; i += size) {
-      chunks.push(this.items.slice(i, i + size))
-    }
-    return new Collection(chunks)
+    return this.split(numberOfGroups)
   }
 
   sum(callback?: ((item: T) => number) | keyof T): number {
-    if (!callback) {
-      return this.items.reduce((acc, item) => acc + Number(item), 0)
-    }
-    if (typeof callback === 'function') {
-      return this.items.reduce((acc, item) => acc + callback(item), 0)
-    }
-    return this.items.reduce((acc, item) => acc + Number(item[callback]), 0)
+    return sumFn(this.items, callback)
   }
 
   take(count: number): Collection<T> {
-    if (count < 0) {
-      return new Collection(this.items.slice(count))
-    }
+    if (count < 0) return new Collection(this.items.slice(count))
     return new Collection(this.items.slice(0, count))
   }
 
@@ -1474,14 +891,10 @@ export class Collection<T> {
     if (typeof callback === 'function') {
       const fn = callback as (item: T, index: number) => boolean
       const index = this.items.findIndex(fn)
-      return index === -1
-        ? new Collection(this.items)
-        : new Collection(this.items.slice(0, index))
+      return index === -1 ? new Collection(this.items) : new Collection(this.items.slice(0, index))
     }
     const index = this.items.indexOf(callback as T)
-    return index === -1
-      ? new Collection(this.items)
-      : new Collection(this.items.slice(0, index))
+    return index === -1 ? new Collection(this.items) : new Collection(this.items.slice(0, index))
   }
 
   takeWhile(callback: (item: T, index: number) => boolean): Collection<T> {
@@ -1516,60 +929,15 @@ export class Collection<T> {
   }
 
   undot(): Collection<Record<string, unknown>> {
-    const expandDot = (obj: Record<string, unknown>): Record<string, unknown> => {
-      const result: Record<string, unknown> = {}
-      for (const [key, value] of Object.entries(obj)) {
-        const parts = key.split('.')
-        let current = result
-        for (let i = 0; i < parts.length - 1; i++) {
-          if (!(parts[i] in current) || typeof current[parts[i]] !== 'object') {
-            current[parts[i]] = {}
-          }
-          current = current[parts[i]] as Record<string, unknown>
-        }
-        current[parts[parts.length - 1]] = value
-      }
-      return result
-    }
-
-    const merged: Record<string, unknown> = {}
-    for (const item of this.items) {
-      if (typeof item === 'object' && item !== null) {
-        Object.assign(merged, item)
-      }
-    }
-
-    return new Collection([expandDot(merged)])
+    return new Collection([undotFn(this.items)])
   }
 
   union(values: T[]): Collection<T> {
-    const unionItems = [...this.items]
-    for (const value of values) {
-      const exists = unionItems.some((item) => this.isEqual(item, value))
-      if (!exists) {
-        unionItems.push(value)
-      }
-    }
-    return new Collection(unionItems)
+    return new Collection(unionFn(this.items, values))
   }
 
   unique(callback?: ((item: T) => unknown) | keyof T): Collection<T> {
-    if (typeof callback === 'function') {
-      return new Collection(
-        this.items.filter(
-          (item, index, self) => self.findIndex((i) => callback(i) === callback(item)) === index
-        )
-      )
-    }
-    if (callback !== undefined) {
-      const key = callback as keyof T
-      return new Collection(
-        this.items.filter(
-          (item, index, self) => self.findIndex((i) => i[key] === item[key]) === index
-        )
-      )
-    }
-    return new Collection(Array.from(new Set(this.items)))
+    return new Collection(uniqueFn(this.items, callback))
   }
 
   uniqueStrict(): Collection<T> {
@@ -1581,25 +949,18 @@ export class Collection<T> {
     callback: (collection: Collection<T>, value: boolean) => void,
     fallback?: (collection: Collection<T>, value: boolean) => void
   ): Collection<T> {
-    if (!condition) {
-      callback(this, condition)
-    } else if (fallback) {
-      fallback(this, condition)
-    }
+    if (!condition) callback(this, condition)
+    else if (fallback) fallback(this, condition)
     return this
   }
 
   unlessEmpty(callback: (collection: Collection<T>) => void): Collection<T> {
-    if (this.items.length > 0) {
-      callback(this)
-    }
+    if (this.items.length > 0) callback(this)
     return this
   }
 
   unlessNotEmpty(callback: (collection: Collection<T>) => void): Collection<T> {
-    if (this.items.length === 0) {
-      callback(this)
-    }
+    if (this.items.length === 0) callback(this)
     return this
   }
 
@@ -1623,11 +984,8 @@ export class Collection<T> {
     callback: (collection: Collection<T>, value: boolean) => void,
     fallback?: (collection: Collection<T>, value: boolean) => void
   ): Collection<T> {
-    if (condition) {
-      callback(this, condition)
-    } else if (fallback) {
-      fallback(this, condition)
-    }
+    if (condition) callback(this, condition)
+    else if (fallback) fallback(this, condition)
     return this
   }
 
@@ -1635,11 +993,8 @@ export class Collection<T> {
     callback: (collection: Collection<T>) => void,
     fallback?: (collection: Collection<T>) => void
   ): Collection<T> {
-    if (this.items.length === 0) {
-      callback(this)
-    } else if (fallback) {
-      fallback(this)
-    }
+    if (this.items.length === 0) callback(this)
+    else if (fallback) fallback(this)
     return this
   }
 
@@ -1647,51 +1002,15 @@ export class Collection<T> {
     callback: (collection: Collection<T>) => void,
     fallback?: (collection: Collection<T>) => void
   ): Collection<T> {
-    if (this.items.length > 0) {
-      callback(this)
-    } else if (fallback) {
-      fallback(this)
-    }
+    if (this.items.length > 0) callback(this)
+    else if (fallback) fallback(this)
     return this
   }
 
   where<K extends keyof T>(key: K, value: T[K]): Collection<T>
   where<K extends keyof T>(key: K, operator: string, value: T[K]): Collection<T>
-  where<K extends keyof T>(
-    key: K,
-    operatorOrValue: string | T[K],
-    value?: T[K]
-  ): Collection<T> {
-    if (value === undefined) {
-      return new Collection(this.items.filter((item) => item[key] === operatorOrValue))
-    }
-    const operator = operatorOrValue as string
-    return new Collection(
-      this.items.filter((item) => {
-        switch (operator) {
-          case '=':
-          case '==':
-            return item[key] == value
-          case '===':
-            return item[key] === value
-          case '!=':
-          case '<>':
-            return item[key] != value
-          case '!==':
-            return item[key] !== value
-          case '<':
-            return item[key] < value!
-          case '<=':
-            return item[key] <= value!
-          case '>':
-            return item[key] > value!
-          case '>=':
-            return item[key] >= value!
-          default:
-            return item[key] === value
-        }
-      })
-    )
+  where<K extends keyof T>(key: K, operatorOrValue: string | T[K], value?: T[K]): Collection<T> {
+    return new Collection(whereFn(this.items, key, operatorOrValue, value))
   }
 
   whereStrict<K extends keyof T>(key: K, value: T[K]): Collection<T> {
@@ -1699,49 +1018,42 @@ export class Collection<T> {
   }
 
   whereBetween<K extends keyof T>(key: K, min: T[K], max: T[K]): Collection<T> {
-    return new Collection(this.items.filter((item) => item[key] >= min && item[key] <= max))
+    return new Collection(whereBetweenFn(this.items, key, min, max))
   }
 
   whereIn<K extends keyof T>(key: K, values: T[K][]): Collection<T> {
-    return new Collection(this.items.filter((item) => values.includes(item[key])))
+    return new Collection(whereInFn(this.items, key, values))
   }
 
   whereInStrict<K extends keyof T>(key: K, values: T[K][]): Collection<T> {
-    return new Collection(this.items.filter((item) => values.includes(item[key])))
+    return new Collection(whereInFn(this.items, key, values))
   }
 
   whereInstanceOf<U extends object>(
     classType: abstract new (...args: ReadonlyArray<unknown>) => U
   ): Collection<U> {
     const ctor = classType as new (...args: unknown[]) => U
-    // Cast needed: T is not known to extend U, but we filter by instanceof at runtime
-    return new Collection(
-      (this.items as unknown as U[]).filter((item) => item instanceof ctor)
-    )
+    return new Collection((this.items as unknown as U[]).filter((item) => item instanceof ctor))
   }
 
   whereNotBetween<K extends keyof T>(key: K, min: T[K], max: T[K]): Collection<T> {
-    return new Collection(this.items.filter((item) => item[key] < min || item[key] > max))
+    return new Collection(whereNotBetweenFn(this.items, key, min, max))
   }
 
   whereNotIn<K extends keyof T>(key: K, values: T[K][]): Collection<T> {
-    return new Collection(this.items.filter((item) => !values.includes(item[key])))
+    return new Collection(whereNotInFn(this.items, key, values))
   }
 
   whereNotInStrict<K extends keyof T>(key: K, values: T[K][]): Collection<T> {
-    return new Collection(this.items.filter((item) => !values.includes(item[key])))
+    return new Collection(whereNotInFn(this.items, key, values))
   }
 
   whereNotNull<K extends keyof T>(key: K): Collection<T> {
-    return new Collection(
-      this.items.filter((item) => item[key] !== null && item[key] !== undefined)
-    )
+    return new Collection(whereNotNullFn(this.items, key))
   }
 
   whereNull<K extends keyof T>(key: K): Collection<T> {
-    return new Collection(
-      this.items.filter((item) => item[key] === null || item[key] === undefined)
-    )
+    return new Collection(whereNullFn(this.items, key))
   }
 
   wrap(): Collection<T[]> {
@@ -1756,4 +1068,3 @@ export class Collection<T> {
     return new Collection(zipped)
   }
 }
-
