@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18, 20, 22]
+        node-version: [18, 20, 22, 24]
     steps:
       - uses: actions/checkout@v4
 
@@ -81,11 +81,3 @@ jobs:
         with:
           name: dist
           path: dist/
-
-      - name: Check package size
-        run: |
-          echo "📦 Package contents:"
-          npx npm-packlist
-          echo ""
-          echo "📏 Packed size:"
-          npm pack --dry-run 2>&1
