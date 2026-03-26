@@ -1,9 +1,15 @@
+import { isDeepEqual } from '../internals'
+
 export function intersect<T>(items: T[], values: T[]): T[] {
   return items.filter((item) => values.includes(item))
 }
 
 export function intersectUsing<T>(items: T[], values: T[], callback: (a: T, b: T) => number): T[] {
   return items.filter((item) => values.some((value) => callback(item, value) === 0))
+}
+
+export function intersectAssoc<T>(items: T[], values: T[]): T[] {
+  return items.filter((item) => values.some((v) => isDeepEqual(item, v)))
 }
 
 export function intersectAssocUsing(
