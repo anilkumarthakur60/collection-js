@@ -11,7 +11,7 @@ Lazy Collections leverage JavaScript **Generators** (`function* () { yield x }`)
 To create a Lazy Collection, import the class and pass a generator function (or any iterable) to its constructor:
 
 ```typescript
-import { LazyCollection } from '@anilkumarthakur/collection'
+import { LazyCollection } from '@anilkumarthakur/collection-js'
 
 const lazy = new LazyCollection(function* () {
   for (let i = 1; i <= 1_000_000; i++) {

@@ -1,4 +1,4 @@
-import { isDeepEqual, deepClone, mergeArrays, isObject } from './internals'
+import { isDeepEqual, deepClone, mergeArrays, isObject, getNestedValue } from './internals'
 import { flattenHelper } from './internals'
 import { UnexpectedValueException } from './exceptions'
 import { LazyCollection } from './LazyCollection'
@@ -12,7 +12,11 @@ import { after } from './methods/after'
 import { average as averageFn } from './methods/average'
 import { before } from './methods/before'
 import { chunk as chunkFn } from './methods/chunk'
-import { contains as containsFn } from './methods/contains'
+import {
+  contains as containsFn,
+  containsBy as containsByFn,
+  containsByStrict as containsByStrictFn
+} from './methods/contains'
 import { countBy as countByFn } from './methods/countBy'
 import { crossJoin as crossJoinFn } from './methods/crossJoin'
 import {
@@ -190,10 +194,7 @@ export class Collection<T> implements IReadonlyCollection<T> {
     return lastFn(this.items, predicate, errorFn)
   }
 
-  lastOr<U>(
-    defaultValue: U | (() => U),
-    predicate?: (item: T, index: number) => boolean
-  ): T | U {
+  lastOr<U>(defaultValue: U | (() => U), predicate?: (item: T, index: number) => boolean): T | U {
     const result = lastFn(this.items, predicate)
     if (result !== undefined) return result
     return typeof defaultValue === 'function' ? (defaultValue as () => U)() : defaultValue
@@ -213,9 +214,14 @@ export class Collection<T> implements IReadonlyCollection<T> {
     return undefined
   }
 
-  value<K extends keyof T>(key?: K): T | T[K] | undefined {
+  value<K extends keyof T>(key?: K | string): T | T[K] | unknown | undefined {
     if (key !== undefined) {
-      return this.items.length > 0 ? this.items[0][key] : undefined
+      if (this.items.length === 0) return undefined
+      const keyStr = String(key)
+      if (keyStr.includes('.')) {
+        return getNestedValue(this.items[0], keyStr)
+      }
+      return this.items[0][key as K]
     }
     return this.items[0]
   }
@@ -234,8 +240,16 @@ export class Collection<T> implements IReadonlyCollection<T> {
 
   // ─── Search & Inspection ─────────────────────────────────────────────────────
 
-  contains(value: T | PredicateContains<T> | Partial<T>): boolean {
-    return containsFn(this.items, value)
+  contains(value: T | PredicateContains<T> | Partial<T>): boolean
+  contains<K extends keyof T>(key: K, value: T[K]): boolean
+  contains<K extends keyof T>(
+    valueOrKey: T | PredicateContains<T> | Partial<T> | K,
+    value?: T[K]
+  ): boolean {
+    if (value !== undefined) {
+      return containsByFn(this.items, valueOrKey as K, value)
+    }
+    return containsFn(this.items, valueOrKey as T | PredicateContains<T> | Partial<T>)
   }
 
   containsOneItem(callback?: PredicateContains<T>): boolean {
@@ -243,16 +257,34 @@ export class Collection<T> implements IReadonlyCollection<T> {
     return this.items.length === 1
   }
 
-  containsStrict(value: T): boolean {
-    return this.items.includes(value)
+  containsStrict(value: T): boolean
+  containsStrict<K extends keyof T>(key: K, value: T[K]): boolean
+  containsStrict<K extends keyof T>(valueOrKey: T | K, value?: T[K]): boolean {
+    if (value !== undefined) {
+      return containsByStrictFn(this.items, valueOrKey as K, value)
+    }
+    return this.items.includes(valueOrKey as T)
   }
 
-  doesntContain(value: T | PredicateContains<T> | Partial<T>): boolean {
-    return !this.contains(value)
+  doesntContain(value: T | PredicateContains<T> | Partial<T>): boolean
+  doesntContain<K extends keyof T>(key: K, value: T[K]): boolean
+  doesntContain<K extends keyof T>(
+    valueOrKey: T | PredicateContains<T> | Partial<T> | K,
+    value?: T[K]
+  ): boolean {
+    if (value !== undefined) {
+      return !containsByFn(this.items, valueOrKey as K, value)
+    }
+    return !containsFn(this.items, valueOrKey as T | PredicateContains<T> | Partial<T>)
   }
 
-  doesntContainStrict(value: T): boolean {
-    return !this.containsStrict(value)
+  doesntContainStrict(value: T): boolean
+  doesntContainStrict<K extends keyof T>(key: K, value: T[K]): boolean
+  doesntContainStrict<K extends keyof T>(valueOrKey: T | K, value?: T[K]): boolean {
+    if (value !== undefined) {
+      return !containsByStrictFn(this.items, valueOrKey as K, value)
+    }
+    return !this.items.includes(valueOrKey as T)
   }
 
   every(callback: (item: T, index: number) => boolean): boolean {
@@ -307,9 +339,7 @@ export class Collection<T> implements IReadonlyCollection<T> {
   }
 
   isList(): boolean {
-    return this.items.every(
-      (_, index) => index === this.items.indexOf(this.items[index])
-    )
+    return this.items.every((_, index) => index === this.items.indexOf(this.items[index]))
   }
 
   count(): number {
@@ -439,11 +469,14 @@ export class Collection<T> implements IReadonlyCollection<T> {
     return new Collection([flipFn(this.items)])
   }
 
-  pluck<K extends keyof T>(key: K): Collection<T[K]>
-  pluck<K extends keyof T, J extends keyof T>(key: K, keyBy: J): Record<string, T[K]>
+  pluck<K extends keyof T>(key: K | string): Collection<T[K]>
   pluck<K extends keyof T, J extends keyof T>(
-    key: K,
-    keyBy?: J
+    key: K | string,
+    keyBy: J | string
+  ): Record<string, T[K]>
+  pluck<K extends keyof T, J extends keyof T>(
+    key: K | string,
+    keyBy?: J | string
   ): Collection<T[K]> | Record<string, T[K]> {
     if (keyBy !== undefined) return pluckWithKey(this.items, key, keyBy)
     return new Collection(pluckFn(this.items, key))
@@ -985,8 +1018,7 @@ export class Collection<T> implements IReadonlyCollection<T> {
     callback: (collection: Collection<T>) => Collection<T> | void,
     fallback?: (collection: Collection<T>) => Collection<T> | void
   ): Collection<T> {
-    const resolvedCondition =
-      typeof condition === 'function' ? condition(this) : condition
+    const resolvedCondition = typeof condition === 'function' ? condition(this) : condition
     if (resolvedCondition) {
       const result = callback(this)
       return result instanceof Collection ? result : this
@@ -1016,20 +1048,15 @@ export class Collection<T> implements IReadonlyCollection<T> {
     callback: (collection: Collection<T>) => Collection<T> | void,
     fallback?: (collection: Collection<T>) => Collection<T> | void
   ): Collection<T> {
-    const resolvedCondition =
-      typeof condition === 'function' ? condition(this) : condition
+    const resolvedCondition = typeof condition === 'function' ? condition(this) : condition
     return this.when(!resolvedCondition, callback, fallback)
   }
 
-  unlessEmpty(
-    callback: (collection: Collection<T>) => Collection<T> | void
-  ): Collection<T> {
+  unlessEmpty(callback: (collection: Collection<T>) => Collection<T> | void): Collection<T> {
     return this.whenNotEmpty(callback)
   }
 
-  unlessNotEmpty(
-    callback: (collection: Collection<T>) => Collection<T> | void
-  ): Collection<T> {
+  unlessNotEmpty(callback: (collection: Collection<T>) => Collection<T> | void): Collection<T> {
     return this.whenEmpty(callback)
   }
 
@@ -1197,6 +1224,58 @@ export class Collection<T> implements IReadonlyCollection<T> {
   dd(): never {
     this.dump()
     throw new Error('Dump and die: Collection debugging terminated.')
+  }
+
+  // ─── JS Protocol Methods ──────────────────────────────────────────────────
+
+  get [Symbol.toStringTag](): string {
+    return 'Collection'
+  }
+
+  toJSON(): T[] {
+    return this.items
+  }
+
+  [Symbol.toPrimitive](hint: string): string | number | T[] {
+    if (hint === 'number') return this.items.length
+    if (hint === 'string') return this.toJson()
+    return this.items
+  }
+
+  get length(): number {
+    return this.items.length
+  }
+
+  // ─── Static Converters ─────────────────────────────────────────────────────
+
+  static fromEntries<V>(entries: Iterable<[string, V]>): Collection<Record<string, V>> {
+    return new Collection([Object.fromEntries(entries) as Record<string, V>])
+  }
+
+  static fromMap<K, V>(map: Map<K, V>): Collection<[K, V]> {
+    return new Collection([...map.entries()])
+  }
+
+  static fromSet<T>(set: Set<T>): Collection<T> {
+    return new Collection([...set])
+  }
+
+  static empty<T>(): Collection<T> {
+    return new Collection<T>([])
+  }
+
+  // ─── Node.js Utilities ─────────────────────────────────────────────────────
+
+  toObject<K extends keyof T, V extends keyof T>(keyField: K, valueField: V): Record<string, T[V]> {
+    const result: Record<string, T[V]> = {}
+    for (const item of this.items) {
+      result[String(item[keyField])] = item[valueField]
+    }
+    return result
+  }
+
+  toEntries<K extends keyof T, V extends keyof T>(keyField: K, valueField: V): [T[K], T[V]][] {
+    return this.items.map((item) => [item[keyField], item[valueField]])
   }
 
   // ─── Internal Helpers ────────────────────────────────────────────────────────
