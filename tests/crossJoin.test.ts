@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('crossJoin', () => {
   it('computes cartesian product with one array', () => {

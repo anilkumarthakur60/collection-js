@@ -1,4 +1,4 @@
-import { collect, Collection, LazyCollection } from '../src/collect'
+import { collect, Collection, LazyCollection } from '../src'
 
 describe('lazy', () => {
   it('returns a LazyCollection instance', () => {

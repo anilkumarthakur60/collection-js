@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('slice', () => {
   it('slices from start index to end', () => {

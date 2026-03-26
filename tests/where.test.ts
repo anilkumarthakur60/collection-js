@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('where', () => {
   it('filters by key-value equality', () => {
@@ -47,13 +47,13 @@ describe('whereStrict', () => {
 describe('whereBetween', () => {
   it('filters items between min and max inclusive', () => {
     const items = [{ score: 10 }, { score: 50 }, { score: 100 }, { score: 75 }]
-    const result = collect(items).whereBetween('score', 50, 100)
+    const result = collect(items).whereBetween('score', [50, 100])
     expect(result.all()).toEqual([{ score: 50 }, { score: 100 }, { score: 75 }])
   })
 
   it('returns empty when nothing in range', () => {
     const items = [{ v: 1 }, { v: 2 }]
-    expect(collect(items).whereBetween('v', 5, 10).all()).toEqual([])
+    expect(collect(items).whereBetween('v', [5, 10]).all()).toEqual([])
   })
 })
 
@@ -105,7 +105,7 @@ describe('whereInstanceOf', () => {
 describe('whereNotBetween', () => {
   it('filters items outside min/max range', () => {
     const items = [{ v: 1 }, { v: 5 }, { v: 10 }, { v: 15 }]
-    const result = collect(items).whereNotBetween('v', 5, 10)
+    const result = collect(items).whereNotBetween('v', [5, 10])
     expect(result.all()).toEqual([{ v: 1 }, { v: 15 }])
   })
 })
