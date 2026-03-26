@@ -42,6 +42,10 @@ export function whereIn<T, K extends keyof T>(items: T[], key: K, values: T[K][]
   return items.filter((item) => values.includes(item[key]))
 }
 
+export function whereInStrict<T, K extends keyof T>(items: T[], key: K, values: T[K][]): T[] {
+  return items.filter((item) => values.some((v) => v === item[key]))
+}
+
 export function whereNotBetween<T, K extends keyof T>(
   items: T[],
   key: K,
@@ -53,6 +57,10 @@ export function whereNotBetween<T, K extends keyof T>(
 
 export function whereNotIn<T, K extends keyof T>(items: T[], key: K, values: T[K][]): T[] {
   return items.filter((item) => !values.includes(item[key]))
+}
+
+export function whereNotInStrict<T, K extends keyof T>(items: T[], key: K, values: T[K][]): T[] {
+  return items.filter((item) => !values.some((v) => v === item[key]))
 }
 
 export function whereNotNull<T, K extends keyof T>(items: T[], key: K): T[] {

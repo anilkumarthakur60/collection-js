@@ -1,5 +1,5 @@
 {
-  "name": "@anilkumarthakur/collection",
+  "name": "@anilkumarthakur/collection-js",
   "version": "0.0.0",
   "description": "A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Provides 120+ chainable methods for elegant array manipulation.",
   "private": false,

@@ -297,7 +297,7 @@ Static helper to generate collections holding a sequence of consecutive integers
 **Simple Example:**
 
 ```typescript
-import { Collection } from '@anilkumarthakur/collection'
+import { Collection } from '@anilkumarthakur/collection-js'
 
 Collection.range(1, 5).all()
 // => [1, 2, 3, 4, 5]

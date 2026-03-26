@@ -7,7 +7,7 @@ Dumps the collection's items and halts execution of the script (throws an Error)
 **Simple Example:**
 
 ```typescript
-import collect from '@anilkumarthakur/collection'
+import collect from '@anilkumarthakur/collection-js'
 
 const items = collect([1, 2, 3])
 

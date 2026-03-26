@@ -4,24 +4,24 @@ The package is published natively on npm and requires **Node.js 16+**.
 
 ## Package Managers
 
-Install the `@anilkumarthakur/collection` package via your preferred package manager:
+Install the `@anilkumarthakur/collection-js` package via your preferred package manager:
 
 ::: code-group
 
 ```bash [npm]
-npm install @anilkumarthakur/collection
+npm install @anilkumarthakur/collection-js
 ```
 
 ```bash [yarn]
-yarn add @anilkumarthakur/collection
+yarn add @anilkumarthakur/collection-js
 ```
 
 ```bash [pnpm]
-pnpm add @anilkumarthakur/collection
+pnpm add @anilkumarthakur/collection-js
 ```
 
 ```bash [bun]
-bun add @anilkumarthakur/collection
+bun add @anilkumarthakur/collection-js
 ```
 
 :::
@@ -35,7 +35,7 @@ There are three ways to import and use the library depending on your architectur
 The most common way to create a collection is using the default `collect` helper.
 
 ```typescript
-import collect from '@anilkumarthakur/collection'
+import collect from '@anilkumarthakur/collection-js'
 
 const items = collect([1, 2, 3])
 ```
@@ -45,7 +45,7 @@ const items = collect([1, 2, 3])
 If you prefer instantiating objects directly via `new`:
 
 ```typescript
-import { Collection } from '@anilkumarthakur/collection'
+import { Collection } from '@anilkumarthakur/collection-js'
 
 const items = new Collection([1, 2, 3])
 ```
@@ -57,7 +57,7 @@ If you only need a single function and don't want the entire Collection class in
 Note that standalone methods are executed immediately and do not return chainable instances unless you re-wrap them.
 
 ```typescript
-import { pluck } from '@anilkumarthakur/collection/methods'
+import { pluck } from '@anilkumarthakur/collection-js/methods'
 
 const names = pluck([{ name: 'Alice' }, { name: 'Bob' }], 'name')
 // => ['Alice', 'Bob']
