@@ -5,7 +5,10 @@ const config: Config.InitialOptions = {
     testEnvironment: 'node',
     transform: {
         '^.+\\.tsx?$': ['ts-jest', {
-            tsconfig: 'tsconfig.json',
+            tsconfig: {
+                declaration: false,
+                rootDir: '.',
+            },
         }],
     },
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
