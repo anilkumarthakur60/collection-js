@@ -1,4 +1,4 @@
-import type { PlainObject } from './types'
+import type { PlainObject } from '@/support/types'
 
 export function isPlainObject(value: unknown): value is PlainObject {
   if (value === null || typeof value !== 'object') return false

@@ -1,7 +1,7 @@
 import { collect } from '../src'
 
 describe('crossJoin', () => {
-  it('computes cartesian product with one array', () => {
+  it('computes Cartesian product with one array', () => {
     const result = collect([1, 2]).crossJoin(['a', 'b'])
     expect(result.all()).toEqual([
       [1, 'a'],
@@ -11,7 +11,7 @@ describe('crossJoin', () => {
     ])
   })
 
-  it('computes cartesian product with two arrays', () => {
+  it('computes Cartesian product with two arrays', () => {
     const result = collect([1, 2]).crossJoin(['a', 'b'], [true, false])
     expect(result.all()).toEqual([
       [1, 'a', true],

@@ -1,3 +1,3 @@
-export { AsyncCollection } from './AsyncCollection'
-export type { AsyncSource } from './AsyncCollection'
-export { mapWithConcurrency } from './concurrent'
+export { AsyncCollection } from '@/async/AsyncCollection'
+export type { AsyncSource } from '@/async/AsyncCollection'
+export { mapWithConcurrency } from '@/async/concurrent'

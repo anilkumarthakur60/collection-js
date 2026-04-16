@@ -1,4 +1,4 @@
-import type { Predicate } from '../support/types'
+import type { Predicate } from '@/support/types'
 
 export function chunkOf<T>(items: readonly T[], size: number): T[][] {
   if (size <= 0) return []

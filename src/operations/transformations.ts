@@ -1,4 +1,4 @@
-import type { ClassConstructor } from '../support/types'
+import type { ClassConstructor } from '@/support/types'
 
 export function mapOf<T, R>(items: readonly T[], fn: (item: T, index: number) => R): R[] {
   const out: R[] = new Array(items.length)

@@ -1,4 +1,4 @@
-export { CollectionException } from './CollectionException'
-export { ItemNotFoundException } from './ItemNotFoundException'
-export { MultipleItemsFoundException } from './MultipleItemsFoundException'
-export { UnexpectedValueException } from './UnexpectedValueException'
+export { CollectionException } from '@/exceptions/CollectionException'
+export { ItemNotFoundException } from '@/exceptions/ItemNotFoundException'
+export { MultipleItemsFoundException } from '@/exceptions/MultipleItemsFoundException'
+export { UnexpectedValueException } from '@/exceptions/UnexpectedValueException'

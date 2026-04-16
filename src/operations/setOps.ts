@@ -1,5 +1,5 @@
-import { deepEqual, looseEqual } from '../support/deepEqual'
-import { isObjectLike } from '../support/isObject'
+import { deepEqual, looseEqual } from '@/support/deepEqual'
+import { isObjectLike } from '@/support/isObject'
 
 export function diffOf<T>(items: readonly T[], other: readonly T[]): T[] {
   return items.filter((item) => !other.some((o) => looseEqual(item, o)))

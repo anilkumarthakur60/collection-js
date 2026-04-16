@@ -5,4 +5,4 @@ export {
   flushMacros,
   applyMacroable,
   type MacroableTarget
-} from './Macroable'
+} from '@/macros/Macroable'

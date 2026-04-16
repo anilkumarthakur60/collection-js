@@ -1,5 +1,5 @@
-import { deepEqual, looseEqual } from './deepEqual'
-import type { Operator } from './types'
+import { deepEqual, looseEqual } from '@/support/deepEqual'
+import type { Operator } from '@/support/types'
 
 /** Compare two values using a Laravel-style operator string. */
 export function operatorForWhere(retrieved: unknown, operator: Operator, value: unknown): boolean {

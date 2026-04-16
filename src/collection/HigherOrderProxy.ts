@@ -1,4 +1,4 @@
-import { dataGet } from '../support/dataGet'
+import { dataGet } from '@/support/dataGet'
 
 /**
  * Methods that support higher-order messages on a collection.

@@ -1,4 +1,4 @@
-import { isPlainObject } from '../support/isObject'
+import { isPlainObject } from '@/support/isObject'
 
 /**
  * Pure-style mutation helpers — they always return a new array. Helpers that

@@ -1,5 +1,5 @@
-import { valueRetriever, type RetrieverInput } from '../support/valueRetriever'
-import type { Comparator, SortDirection } from '../support/types'
+import { valueRetriever, type RetrieverInput } from '@/support/valueRetriever'
+import type { Comparator, SortDirection } from '@/support/types'
 
 const defaultCompare: Comparator<unknown> = (a, b) => {
   if (a === b) return 0

@@ -1,4 +1,4 @@
-import { isPlainObject } from './isObject'
+import { isPlainObject } from '@/support/isObject'
 
 export function deepClone<T>(value: T): T {
   if (value === null || typeof value !== 'object') return value

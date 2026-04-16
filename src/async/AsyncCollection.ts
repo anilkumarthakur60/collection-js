@@ -1,5 +1,5 @@
-import { Collection } from '../collection/Collection'
-import { mapWithConcurrency } from './concurrent'
+import { Collection } from '@/collection/Collection'
+import { mapWithConcurrency } from '@/async/concurrent'
 
 export type AsyncSource<T> = AsyncIterable<T> | Iterable<T> | (() => AsyncIterable<T> | Iterable<T>)
 
