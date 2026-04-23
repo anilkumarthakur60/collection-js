@@ -305,6 +305,20 @@ collect([{ age: 10 }, { age: 20 }]).whereIn('age', [20, 30])
 collect([{ name: 'Anil' }, { name: null }]).whereNull('name')
 ```
 
+### `whereLike` / `whereNotLike`
+
+Filters by an SQL-`LIKE` pattern where `%` matches any run of characters and `_` matches exactly one. Matching is case-insensitive unless a third `caseSensitive` argument of `true` is passed. `whereNotLike` returns the complement.
+
+```typescript
+collect([{ name: 'Alice Smith' }, { name: 'Bob Jones' }]).whereLike('name', '%Smith')
+// => [{ name: 'Alice Smith' }]
+
+collect([{ sku: 'A1' }, { sku: 'A12' }]).whereLike('sku', 'A_')
+// => [{ sku: 'A1' }]
+
+collect(users).whereLike('email', 'alice%', true) // case-sensitive
+```
+
 ### `whereInstanceOf`
 
 Filters instances mapped locally by specific TypeScript/ES6 classes.
