@@ -30,7 +30,7 @@ export interface FirstWhereSpec {
 export function buildFirstWhereSpec(
   operatorOrValue: Operator | unknown,
   value: unknown,
-  argCount: number,
+  argCount: number
 ): FirstWhereSpec {
   if (argCount <= 1) return { truthy: true, operator: '=', value: undefined }
   if (argCount >= 3 && isOperator(operatorOrValue)) {
@@ -42,10 +42,12 @@ export function buildFirstWhereSpec(
 export function firstWhereOf<T>(
   items: readonly T[],
   key: keyof T | string,
-  spec: FirstWhereSpec,
+  spec: FirstWhereSpec
 ): T | undefined {
   if (spec.truthy) return items.find((item) => Boolean(dataGet(item, String(key))))
-  return items.find((item) => operatorForWhere(dataGet(item, String(key)), spec.operator, spec.value))
+  return items.find((item) =>
+    operatorForWhere(dataGet(item, String(key)), spec.operator, spec.value)
+  )
 }
 
 export function lastOf<T>(items: readonly T[], predicate?: Predicate<T>): T | undefined {
@@ -70,7 +72,7 @@ export function valueOfFirst<T, R = unknown>(items: readonly T[], key: string): 
 export function soleOf<T>(
   items: readonly T[],
   predicate?: Predicate<T> | keyof T | string,
-  expected?: unknown,
+  expected?: unknown
 ): T {
   let filter: Predicate<T>
   if (predicate === undefined) {
@@ -91,7 +93,11 @@ export function soleOf<T>(
   return matched[0]
 }
 
-function resolveItem<T>(items: readonly T[], target: T | string | Predicate<T>, strict: boolean): number {
+function resolveItem<T>(
+  items: readonly T[],
+  target: T | string | Predicate<T>,
+  strict: boolean
+): number {
   if (typeof target === 'function') {
     return items.findIndex(target as Predicate<T>)
   }
@@ -99,13 +105,21 @@ function resolveItem<T>(items: readonly T[], target: T | string | Predicate<T>, 
   return items.findIndex((item) => looseEqual(item, target))
 }
 
-export function afterOf<T>(items: readonly T[], target: T | string | Predicate<T>, strict = false): T | undefined {
+export function afterOf<T>(
+  items: readonly T[],
+  target: T | string | Predicate<T>,
+  strict = false
+): T | undefined {
   const idx = resolveItem(items, target, strict)
   if (idx === -1 || idx === items.length - 1) return undefined
   return items[idx + 1]
 }
 
-export function beforeOf<T>(items: readonly T[], target: T | string | Predicate<T>, strict = false): T | undefined {
+export function beforeOf<T>(
+  items: readonly T[],
+  target: T | string | Predicate<T>,
+  strict = false
+): T | undefined {
   const idx = resolveItem(items, target, strict)
   if (idx <= 0) return undefined
   return items[idx - 1]
@@ -113,12 +127,16 @@ export function beforeOf<T>(items: readonly T[], target: T | string | Predicate<
 
 export function hasKey<T>(items: readonly T[], keys: readonly (keyof T | string)[]): boolean {
   return keys.every((key) =>
-    items.some((item) => isObjectLike(item) && Object.prototype.hasOwnProperty.call(item, String(key))),
+    items.some(
+      (item) => isObjectLike(item) && Object.prototype.hasOwnProperty.call(item, String(key))
+    )
   )
 }
 
 export function hasAnyKey<T>(items: readonly T[], keys: readonly (keyof T | string)[]): boolean {
   return keys.some((key) =>
-    items.some((item) => isObjectLike(item) && Object.prototype.hasOwnProperty.call(item, String(key))),
+    items.some(
+      (item) => isObjectLike(item) && Object.prototype.hasOwnProperty.call(item, String(key))
+    )
   )
 }

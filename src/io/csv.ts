@@ -23,7 +23,10 @@ export interface CsvSerializeOptions {
  * delimiters, escaped quotes (`""`), and \r\n / \n line endings. Returns
  * either string[][] (when `header` is false) or `Record<string, string>[]`.
  */
-export function parseCsv(input: string, options: CsvParseOptions = {}): string[][] | Record<string, string | number | boolean | null>[] {
+export function parseCsv(
+  input: string,
+  options: CsvParseOptions = {}
+): string[][] | Record<string, string | number | boolean | null>[] {
   const delimiter = options.delimiter ?? ','
   const quote = options.quote ?? '"'
   const useQuote = quote.length > 0
@@ -38,7 +41,11 @@ export function parseCsv(input: string, options: CsvParseOptions = {}): string[]
     const ch = input[i]
     if (inQuotes) {
       if (useQuote && ch === quote) {
-        if (input[i + 1] === quote) { field += quote; i += 2; continue }
+        if (input[i + 1] === quote) {
+          field += quote
+          i += 2
+          continue
+        }
         inQuotes = false
         i++
         continue
@@ -89,7 +96,7 @@ export function parseCsv(input: string, options: CsvParseOptions = {}): string[]
   return rest.map((r) => {
     const obj: Record<string, string | number | boolean | null> = {}
     for (let j = 0; j < headerRow.length; j++) {
-      obj[headerRow[j]] = options.raw ? r[j] ?? '' : coerce(r[j] ?? '')
+      obj[headerRow[j]] = options.raw ? (r[j] ?? '') : coerce(r[j] ?? '')
     }
     return obj
   })
@@ -114,7 +121,7 @@ function coerce(value: string): string | number | boolean | null {
  */
 export function toCsv(
   rows: ReadonlyArray<Record<string, unknown>> | ReadonlyArray<readonly unknown[]>,
-  options: CsvSerializeOptions = {},
+  options: CsvSerializeOptions = {}
 ): string {
   const delimiter = options.delimiter ?? ','
   const eol = options.eol ?? '\n'
@@ -126,7 +133,8 @@ export function toCsv(
   if (isObjectRow) {
     const objectRows = rows as ReadonlyArray<Record<string, unknown>>
     const columns = options.columns ?? collectColumns(objectRows)
-    if (options.header !== false) out.push(columns.map((c) => csvField(c, delimiter)).join(delimiter))
+    if (options.header !== false)
+      out.push(columns.map((c) => csvField(c, delimiter)).join(delimiter))
     for (const row of objectRows) {
       out.push(columns.map((c) => csvField(stringify(row[c]), delimiter)).join(delimiter))
     }
@@ -156,7 +164,12 @@ function stringify(value: unknown): string {
 }
 
 function csvField(value: string, delimiter: string): string {
-  if (value.includes(delimiter) || value.includes('"') || value.includes('\n') || value.includes('\r')) {
+  if (
+    value.includes(delimiter) ||
+    value.includes('"') ||
+    value.includes('\n') ||
+    value.includes('\r')
+  ) {
     return `"${value.replace(/"/g, '""')}"`
   }
   return value

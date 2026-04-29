@@ -4,7 +4,7 @@ export function implodeOf<T>(
   items: readonly T[],
   glueOrFormatter: string | ((item: T, index: number) => string),
   separatorIfFormatter?: string,
-  key?: string,
+  key?: string
 ): string {
   if (typeof glueOrFormatter === 'function') {
     const sep = separatorIfFormatter ?? ''

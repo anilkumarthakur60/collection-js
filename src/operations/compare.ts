@@ -3,11 +3,7 @@ import { deepEqual, looseEqual } from '../support/deepEqual'
 import { isObjectLike } from '../support/isObject'
 import type { Predicate } from '../support/types'
 
-export type ContainsArg<T> =
-  | T
-  | Predicate<T>
-  | Partial<T>
-  | { [key: string]: unknown }
+export type ContainsArg<T> = T | Predicate<T> | Partial<T> | { [key: string]: unknown }
 
 function matchesShape(item: unknown, shape: Record<string, unknown>): boolean {
   if (!isObjectLike(item)) return false
@@ -33,7 +29,9 @@ export function containsOf<T>(items: readonly T[], spec: ContainsSpec<T>, strict
     case 'keyValue':
       return items.some((item) => {
         const got = dataGet(item, spec.key)
-        return strict ? got === spec.value || deepEqual(got, spec.value) : looseEqual(got, spec.value)
+        return strict
+          ? got === spec.value || deepEqual(got, spec.value)
+          : looseEqual(got, spec.value)
       })
     case 'shape':
       return items.some((item) => matchesShape(item, spec.shape))
@@ -42,7 +40,11 @@ export function containsOf<T>(items: readonly T[], spec: ContainsSpec<T>, strict
   }
 }
 
-export function doesntContainOf<T>(items: readonly T[], spec: ContainsSpec<T>, strict = false): boolean {
+export function doesntContainOf<T>(
+  items: readonly T[],
+  spec: ContainsSpec<T>,
+  strict = false
+): boolean {
   return !containsOf(items, spec, strict)
 }
 
@@ -50,9 +52,16 @@ export function doesntContainOf<T>(items: readonly T[], spec: ContainsSpec<T>, s
  * Resolve user-supplied arguments into a normalised ContainsSpec.
  * Used by both Collection.contains/doesntContain and their lazy counterparts.
  */
-export function resolveContainsSpec<T>(target: ContainsArg<T>, value: unknown, hasValue: boolean): ContainsSpec<T> {
+export function resolveContainsSpec<T>(
+  target: ContainsArg<T>,
+  value: unknown,
+  hasValue: boolean
+): ContainsSpec<T> {
   if (typeof target === 'function') return { kind: 'predicate', predicate: target as Predicate<T> }
-  if (hasValue && (typeof target === 'string' || typeof target === 'number' || typeof target === 'symbol')) {
+  if (
+    hasValue &&
+    (typeof target === 'string' || typeof target === 'number' || typeof target === 'symbol')
+  ) {
     return { kind: 'keyValue', key: String(target), value }
   }
   if (isObjectLike(target) && !Array.isArray(target)) {
@@ -74,7 +83,7 @@ export function someOf<T>(items: readonly T[], predicate: Predicate<T>): boolean
 export function searchOf<T>(
   items: readonly T[],
   target: T | Predicate<T>,
-  strict = false,
+  strict = false
 ): number | false {
   if (typeof target === 'function') {
     const idx = items.findIndex(target as Predicate<T>)

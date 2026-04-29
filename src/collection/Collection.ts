@@ -12,7 +12,7 @@ import type {
   Comparator,
   Operator,
   Predicate,
-  SortDirection,
+  SortDirection
 } from '../support/types'
 import type { RetrieverInput } from '../support/valueRetriever'
 import { dataGet } from '../support/dataGet'
@@ -29,7 +29,7 @@ type RI<T, R = unknown> = RetrieverInput<T, R>
  *   coll.sum.votes  // property access
  */
 function callableHigherOrder<R>(
-  impl: (by?: ((item: unknown, idx: number) => R) | string) => R,
+  impl: (by?: ((item: unknown, idx: number) => R) | string) => R
 ): unknown {
   const fn = function (this: unknown, by?: unknown): R {
     if (typeof by === 'function') return impl(by as (item: unknown, idx: number) => R)
@@ -46,7 +46,7 @@ function callableHigherOrder<R>(
       if (typeof a === 'function') return impl(a as (item: unknown, idx: number) => R)
       if (typeof a === 'string') return impl(a)
       return impl()
-    },
+    }
   })
 }
 
@@ -128,27 +128,29 @@ export class Collection<T> implements Enumerable<T> {
   get sum(): (by?: RI<T, number> | string) => number {
     const items = this.items
     return callableHigherOrder<number>((by) => ops.sumOf(items, by as RI<T, number>)) as (
-      by?: RI<T, number> | string,
+      by?: RI<T, number> | string
     ) => number
   }
   get average(): (by?: RI<T, number> | string) => number {
     const items = this.items
     return callableHigherOrder<number>((by) => ops.averageOf(items, by as RI<T, number>)) as (
-      by?: RI<T, number> | string,
+      by?: RI<T, number> | string
     ) => number
   }
-  get avg(): (by?: RI<T, number> | string) => number { return this.average }
+  get avg(): (by?: RI<T, number> | string) => number {
+    return this.average
+  }
   get max(): (by?: RI<T, number> | string) => number | undefined {
     const items = this.items
-    return callableHigherOrder<number | undefined>((by) => ops.maxOf(items, by as RI<T, number>)) as (
-      by?: RI<T, number> | string,
-    ) => number | undefined
+    return callableHigherOrder<number | undefined>((by) =>
+      ops.maxOf(items, by as RI<T, number>)
+    ) as (by?: RI<T, number> | string) => number | undefined
   }
   get min(): (by?: RI<T, number> | string) => number | undefined {
     const items = this.items
-    return callableHigherOrder<number | undefined>((by) => ops.minOf(items, by as RI<T, number>)) as (
-      by?: RI<T, number> | string,
-    ) => number | undefined
+    return callableHigherOrder<number | undefined>((by) =>
+      ops.minOf(items, by as RI<T, number>)
+    ) as (by?: RI<T, number> | string) => number | undefined
   }
 
   // ─── Retrieval & access ──────────────────────────────────────────────────────
@@ -345,7 +347,9 @@ export class Collection<T> implements Enumerable<T> {
     return new Collection(this.items.filter((item): item is NonNullable<T> => item != null))
   }
 
-  whereInstanceOf<R>(Ctor: ClassConstructor<R> | (abstract new (...args: never[]) => R)): Collection<R> {
+  whereInstanceOf<R>(
+    Ctor: ClassConstructor<R> | (abstract new (...args: never[]) => R)
+  ): Collection<R> {
     return new Collection(ops.whereInstanceOfOf<T, R>(this.items, Ctor as ClassConstructor<R>))
   }
 
@@ -360,15 +364,22 @@ export class Collection<T> implements Enumerable<T> {
 
   mapSpread<R>(fn: (...args: T extends readonly unknown[] ? T : never) => R): Collection<R> {
     return new Collection(
-      ops.mapSpreadOf(this.items as unknown as readonly (readonly unknown[])[], fn as (...args: unknown[]) => R) as R[],
+      ops.mapSpreadOf(
+        this.items as unknown as readonly (readonly unknown[])[],
+        fn as (...args: unknown[]) => R
+      ) as R[]
     )
   }
 
-  mapToGroups<K extends PropertyKey, V>(fn: (item: T, index: number) => readonly [K, V]): Record<K, V[]> {
+  mapToGroups<K extends PropertyKey, V>(
+    fn: (item: T, index: number) => readonly [K, V]
+  ): Record<K, V[]> {
     return ops.mapToGroupsOf(this.items, fn)
   }
 
-  mapWithKeys<K extends PropertyKey, V>(fn: (item: T, index: number) => readonly [K, V]): Record<K, V> {
+  mapWithKeys<K extends PropertyKey, V>(
+    fn: (item: T, index: number) => readonly [K, V]
+  ): Record<K, V> {
     return ops.mapWithKeysOf(this.items, fn)
   }
 
@@ -439,16 +450,20 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   sortKeys(): Collection<T> {
-    return new Collection(ops.sortKeysOf(this.items as unknown as readonly object[]) as unknown as T[])
+    return new Collection(
+      ops.sortKeysOf(this.items as unknown as readonly object[]) as unknown as T[]
+    )
   }
 
   sortKeysDesc(): Collection<T> {
-    return new Collection(ops.sortKeysOf(this.items as unknown as readonly object[], true) as unknown as T[])
+    return new Collection(
+      ops.sortKeysOf(this.items as unknown as readonly object[], true) as unknown as T[]
+    )
   }
 
   sortKeysUsing(comparator: (a: string, b: string) => number): Collection<T> {
     return new Collection(
-      ops.sortKeysUsingOf(this.items as unknown as readonly object[], comparator) as unknown as T[],
+      ops.sortKeysUsingOf(this.items as unknown as readonly object[], comparator) as unknown as T[]
     )
   }
 
@@ -461,13 +476,27 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   // ─── Aggregation aliases on the instance ─────────────────────────────────────
-  sumBy(by?: RI<T, number>): number { return ops.sumOf(this.items, by) }
-  averageBy(by?: RI<T, number>): number { return ops.averageOf(this.items, by) }
-  avgBy(by?: RI<T, number>): number { return ops.averageOf(this.items, by) }
-  maxBy(by?: RI<T, number>): number | undefined { return ops.maxOf(this.items, by) }
-  minBy(by?: RI<T, number>): number | undefined { return ops.minOf(this.items, by) }
-  median(by?: RI<T, number>): number | undefined { return ops.medianOf(this.items, by) }
-  mode(by?: RI<T>): unknown[] | undefined { return ops.modeOf(this.items, by) }
+  sumBy(by?: RI<T, number>): number {
+    return ops.sumOf(this.items, by)
+  }
+  averageBy(by?: RI<T, number>): number {
+    return ops.averageOf(this.items, by)
+  }
+  avgBy(by?: RI<T, number>): number {
+    return ops.averageOf(this.items, by)
+  }
+  maxBy(by?: RI<T, number>): number | undefined {
+    return ops.maxOf(this.items, by)
+  }
+  minBy(by?: RI<T, number>): number | undefined {
+    return ops.minOf(this.items, by)
+  }
+  median(by?: RI<T, number>): number | undefined {
+    return ops.medianOf(this.items, by)
+  }
+  mode(by?: RI<T>): unknown[] | undefined {
+    return ops.modeOf(this.items, by)
+  }
   percentage(predicate: Predicate<T>, precision: number = 2): number {
     return ops.percentageOf(this.items, predicate, precision)
   }
@@ -477,7 +506,9 @@ export class Collection<T> implements Enumerable<T> {
     return new Collection(ops.chunkOf(this.items, size).map((c) => new Collection(c)))
   }
 
-  chunkWhile(predicate: (item: T, key: number, chunk: readonly T[]) => boolean): Collection<Collection<T>> {
+  chunkWhile(
+    predicate: (item: T, key: number, chunk: readonly T[]) => boolean
+  ): Collection<Collection<T>> {
     return new Collection(ops.chunkWhileOf(this.items, predicate).map((c) => new Collection(c)))
   }
 
@@ -494,7 +525,7 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   partition<S extends T>(
-    predicate: (item: T, index: number) => item is S,
+    predicate: (item: T, index: number) => item is S
   ): [Collection<S>, Collection<Exclude<T, S>>]
   partition(predicate: (item: T, index: number) => unknown): [Collection<T>, Collection<T>]
   partition(predicate: (item: T, index: number) => unknown): unknown {
@@ -523,13 +554,27 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   // ─── Slice / take / skip ────────────────────────────────────────────────────
-  take(count: number): Collection<T> { return new Collection(ops.takeOf(this.items, count)) }
-  takeUntil(target: T | Predicate<T>): Collection<T> { return new Collection(ops.takeUntilOf(this.items, target)) }
-  takeWhile(predicate: Predicate<T>): Collection<T> { return new Collection(ops.takeWhileOf(this.items, predicate)) }
-  skip(count: number): Collection<T> { return new Collection(ops.skipOf(this.items, count)) }
-  skipUntil(target: T | Predicate<T>): Collection<T> { return new Collection(ops.skipUntilOf(this.items, target)) }
-  skipWhile(predicate: Predicate<T>): Collection<T> { return new Collection(ops.skipWhileOf(this.items, predicate)) }
-  slice(start: number, length?: number): Collection<T> { return new Collection(ops.sliceOf(this.items, start, length)) }
+  take(count: number): Collection<T> {
+    return new Collection(ops.takeOf(this.items, count))
+  }
+  takeUntil(target: T | Predicate<T>): Collection<T> {
+    return new Collection(ops.takeUntilOf(this.items, target))
+  }
+  takeWhile(predicate: Predicate<T>): Collection<T> {
+    return new Collection(ops.takeWhileOf(this.items, predicate))
+  }
+  skip(count: number): Collection<T> {
+    return new Collection(ops.skipOf(this.items, count))
+  }
+  skipUntil(target: T | Predicate<T>): Collection<T> {
+    return new Collection(ops.skipUntilOf(this.items, target))
+  }
+  skipWhile(predicate: Predicate<T>): Collection<T> {
+    return new Collection(ops.skipWhileOf(this.items, predicate))
+  }
+  slice(start: number, length?: number): Collection<T> {
+    return new Collection(ops.sliceOf(this.items, start, length))
+  }
 
   // ─── Mutations ──────────────────────────────────────────────────────────────
   push(...values: T[]): this {
@@ -567,7 +612,9 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   forget(keys: number | string | readonly (number | string)[]): this {
-    const list = Array.isArray(keys) ? (keys as readonly (number | string)[]) : [keys as number | string]
+    const list = Array.isArray(keys)
+      ? (keys as readonly (number | string)[])
+      : [keys as number | string]
     this.items = ops.forgetOf(this.items, list)
     return this
   }
@@ -606,37 +653,64 @@ export class Collection<T> implements Enumerable<T> {
   union(other: readonly T[] | Collection<T>): Collection<T> {
     const list = other instanceof Collection ? other.toArray() : other
     if (this.items.every(isPlainObject)) {
-      return new Collection(ops.unionObjectsOf(this.items as unknown as readonly object[], list as readonly object[]) as unknown as T[])
+      return new Collection(
+        ops.unionObjectsOf(
+          this.items as unknown as readonly object[],
+          list as readonly object[]
+        ) as unknown as T[]
+      )
     }
     return new Collection(ops.unionOf(this.items, list))
   }
 
   // ─── Set operations ──────────────────────────────────────────────────────────
   diff(other: readonly T[] | Collection<T>): Collection<T> {
-    return new Collection(ops.diffOf(this.items, other instanceof Collection ? other.toArray() : other))
+    return new Collection(
+      ops.diffOf(this.items, other instanceof Collection ? other.toArray() : other)
+    )
   }
 
   diffAssoc(other: readonly Partial<T>[] | Collection<Partial<T>>): Collection<T> {
-    return new Collection(ops.diffAssocOf(this.items, other instanceof Collection ? other.toArray() : other))
+    return new Collection(
+      ops.diffAssocOf(this.items, other instanceof Collection ? other.toArray() : other)
+    )
   }
 
-  diffAssocUsing(other: readonly T[] | Collection<T>, comparator: (a: T, b: T) => number): Collection<T> {
+  diffAssocUsing(
+    other: readonly T[] | Collection<T>,
+    comparator: (a: T, b: T) => number
+  ): Collection<T> {
     return new Collection(
-      ops.diffAssocUsingOf(this.items, other instanceof Collection ? other.toArray() : other, comparator),
+      ops.diffAssocUsingOf(
+        this.items,
+        other instanceof Collection ? other.toArray() : other,
+        comparator
+      )
     )
   }
 
   diffKeys(otherKeys: readonly string[]): Collection<T> {
-    return new Collection(ops.diffKeysOf(this.items as unknown as readonly object[], otherKeys) as unknown as T[])
+    return new Collection(
+      ops.diffKeysOf(this.items as unknown as readonly object[], otherKeys) as unknown as T[]
+    )
   }
 
   intersect(other: readonly T[] | Collection<T>): Collection<T> {
-    return new Collection(ops.intersectOf(this.items, other instanceof Collection ? other.toArray() : other))
+    return new Collection(
+      ops.intersectOf(this.items, other instanceof Collection ? other.toArray() : other)
+    )
   }
 
-  intersectUsing(other: readonly T[] | Collection<T>, comparator: (a: T, b: T) => number): Collection<T> {
+  intersectUsing(
+    other: readonly T[] | Collection<T>,
+    comparator: (a: T, b: T) => number
+  ): Collection<T> {
     return new Collection(
-      ops.intersectUsingOf(this.items, other instanceof Collection ? other.toArray() : other, comparator),
+      ops.intersectUsingOf(
+        this.items,
+        other instanceof Collection ? other.toArray() : other,
+        comparator
+      )
     )
   }
 
@@ -644,39 +718,53 @@ export class Collection<T> implements Enumerable<T> {
     return new Collection(
       ops.intersectAssocOf(
         this.items as unknown as readonly object[],
-        (other instanceof Collection ? other.toArray() : other) as readonly Partial<object>[],
-      ) as unknown as T[],
+        (other instanceof Collection ? other.toArray() : other) as readonly Partial<object>[]
+      ) as unknown as T[]
     )
   }
 
   intersectAssocUsing(
     other: Record<string, unknown>,
-    comparator: (a: string, b: string) => number,
+    comparator: (a: string, b: string) => number
   ): Collection<T> {
     return new Collection(
-      ops.intersectAssocUsingOf(this.items as unknown as readonly object[], other, comparator) as unknown as T[],
+      ops.intersectAssocUsingOf(
+        this.items as unknown as readonly object[],
+        other,
+        comparator
+      ) as unknown as T[]
     )
   }
 
   intersectByKeys(keys: readonly string[]): Collection<T> {
-    return new Collection(ops.intersectByKeysOf(this.items as unknown as readonly object[], keys) as unknown as T[])
+    return new Collection(
+      ops.intersectByKeysOf(this.items as unknown as readonly object[], keys) as unknown as T[]
+    )
   }
 
   crossJoin<U>(...others: readonly (readonly U[])[]): Collection<(T | U)[]> {
     const sources: readonly (T | U)[][] = [
       this.items.slice() as (T | U)[],
-      ...others.map((o) => [...o] as (T | U)[]),
+      ...others.map((o) => [...o] as (T | U)[])
     ]
     return new Collection<(T | U)[]>(ops.crossJoinOf<T | U>(...sources))
   }
 
   // ─── Unique & duplicates ─────────────────────────────────────────────────────
-  unique(by?: RI<T>): Collection<T> { return new Collection(ops.uniqueOf(this.items, by, false)) }
-  uniqueStrict(by?: RI<T>): Collection<T> { return new Collection(ops.uniqueStrictOf(this.items, by)) }
+  unique(by?: RI<T>): Collection<T> {
+    return new Collection(ops.uniqueOf(this.items, by, false))
+  }
+  uniqueStrict(by?: RI<T>): Collection<T> {
+    return new Collection(ops.uniqueStrictOf(this.items, by))
+  }
 
   duplicates(by?: RI<T>): Record<number, T> {
     const accessor = by !== undefined ? valueRetriever<T, unknown>(by) : undefined
-    const map = ops.duplicatesOf(this.items, accessor ? (item) => accessor(item, 0) : undefined, false)
+    const map = ops.duplicatesOf(
+      this.items,
+      accessor ? (item) => accessor(item, 0) : undefined,
+      false
+    )
     const out: Record<number, T> = {}
     for (const [idx, item] of map) out[idx] = item
     return out
@@ -684,33 +772,49 @@ export class Collection<T> implements Enumerable<T> {
 
   duplicatesStrict(by?: RI<T>): Record<number, T> {
     const accessor = by !== undefined ? valueRetriever<T, unknown>(by) : undefined
-    const map = ops.duplicatesOf(this.items, accessor ? (item) => accessor(item, 0) : undefined, true)
+    const map = ops.duplicatesOf(
+      this.items,
+      accessor ? (item) => accessor(item, 0) : undefined,
+      true
+    )
     const out: Record<number, T> = {}
     for (const [idx, item] of map) out[idx] = item
     return out
   }
 
   // ─── Object key operations ──────────────────────────────────────────────────
-  keys(): Collection<string> { return new Collection(ops.keysOf(this.items)) }
-  values(): Collection<T> { return new Collection([...this.items]) }
+  keys(): Collection<string> {
+    return new Collection(ops.keysOf(this.items))
+  }
+  values(): Collection<T> {
+    return new Collection([...this.items])
+  }
 
   only(keys: readonly string[]): Collection<Partial<T>> {
-    return new Collection(ops.onlyOf(this.items as unknown as readonly object[], keys) as Partial<T>[])
+    return new Collection(
+      ops.onlyOf(this.items as unknown as readonly object[], keys) as Partial<T>[]
+    )
   }
   except(keys: readonly string[]): Collection<Partial<T>> {
-    return new Collection(ops.exceptOf(this.items as unknown as readonly object[], keys) as Partial<T>[])
+    return new Collection(
+      ops.exceptOf(this.items as unknown as readonly object[], keys) as Partial<T>[]
+    )
   }
   select<K extends keyof T>(keys: K | readonly K[]): Collection<Pick<T, K>> {
     return new Collection(
       ops.selectOf<T extends object ? T : never, K>(
         this.items as unknown as readonly (T extends object ? T : never)[],
-        keys,
-      ) as unknown as Pick<T, K>[],
+        keys
+      ) as unknown as Pick<T, K>[]
     )
   }
 
-  dot(): Record<string, unknown> { return ops.dotOf(this.items as readonly unknown[]) }
-  undot(): Collection<Record<string, unknown>> { return new Collection([ops.undotOf(this.items as readonly unknown[])]) }
+  dot(): Record<string, unknown> {
+    return ops.dotOf(this.items as readonly unknown[])
+  }
+  undot(): Collection<Record<string, unknown>> {
+    return new Collection([ops.undotOf(this.items as readonly unknown[])])
+  }
 
   // ─── Iteration helpers ──────────────────────────────────────────────────────
   each(callback: (item: T, index: number) => void | false): this {
@@ -722,7 +826,11 @@ export class Collection<T> implements Enumerable<T> {
 
   eachSpread(callback: (...args: T extends readonly unknown[] ? T : never) => void | false): this {
     for (let i = 0; i < this.items.length; i++) {
-      if (callback(...(this.items[i] as unknown as T extends readonly unknown[] ? T : never)) === false) break
+      if (
+        callback(...(this.items[i] as unknown as T extends readonly unknown[] ? T : never)) ===
+        false
+      )
+        break
     }
     return this
   }
@@ -737,7 +845,8 @@ export class Collection<T> implements Enumerable<T> {
   reduce(fn: (carry: T, item: T, index: number) => T): T
   reduce<R>(fn: (carry: R | T, item: T, index: number) => R | T, initial?: R): R | T {
     if (initial === undefined) {
-      if (this.items.length === 0) throw new TypeError('Reduce of empty collection with no initial value')
+      if (this.items.length === 0)
+        throw new TypeError('Reduce of empty collection with no initial value')
       let acc: T = this.items[0]
       for (let i = 1; i < this.items.length; i++) acc = fn(acc as T, this.items[i], i) as T
       return acc
@@ -752,8 +861,12 @@ export class Collection<T> implements Enumerable<T> {
     return ops.reduceSpreadOf(this.items, fn, ...initials)
   }
 
-  pipe<R>(callback: (collection: this) => R): R { return callback(this) }
-  pipeInto<R>(Ctor: ClassConstructor<R, [this]>): R { return new Ctor(this) }
+  pipe<R>(callback: (collection: this) => R): R {
+    return callback(this)
+  }
+  pipeInto<R>(Ctor: ClassConstructor<R, [this]>): R {
+    return new Ctor(this)
+  }
   pipeThrough(pipes: readonly ((value: unknown) => unknown)[]): unknown {
     return pipes.reduce<unknown>((carry, pipe) => pipe(carry), this)
   }
@@ -764,7 +877,10 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   // ─── String operations ──────────────────────────────────────────────────────
-  implode(glueOrFormatter: string | ((item: T, index: number) => string), keyOrSeparator?: string): string {
+  implode(
+    glueOrFormatter: string | ((item: T, index: number) => string),
+    keyOrSeparator?: string
+  ): string {
     if (typeof glueOrFormatter === 'function') {
       return ops.implodeOf(this.items, glueOrFormatter, keyOrSeparator ?? '')
     }
@@ -779,7 +895,7 @@ export class Collection<T> implements Enumerable<T> {
   when(
     condition: boolean | ((c: this) => boolean),
     callback: (c: this, value: boolean) => this | void,
-    fallback?: (c: this, value: boolean) => this | void,
+    fallback?: (c: this, value: boolean) => this | void
   ): this {
     return ops.whenOf(this, condition, callback, fallback) as this
   }
@@ -787,9 +903,12 @@ export class Collection<T> implements Enumerable<T> {
   unless(
     condition: boolean | ((c: this) => boolean),
     callback: (c: this, value: boolean) => this | void,
-    fallback?: (c: this, value: boolean) => this | void,
+    fallback?: (c: this, value: boolean) => this | void
   ): this {
-    const inverted = typeof condition === 'function' ? (c: this) => !(condition as (c: this) => boolean)(c) : !condition
+    const inverted =
+      typeof condition === 'function'
+        ? (c: this) => !(condition as (c: this) => boolean)(c)
+        : !condition
     return ops.whenOf(this, inverted, callback, fallback) as this
   }
 
@@ -801,19 +920,27 @@ export class Collection<T> implements Enumerable<T> {
     return this.when(this.isNotEmpty(), callback, fallback)
   }
 
-  unlessEmpty(callback: (c: this) => this | void): this { return this.whenNotEmpty(callback) }
-  unlessNotEmpty(callback: (c: this) => this | void): this { return this.whenEmpty(callback) }
+  unlessEmpty(callback: (c: this) => this | void): this {
+    return this.whenNotEmpty(callback)
+  }
+  unlessNotEmpty(callback: (c: this) => this | void): this {
+    return this.whenEmpty(callback)
+  }
 
   // ─── Type checking ──────────────────────────────────────────────────────────
   ensure(...types: ReadonlyArray<ClassConstructor<unknown> | string>): this {
     for (const item of this.items) {
       const ok = types.some((type) =>
-        typeof type === 'string' ? typeof item === type || (type === 'array' && Array.isArray(item)) : item instanceof (type as Function),
+        typeof type === 'string'
+          ? typeof item === type || (type === 'array' && Array.isArray(item))
+          : item instanceof (type as Function)
       )
       if (!ok) {
-        const expected = types.map((t) => (typeof t === 'string' ? t : (t as Function).name || 'object')).join('|')
+        const expected = types
+          .map((t) => (typeof t === 'string' ? t : (t as Function).name || 'object'))
+          .join('|')
         throw new UnexpectedValueException(
-          `Collection should only include "${expected}" items, but ${typeof item} found.`,
+          `Collection should only include "${expected}" items, but ${typeof item} found.`
         )
       }
     }
@@ -821,10 +948,18 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   // ─── Padding & multiplication ───────────────────────────────────────────────
-  pad(size: number, value: T): Collection<T> { return new Collection(ops.padOf(this.items, size, value)) }
-  multiply(factor: number): Collection<T> { return new Collection(ops.multiplyOf(this.items, factor)) }
-  repeat(factor: number): Collection<T> { return this.multiply(factor) }
-  times(factor: number): Collection<T> { return this.multiply(factor) }
+  pad(size: number, value: T): Collection<T> {
+    return new Collection(ops.padOf(this.items, size, value))
+  }
+  multiply(factor: number): Collection<T> {
+    return new Collection(ops.multiplyOf(this.items, factor))
+  }
+  repeat(factor: number): Collection<T> {
+    return this.multiply(factor)
+  }
+  times(factor: number): Collection<T> {
+    return this.multiply(factor)
+  }
 
   // ─── Combine & zip ──────────────────────────────────────────────────────────
   combine<V>(values: readonly V[] | Collection<V>): Record<string, V> {
@@ -838,8 +973,12 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   // ─── Wrap helpers ───────────────────────────────────────────────────────────
-  wrap(): Collection<T[]> { return new Collection([this.items]) }
-  unwrap(): T | T[] { return this.items.length === 1 ? this.items[0] : [...this.items] }
+  wrap(): Collection<T[]> {
+    return new Collection([this.items])
+  }
+  unwrap(): T | T[] {
+    return this.items.length === 1 ? this.items[0] : [...this.items]
+  }
 
   // ─── Range helper instance ──────────────────────────────────────────────────
   range(start: number, end: number, step: number = 1): Collection<number> {
@@ -847,18 +986,33 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   // ─── Serialization ──────────────────────────────────────────────────────────
-  toArray(): T[] { return [...this.items] }
-  toJson(): string { return JSON.stringify(this.items) }
-  toPrettyJson(indent: number = 2): string { return JSON.stringify(this.items, null, indent) }
+  toArray(): T[] {
+    return [...this.items]
+  }
+  toJson(): string {
+    return JSON.stringify(this.items)
+  }
+  toPrettyJson(indent: number = 2): string {
+    return JSON.stringify(this.items, null, indent)
+  }
   toMap<K, V>(keyFn: (item: T, i: number) => K, valueFn: (item: T, i: number) => V): Map<K, V> {
     const out = new Map<K, V>()
-    for (let i = 0; i < this.items.length; i++) out.set(keyFn(this.items[i], i), valueFn(this.items[i], i))
+    for (let i = 0; i < this.items.length; i++)
+      out.set(keyFn(this.items[i], i), valueFn(this.items[i], i))
     return out
   }
-  toSet(): Set<T> { return new Set(this.items) }
-  toJSON(): T[] { return this.items }
-  toString(): string { return this.toJson() }
-  valueOf(): T[] { return this.items }
+  toSet(): Set<T> {
+    return new Set(this.items)
+  }
+  toJSON(): T[] {
+    return this.items
+  }
+  toString(): string {
+    return this.toJson()
+  }
+  valueOf(): T[] {
+    return this.items
+  }
   [Symbol.toPrimitive](hint: string): string | number | T[] {
     if (hint === 'number') return this.items.length
     if (hint === 'string') return this.toJson()
@@ -866,20 +1020,24 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   // ─── Cloning ────────────────────────────────────────────────────────────────
-  collect(): Collection<T> { return new Collection([...this.items]) }
-  clone(): Collection<T> { return new Collection(deepClone(this.items)) }
+  collect(): Collection<T> {
+    return new Collection([...this.items])
+  }
+  clone(): Collection<T> {
+    return new Collection(deepClone(this.items))
+  }
   /**
    * Returns a LazyCollection. Wired by `setLazyConstructor` at module load
    * time to avoid an ESM circular import between Collection ↔ LazyCollection.
    */
   lazy(): unknown {
-    if (lazyConstructor === null) throw new Error('LazyCollection not registered yet — internal wiring error.')
+    if (lazyConstructor === null)
+      throw new Error('LazyCollection not registered yet — internal wiring error.')
     return new lazyConstructor(this.items)
   }
 
   // ─── Debug ──────────────────────────────────────────────────────────────────
   dump(): this {
-     
     console.log(this.items)
     return this
   }
@@ -889,13 +1047,28 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   // ─── Stats ──────────────────────────────────────────────────────────────────
-  variance(by?: RI<T, number>): number | undefined { return ops.varianceOf(this.items, by) }
-  sampleVariance(by?: RI<T, number>): number | undefined { return ops.sampleVarianceOf(this.items, by) }
-  stddev(by?: RI<T, number>): number | undefined { return ops.stddevOf(this.items, by) }
-  sampleStddev(by?: RI<T, number>): number | undefined { return ops.sampleStddevOf(this.items, by) }
-  quantile(q: number, by?: RI<T, number>): number | undefined { return ops.quantileOf(this.items, q, by) }
-  percentileAt(p: number, by?: RI<T, number>): number | undefined { return ops.percentileOf(this.items, p, by) }
-  histogram(bins: number, options?: { by?: RI<T, number>; range?: readonly [number, number] }): ops.HistogramBin[] {
+  variance(by?: RI<T, number>): number | undefined {
+    return ops.varianceOf(this.items, by)
+  }
+  sampleVariance(by?: RI<T, number>): number | undefined {
+    return ops.sampleVarianceOf(this.items, by)
+  }
+  stddev(by?: RI<T, number>): number | undefined {
+    return ops.stddevOf(this.items, by)
+  }
+  sampleStddev(by?: RI<T, number>): number | undefined {
+    return ops.sampleStddevOf(this.items, by)
+  }
+  quantile(q: number, by?: RI<T, number>): number | undefined {
+    return ops.quantileOf(this.items, q, by)
+  }
+  percentileAt(p: number, by?: RI<T, number>): number | undefined {
+    return ops.percentileOf(this.items, p, by)
+  }
+  histogram(
+    bins: number,
+    options?: { by?: RI<T, number>; range?: readonly [number, number] }
+  ): ops.HistogramBin[] {
     return ops.histogramOf(this.items, bins, options)
   }
   correlation(xBy: RI<T, number>, yBy: RI<T, number>): number | undefined {
@@ -906,19 +1079,19 @@ export class Collection<T> implements Enumerable<T> {
   joinOn<R, K extends PropertyKey>(
     right: readonly R[] | Collection<R>,
     leftKey: RI<T, K>,
-    rightKey: RI<R, K>,
+    rightKey: RI<R, K>
   ): Collection<[T, R]>
   joinOn<R, K extends PropertyKey, M>(
     right: readonly R[] | Collection<R>,
     leftKey: RI<T, K>,
     rightKey: RI<R, K>,
-    merge: (l: T, r: R) => M,
+    merge: (l: T, r: R) => M
   ): Collection<M>
   joinOn<R, K extends PropertyKey, M = [T, R]>(
     right: readonly R[] | Collection<R>,
     leftKey: RI<T, K>,
     rightKey: RI<R, K>,
-    merge?: (l: T, r: R) => M,
+    merge?: (l: T, r: R) => M
   ): Collection<M> {
     const list = right instanceof Collection ? right.toArray() : right
     return new Collection(ops.joinOnOf<T, R, K, M>(this.items, list, leftKey, rightKey, merge))
@@ -927,19 +1100,19 @@ export class Collection<T> implements Enumerable<T> {
   leftJoin<R, K extends PropertyKey>(
     right: readonly R[] | Collection<R>,
     leftKey: RI<T, K>,
-    rightKey: RI<R, K>,
+    rightKey: RI<R, K>
   ): Collection<[T, R | undefined]>
   leftJoin<R, K extends PropertyKey, M>(
     right: readonly R[] | Collection<R>,
     leftKey: RI<T, K>,
     rightKey: RI<R, K>,
-    merge: (l: T, r: R | undefined) => M,
+    merge: (l: T, r: R | undefined) => M
   ): Collection<M>
   leftJoin<R, K extends PropertyKey, M = [T, R | undefined]>(
     right: readonly R[] | Collection<R>,
     leftKey: RI<T, K>,
     rightKey: RI<R, K>,
-    merge?: (l: T, r: R | undefined) => M,
+    merge?: (l: T, r: R | undefined) => M
   ): Collection<M> {
     const list = right instanceof Collection ? right.toArray() : right
     return new Collection(ops.leftJoinOf<T, R, K, M>(this.items, list, leftKey, rightKey, merge))
@@ -948,19 +1121,19 @@ export class Collection<T> implements Enumerable<T> {
   rightJoin<R, K extends PropertyKey>(
     right: readonly R[] | Collection<R>,
     leftKey: RI<T, K>,
-    rightKey: RI<R, K>,
+    rightKey: RI<R, K>
   ): Collection<[T | undefined, R]>
   rightJoin<R, K extends PropertyKey, M>(
     right: readonly R[] | Collection<R>,
     leftKey: RI<T, K>,
     rightKey: RI<R, K>,
-    merge: (l: T | undefined, r: R) => M,
+    merge: (l: T | undefined, r: R) => M
   ): Collection<M>
   rightJoin<R, K extends PropertyKey, M = [T | undefined, R]>(
     right: readonly R[] | Collection<R>,
     leftKey: RI<T, K>,
     rightKey: RI<R, K>,
-    merge?: (l: T | undefined, r: R) => M,
+    merge?: (l: T | undefined, r: R) => M
   ): Collection<M> {
     const list = right instanceof Collection ? right.toArray() : right
     return new Collection(ops.rightJoinOf<T, R, K, M>(this.items, list, leftKey, rightKey, merge))
@@ -969,19 +1142,19 @@ export class Collection<T> implements Enumerable<T> {
   outerJoin<R, K extends PropertyKey>(
     right: readonly R[] | Collection<R>,
     leftKey: RI<T, K>,
-    rightKey: RI<R, K>,
+    rightKey: RI<R, K>
   ): Collection<[T | undefined, R | undefined]>
   outerJoin<R, K extends PropertyKey, M>(
     right: readonly R[] | Collection<R>,
     leftKey: RI<T, K>,
     rightKey: RI<R, K>,
-    merge: (l: T | undefined, r: R | undefined) => M,
+    merge: (l: T | undefined, r: R | undefined) => M
   ): Collection<M>
   outerJoin<R, K extends PropertyKey, M = [T | undefined, R | undefined]>(
     right: readonly R[] | Collection<R>,
     leftKey: RI<T, K>,
     rightKey: RI<R, K>,
-    merge?: (l: T | undefined, r: R | undefined) => M,
+    merge?: (l: T | undefined, r: R | undefined) => M
   ): Collection<M> {
     const list = right instanceof Collection ? right.toArray() : right
     return new Collection(ops.outerJoinOf<T, R, K, M>(this.items, list, leftKey, rightKey, merge))
@@ -991,24 +1164,36 @@ export class Collection<T> implements Enumerable<T> {
   scan<R>(fn: (carry: R, item: T, index: number) => R, initial: R): Collection<R> {
     return new Collection(ops.scanOf(this.items, fn, initial))
   }
-  pairwise(): Collection<[T, T]> { return new Collection(ops.pairwiseOf(this.items)) }
-  enumerate(start: number = 0): Collection<[number, T]> { return new Collection(ops.enumerateOf(this.items, start)) }
+  pairwise(): Collection<[T, T]> {
+    return new Collection(ops.pairwiseOf(this.items))
+  }
+  enumerate(start: number = 0): Collection<[number, T]> {
+    return new Collection(ops.enumerateOf(this.items, start))
+  }
   cycle(n: number = Infinity): Collection<T> {
     if (n === Infinity) {
-      throw new Error('cycle(Infinity) on Collection materialises — use lazy().cycle() for infinite cycles')
+      throw new Error(
+        'cycle(Infinity) on Collection materialises — use lazy().cycle() for infinite cycles'
+      )
     }
     return new Collection([...ops.cycleOf(this.items, n)])
   }
   interleave(...others: readonly (readonly T[] | Collection<T>)[]): Collection<T> {
     const sources: readonly T[][] = [
       this.items.slice(),
-      ...others.map((o) => (o instanceof Collection ? o.toArray() : [...o])),
+      ...others.map((o) => (o instanceof Collection ? o.toArray() : [...o]))
     ]
     return new Collection(ops.interleaveOf(...sources))
   }
-  permutations(r?: number): Collection<T[]> { return new Collection([...ops.permutationsOf(this.items, r)]) }
-  combinations(r: number): Collection<T[]> { return new Collection([...ops.combinationsOf(this.items, r)]) }
-  powerSet(): Collection<T[]> { return new Collection([...ops.powerSetOf(this.items)]) }
+  permutations(r?: number): Collection<T[]> {
+    return new Collection([...ops.permutationsOf(this.items, r)])
+  }
+  combinations(r: number): Collection<T[]> {
+    return new Collection([...ops.combinationsOf(this.items, r)])
+  }
+  powerSet(): Collection<T[]> {
+    return new Collection([...ops.powerSetOf(this.items)])
+  }
 
   // ─── Macroable surface ──────────────────────────────────────────────────────
   // Real implementations are installed by `applyMacroable(Collection)` below.

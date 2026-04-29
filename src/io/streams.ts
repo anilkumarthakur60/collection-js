@@ -20,7 +20,7 @@ export interface FromReadableOptions {
  */
 export function fromReadable(
   source: ReadableLike<Buffer | Uint8Array | string>,
-  options: FromReadableOptions = {},
+  options: FromReadableOptions = {}
 ): AsyncCollection<string> {
   const encoding = options.decodeAs === undefined ? null : options.decodeAs
   const decoder = encoding ? new TextDecoder(encoding) : null
@@ -46,7 +46,8 @@ export function lines(source: ReadableLike<Buffer | Uint8Array | string>): Async
     let buffer = ''
     const decoder = new TextDecoder('utf-8')
     for await (const chunk of source as AsyncIterable<Buffer | Uint8Array | string>) {
-      buffer += typeof chunk === 'string' ? chunk : decoder.decode(chunk as Uint8Array, { stream: true })
+      buffer +=
+        typeof chunk === 'string' ? chunk : decoder.decode(chunk as Uint8Array, { stream: true })
       let idx: number
       while ((idx = buffer.indexOf('\n')) >= 0) {
         yield buffer.slice(0, idx).replace(/\r$/, '')

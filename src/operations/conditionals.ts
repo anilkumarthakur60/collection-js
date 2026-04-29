@@ -1,7 +1,9 @@
 export type WhenCondition<C> = boolean | ((carrier: C) => boolean)
 
 export function resolveCondition<C>(carrier: C, condition: WhenCondition<C>): boolean {
-  return typeof condition === 'function' ? Boolean((condition as (c: C) => boolean)(carrier)) : Boolean(condition)
+  return typeof condition === 'function'
+    ? Boolean((condition as (c: C) => boolean)(carrier))
+    : Boolean(condition)
 }
 
 /**
@@ -12,7 +14,7 @@ export function whenOf<C>(
   carrier: C,
   condition: WhenCondition<C>,
   truthy: (carrier: C, value: boolean) => C | void,
-  falsy?: (carrier: C, value: boolean) => C | void,
+  falsy?: (carrier: C, value: boolean) => C | void
 ): C {
   const matched = resolveCondition(carrier, condition)
   const cb = matched ? truthy : falsy

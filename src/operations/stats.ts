@@ -12,7 +12,10 @@ function toNumberArray<T>(items: readonly T[], by?: RetrieverInput<T, number>): 
 }
 
 /** Population variance (divides by N). For sample variance, use `sampleVarianceOf`. */
-export function varianceOf<T>(items: readonly T[], by?: RetrieverInput<T, number>): number | undefined {
+export function varianceOf<T>(
+  items: readonly T[],
+  by?: RetrieverInput<T, number>
+): number | undefined {
   const values = toNumberArray(items, by)
   if (values.length === 0) return undefined
   const mean = values.reduce((a, b) => a + b, 0) / values.length
@@ -22,7 +25,10 @@ export function varianceOf<T>(items: readonly T[], by?: RetrieverInput<T, number
 }
 
 /** Sample variance (divides by N-1). Returns `undefined` for fewer than 2 samples. */
-export function sampleVarianceOf<T>(items: readonly T[], by?: RetrieverInput<T, number>): number | undefined {
+export function sampleVarianceOf<T>(
+  items: readonly T[],
+  by?: RetrieverInput<T, number>
+): number | undefined {
   const values = toNumberArray(items, by)
   if (values.length < 2) return undefined
   const mean = values.reduce((a, b) => a + b, 0) / values.length
@@ -31,12 +37,18 @@ export function sampleVarianceOf<T>(items: readonly T[], by?: RetrieverInput<T, 
   return acc / (values.length - 1)
 }
 
-export function stddevOf<T>(items: readonly T[], by?: RetrieverInput<T, number>): number | undefined {
+export function stddevOf<T>(
+  items: readonly T[],
+  by?: RetrieverInput<T, number>
+): number | undefined {
   const v = varianceOf(items, by)
   return v === undefined ? undefined : Math.sqrt(v)
 }
 
-export function sampleStddevOf<T>(items: readonly T[], by?: RetrieverInput<T, number>): number | undefined {
+export function sampleStddevOf<T>(
+  items: readonly T[],
+  by?: RetrieverInput<T, number>
+): number | undefined {
   const v = sampleVarianceOf(items, by)
   return v === undefined ? undefined : Math.sqrt(v)
 }
@@ -45,7 +57,11 @@ export function sampleStddevOf<T>(items: readonly T[], by?: RetrieverInput<T, nu
  * Quantile via linear interpolation between closest ranks (matches numpy/R type 7).
  * `q` is in [0, 1]. Returns undefined for empty input.
  */
-export function quantileOf<T>(items: readonly T[], q: number, by?: RetrieverInput<T, number>): number | undefined {
+export function quantileOf<T>(
+  items: readonly T[],
+  q: number,
+  by?: RetrieverInput<T, number>
+): number | undefined {
   if (q < 0 || q > 1) throw new RangeError(`quantile q must be in [0,1] (got ${q})`)
   const values = toNumberArray(items, by).sort((a, b) => a - b)
   if (values.length === 0) return undefined
@@ -57,7 +73,11 @@ export function quantileOf<T>(items: readonly T[], q: number, by?: RetrieverInpu
   return values[lo] + (values[hi] - values[lo]) * (pos - lo)
 }
 
-export function percentileOf<T>(items: readonly T[], p: number, by?: RetrieverInput<T, number>): number | undefined {
+export function percentileOf<T>(
+  items: readonly T[],
+  p: number,
+  by?: RetrieverInput<T, number>
+): number | undefined {
   return quantileOf(items, p / 100, by)
 }
 
@@ -76,7 +96,7 @@ export interface HistogramBin {
 export function histogramOf<T>(
   items: readonly T[],
   bins: number,
-  options: { by?: RetrieverInput<T, number>; range?: readonly [number, number] } = {},
+  options: { by?: RetrieverInput<T, number>; range?: readonly [number, number] } = {}
 ): HistogramBin[] {
   if (bins <= 0 || !Number.isInteger(bins)) {
     throw new RangeError(`bins must be a positive integer (got ${bins})`)
@@ -91,7 +111,7 @@ export function histogramOf<T>(
   const out: HistogramBin[] = Array.from({ length: bins }, (_, i) => ({
     from: min + i * width,
     to: min + (i + 1) * width,
-    count: 0,
+    count: 0
   }))
   for (const v of values) {
     if (v < min || v > max) continue
@@ -105,7 +125,7 @@ export function histogramOf<T>(
 export function correlationOf<T>(
   items: readonly T[],
   xBy: RetrieverInput<T, number>,
-  yBy: RetrieverInput<T, number>,
+  yBy: RetrieverInput<T, number>
 ): number | undefined {
   if (items.length < 2) return undefined
   const xs = toNumberArray(items, xBy)

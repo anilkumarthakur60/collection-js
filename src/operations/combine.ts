@@ -1,4 +1,7 @@
-export function combineOf<K extends PropertyKey, V>(keys: readonly K[], values: readonly V[]): Record<K, V> {
+export function combineOf<K extends PropertyKey, V>(
+  keys: readonly K[],
+  values: readonly V[]
+): Record<K, V> {
   const out = {} as Record<K, V>
   const len = Math.min(keys.length, values.length)
   for (let i = 0; i < len; i++) out[keys[i]] = values[i]

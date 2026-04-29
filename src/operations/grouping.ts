@@ -2,7 +2,7 @@ import { valueRetriever, type RetrieverInput } from '../support/valueRetriever'
 
 export function groupByOf<T, K extends PropertyKey = PropertyKey>(
   items: readonly T[],
-  by: RetrieverInput<T, K | readonly K[]>,
+  by: RetrieverInput<T, K | readonly K[]>
 ): Record<K, T[]> {
   const get = valueRetriever<T, K | readonly K[]>(by)
   const out = {} as Record<K, T[]>
@@ -21,7 +21,7 @@ export function groupByOf<T, K extends PropertyKey = PropertyKey>(
 /** groupByMany: apply multiple grouping functions left-to-right, producing nested groups. */
 export function groupByManyOf<T>(
   items: readonly T[],
-  groupers: readonly RetrieverInput<T>[],
+  groupers: readonly RetrieverInput<T>[]
 ): Record<PropertyKey, unknown> {
   if (groupers.length === 0) return items as unknown as Record<PropertyKey, unknown>
   const [first, ...rest] = groupers
@@ -36,7 +36,7 @@ export function groupByManyOf<T>(
 
 export function keyByOf<T, K extends PropertyKey = PropertyKey>(
   items: readonly T[],
-  by: RetrieverInput<T, K>,
+  by: RetrieverInput<T, K>
 ): Record<K, T> {
   const get = valueRetriever<T, K>(by)
   const out = {} as Record<K, T>

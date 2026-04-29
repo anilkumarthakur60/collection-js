@@ -1,7 +1,7 @@
 export function reduceOf<T, R>(
   items: readonly T[],
   fn: (carry: R, item: T, index: number) => R,
-  initial: R,
+  initial: R
 ): R {
   let acc = initial
   for (let i = 0; i < items.length; i++) acc = fn(acc, items[i], i)

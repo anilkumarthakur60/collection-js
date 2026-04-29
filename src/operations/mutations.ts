@@ -23,7 +23,10 @@ export function popOf<T>(items: readonly T[], count: number = 1): { remaining: T
   return { remaining: items.slice(0, splitAt), removed: items.slice(splitAt).reverse() }
 }
 
-export function shiftOf<T>(items: readonly T[], count: number = 1): { remaining: T[]; removed: T[] } {
+export function shiftOf<T>(
+  items: readonly T[],
+  count: number = 1
+): { remaining: T[]; removed: T[] } {
   if (count <= 0 || items.length === 0) return { remaining: [...items], removed: [] }
   const splitAt = Math.min(items.length, count)
   return { remaining: items.slice(splitAt), removed: items.slice(0, splitAt) }
@@ -33,14 +36,20 @@ export function spliceOf<T>(
   items: readonly T[],
   start: number,
   deleteCount?: number,
-  replacements: readonly T[] = [],
+  replacements: readonly T[] = []
 ): { remaining: T[]; removed: T[] } {
   const copy = [...items]
-  const removed = deleteCount === undefined ? copy.splice(start) : copy.splice(start, deleteCount, ...replacements)
+  const removed =
+    deleteCount === undefined
+      ? copy.splice(start)
+      : copy.splice(start, deleteCount, ...replacements)
   return { remaining: copy, removed }
 }
 
-export function pullOf<T>(items: readonly T[], target: T): { remaining: T[]; removed: T | undefined } {
+export function pullOf<T>(
+  items: readonly T[],
+  target: T
+): { remaining: T[]; removed: T | undefined } {
   const idx = items.indexOf(target)
   if (idx === -1) return { remaining: [...items], removed: undefined }
   const copy = [...items]
@@ -74,12 +83,19 @@ export function forgetOf<T>(items: readonly T[], keys: readonly (number | string
   return result
 }
 
-export function putOf<T extends object, K extends keyof T>(items: readonly T[], key: K, value: T[K]): T[] {
+export function putOf<T extends object, K extends keyof T>(
+  items: readonly T[],
+  key: K,
+  value: T[K]
+): T[] {
   return items.map((item) => ({ ...item, [key]: value }) as T)
 }
 
 /** Recursive object merge (Laravel `mergeRecursive`). */
-export function mergeRecursiveOf<T>(items: readonly T[], ...others: readonly (readonly T[])[]): T[] {
+export function mergeRecursiveOf<T>(
+  items: readonly T[],
+  ...others: readonly (readonly T[])[]
+): T[] {
   const merge = (a: unknown, b: unknown): unknown => {
     if (Array.isArray(a) && Array.isArray(b)) return [...a, ...b]
     if (isPlainObject(a) && isPlainObject(b)) {

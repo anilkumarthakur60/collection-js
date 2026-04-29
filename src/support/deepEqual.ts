@@ -12,7 +12,9 @@ export function deepEqual<T>(a: T, b: T): boolean {
     return a instanceof Date && b instanceof Date && a.getTime() === b.getTime()
   }
   if (a instanceof RegExp || b instanceof RegExp) {
-    return a instanceof RegExp && b instanceof RegExp && a.source === b.source && a.flags === b.flags
+    return (
+      a instanceof RegExp && b instanceof RegExp && a.source === b.source && a.flags === b.flags
+    )
   }
 
   const aIsArr = Array.isArray(a)
@@ -52,7 +54,6 @@ export function looseEqual(a: unknown, b: unknown): boolean {
     (typeof a === 'string' || typeof a === 'number' || typeof a === 'boolean') &&
     (typeof b === 'string' || typeof b === 'number' || typeof b === 'boolean')
   ) {
-     
     return a == b
   }
   return false

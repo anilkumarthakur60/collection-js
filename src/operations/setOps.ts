@@ -10,7 +10,8 @@ export function diffAssocOf<T>(items: readonly T[], other: readonly Partial<T>[]
   // Collection diffAssoc operates on key/value pairs of an object — flatten the
   // single object case Laravel uses, while preserving array-of-objects element
   // semantics for our TS API.
-  const otherEntries = other[0] && isObjectLike(other[0]) ? Object.entries(other[0] as Record<string, unknown>) : []
+  const otherEntries =
+    other[0] && isObjectLike(other[0]) ? Object.entries(other[0] as Record<string, unknown>) : []
   return items.filter((item) => {
     if (!isObjectLike(item)) return true
     const obj = item as Record<string, unknown>
@@ -24,12 +25,15 @@ export function diffAssocOf<T>(items: readonly T[], other: readonly Partial<T>[]
 export function diffAssocUsingOf<T>(
   items: readonly T[],
   other: readonly T[],
-  comparator: (a: T, b: T) => number,
+  comparator: (a: T, b: T) => number
 ): T[] {
   return items.filter((item) => !other.some((o) => comparator(item, o) === 0))
 }
 
-export function diffKeysOf<T extends object>(items: readonly T[], otherKeys: readonly (keyof T | string)[]): T[] {
+export function diffKeysOf<T extends object>(
+  items: readonly T[],
+  otherKeys: readonly (keyof T | string)[]
+): T[] {
   const set = new Set(otherKeys.map(String))
   return items.map((item) => {
     if (!isObjectLike(item)) return item
@@ -45,11 +49,18 @@ export function intersectOf<T>(items: readonly T[], other: readonly T[]): T[] {
   return items.filter((item) => other.some((o) => looseEqual(item, o)))
 }
 
-export function intersectUsingOf<T>(items: readonly T[], other: readonly T[], comparator: (a: T, b: T) => number): T[] {
+export function intersectUsingOf<T>(
+  items: readonly T[],
+  other: readonly T[],
+  comparator: (a: T, b: T) => number
+): T[] {
   return items.filter((item) => other.some((o) => comparator(item, o) === 0))
 }
 
-export function intersectAssocOf<T extends object>(items: readonly T[], other: readonly Partial<T>[]): T[] {
+export function intersectAssocOf<T extends object>(
+  items: readonly T[],
+  other: readonly Partial<T>[]
+): T[] {
   if (items.length === 0) return []
   const flat = other[0] && isObjectLike(other[0]) ? (other[0] as Record<string, unknown>) : {}
   return items.map((item) => {
@@ -65,7 +76,7 @@ export function intersectAssocOf<T extends object>(items: readonly T[], other: r
 export function intersectAssocUsingOf<T extends object>(
   items: readonly T[],
   other: Record<string, unknown>,
-  comparator: (a: string, b: string) => number,
+  comparator: (a: string, b: string) => number
 ): T[] {
   if (items.length === 0) return []
   return items.map((item) => {
@@ -73,14 +84,19 @@ export function intersectAssocUsingOf<T extends object>(
     const obj = item as Record<string, unknown>
     const out: Record<string, unknown> = {}
     for (const [k, v] of Object.entries(obj)) {
-      const match = Object.entries(other).find(([ok, ov]) => comparator(ok, k) === 0 && comparator(String(ov), String(v)) === 0)
+      const match = Object.entries(other).find(
+        ([ok, ov]) => comparator(ok, k) === 0 && comparator(String(ov), String(v)) === 0
+      )
       if (match) out[k] = v
     }
     return out as unknown as T
   })
 }
 
-export function intersectByKeysOf<T extends object>(items: readonly T[], otherKeys: readonly (keyof T | string)[]): T[] {
+export function intersectByKeysOf<T extends object>(
+  items: readonly T[],
+  otherKeys: readonly (keyof T | string)[]
+): T[] {
   const set = new Set(otherKeys.map(String))
   return items.map((item) => {
     if (!isObjectLike(item)) return item
@@ -123,11 +139,15 @@ export function crossJoinOf<T>(...arrays: readonly (readonly T[])[]): T[][] {
       for (const a of acc) for (const b of arr) next.push([...a, b])
       return next
     },
-    [[]] as T[][],
+    [[]] as T[][]
   )
 }
 
-export function duplicatesOf<T>(items: readonly T[], by?: (item: T) => unknown, strict = false): Map<number, T> {
+export function duplicatesOf<T>(
+  items: readonly T[],
+  by?: (item: T) => unknown,
+  strict = false
+): Map<number, T> {
   const seen: unknown[] = []
   const dupes = new Map<number, T>()
   for (let i = 0; i < items.length; i++) {
