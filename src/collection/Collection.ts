@@ -929,16 +929,18 @@ export class Collection<T> implements Enumerable<T> {
 
   // ─── Type checking ──────────────────────────────────────────────────────────
   ensure(...types: ReadonlyArray<ClassConstructor<unknown> | string>): this {
+    type AnyCtor = new (...args: never[]) => unknown
+    const ctorName = (t: ClassConstructor<unknown>): string =>
+      (t as unknown as { name?: string }).name ?? 'object'
+
     for (const item of this.items) {
       const ok = types.some((type) =>
         typeof type === 'string'
           ? typeof item === type || (type === 'array' && Array.isArray(item))
-          : item instanceof (type as Function)
+          : item instanceof (type as AnyCtor)
       )
       if (!ok) {
-        const expected = types
-          .map((t) => (typeof t === 'string' ? t : (t as Function).name || 'object'))
-          .join('|')
+        const expected = types.map((t) => (typeof t === 'string' ? t : ctorName(t))).join('|')
         throw new UnexpectedValueException(
           `Collection should only include "${expected}" items, but ${typeof item} found.`
         )

@@ -93,5 +93,7 @@ export function whereInstanceOfOf<T, R>(
   items: readonly T[],
   Ctor: ClassConstructor<R> | (abstract new (...args: never[]) => R)
 ): R[] {
-  return items.filter((item) => item instanceof (Ctor as Function)) as unknown as R[]
+  type AnyCtor = abstract new (...args: never[]) => unknown
+  const ctor = Ctor as AnyCtor
+  return items.filter((item) => item instanceof ctor) as unknown as R[]
 }
