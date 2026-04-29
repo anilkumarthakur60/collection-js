@@ -164,9 +164,11 @@ export class Collection<T> implements Enumerable<T> {
     return ops.firstOrFailOf(this.items, predicate)
   }
 
-  firstWhere(key: string, _operatorOrValue?: unknown, _value?: unknown): T | undefined {
-    const argCount = arguments.length
-    const spec = ops.buildFirstWhereSpec(arguments[1], arguments[2], argCount)
+  firstWhere(key: string, ...rest: readonly unknown[]): T | undefined {
+    // 0 rest args → truthy check on `key`
+    // 1 rest arg → match `key === rest[0]` (loose)
+    // 2 rest args → `key {operator} rest[1]`
+    const spec = ops.buildFirstWhereSpec(rest[0], rest[1], rest.length + 1)
     return ops.firstWhereOf(this.items, key, spec)
   }
 
@@ -206,22 +208,28 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   // ─── Search & inspection ─────────────────────────────────────────────────────
-  contains(target: unknown, value?: unknown): boolean {
-    const spec = ops.resolveContainsSpec<T>(target as ops.ContainsArg<T>, value, arguments.length >= 2)
+  /**
+   * `contains(value)` — loose match on whole item.
+   * `contains(predicate)` — first-match callback.
+   * `contains(key, value)` — match on object property.
+   * `contains(shape)` — partial-shape match.
+   */
+  contains(target: unknown, ...rest: readonly unknown[]): boolean {
+    const spec = ops.resolveContainsSpec<T>(target as ops.ContainsArg<T>, rest[0], rest.length >= 1)
     return ops.containsOf(this.items, spec, false)
   }
 
-  containsStrict(target: unknown, value?: unknown): boolean {
-    const spec = ops.resolveContainsSpec<T>(target as ops.ContainsArg<T>, value, arguments.length >= 2)
+  containsStrict(target: unknown, ...rest: readonly unknown[]): boolean {
+    const spec = ops.resolveContainsSpec<T>(target as ops.ContainsArg<T>, rest[0], rest.length >= 1)
     return ops.containsOf(this.items, spec, true)
   }
 
-  doesntContain(target: unknown, value?: unknown): boolean {
-    return !this.contains(target as ops.ContainsArg<T>, value)
+  doesntContain(target: unknown, ...rest: readonly unknown[]): boolean {
+    return !this.contains(target as ops.ContainsArg<T>, ...rest)
   }
 
-  doesntContainStrict(target: unknown, value?: unknown): boolean {
-    return !this.containsStrict(target as ops.ContainsArg<T>, value)
+  doesntContainStrict(target: unknown, ...rest: readonly unknown[]): boolean {
+    return !this.containsStrict(target as ops.ContainsArg<T>, ...rest)
   }
 
   containsOneItem(predicate?: Predicate<T>): boolean {
@@ -290,9 +298,8 @@ export class Collection<T> implements Enumerable<T> {
     return new Collection(ops.rejectOf(this.items, predicate as Predicate<T>))
   }
 
-  where(key: string, _operatorOrValue?: unknown, _value?: unknown): Collection<T> {
-    const args = Array.from(arguments)
-    const spec = ops.buildWhereSpec(args, false)
+  where(key: string, ...rest: readonly unknown[]): Collection<T> {
+    const spec = ops.buildWhereSpec([key, ...rest], false)
     return new Collection(ops.whereOf(this.items, key, spec))
   }
 
@@ -872,7 +879,7 @@ export class Collection<T> implements Enumerable<T> {
 
   // ─── Debug ──────────────────────────────────────────────────────────────────
   dump(): this {
-    // eslint-disable-next-line no-console
+     
     console.log(this.items)
     return this
   }

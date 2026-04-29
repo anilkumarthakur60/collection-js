@@ -98,10 +98,14 @@ export class LazyCollection<T> implements Enumerable<T> {
   // ─── Inspection (consume the generator) ────────────────────────────────────
   count(): number {
     let n = 0
-    for (const _ of this.source()) n++
+    const it = this.source()[Symbol.iterator]()
+    for (let next = it.next(); !next.done; next = it.next()) n++
     return n
   }
-  isEmpty(): boolean { for (const _ of this.source()) return false; return true }
+  isEmpty(): boolean {
+    const it = this.source()[Symbol.iterator]()
+    return it.next().done === true
+  }
   isNotEmpty(): boolean { return !this.isEmpty() }
 
   countBy(by?: RetrieverInput<T>): Record<string, number> {
@@ -132,15 +136,12 @@ export class LazyCollection<T> implements Enumerable<T> {
     return r
   }
 
-  firstWhere(key: string, _operatorOrValue?: unknown, _value?: unknown): T | undefined {
-    const argCount = arguments.length
-    const spec = ops.buildFirstWhereSpec(arguments[1], arguments[2], argCount)
-    let i = 0
+  firstWhere(key: string, ...rest: readonly unknown[]): T | undefined {
+    const spec = ops.buildFirstWhereSpec(rest[0], rest[1], rest.length + 1)
     for (const item of this.source()) {
       const v = dataGet(item, key)
       const matched = spec.truthy ? Boolean(v) : operatorForWhere(v, spec.operator, spec.value)
       if (matched) return item
-      i++
     }
     return undefined
   }
@@ -162,15 +163,17 @@ export class LazyCollection<T> implements Enumerable<T> {
   random(): T | undefined { return ops.randomOne(this.all()) }
 
   // ─── Search & inspection ────────────────────────────────────────────────────
-  contains(target: unknown, value?: unknown): boolean {
-    const spec = ops.resolveContainsSpec<T>(target as ops.ContainsArg<T>, value, arguments.length >= 2)
+  contains(target: unknown, ...rest: readonly unknown[]): boolean {
+    const spec = ops.resolveContainsSpec<T>(target as ops.ContainsArg<T>, rest[0], rest.length >= 1)
     return ops.containsOf(this.all(), spec, false)
   }
-  containsStrict(target: unknown, value?: unknown): boolean {
-    const spec = ops.resolveContainsSpec<T>(target as ops.ContainsArg<T>, value, arguments.length >= 2)
+  containsStrict(target: unknown, ...rest: readonly unknown[]): boolean {
+    const spec = ops.resolveContainsSpec<T>(target as ops.ContainsArg<T>, rest[0], rest.length >= 1)
     return ops.containsOf(this.all(), spec, true)
   }
-  doesntContain(target: unknown, value?: unknown): boolean { return !this.contains(target, value) }
+  doesntContain(target: unknown, ...rest: readonly unknown[]): boolean {
+    return !this.contains(target, ...rest)
+  }
 
   every(predicate: Predicate<T>): boolean {
     let i = 0
@@ -217,9 +220,8 @@ export class LazyCollection<T> implements Enumerable<T> {
     return this.filter((item, i) => !predicate(item, i))
   }
 
-  where(key: string, _operatorOrValue?: unknown, _value?: unknown): LazyCollection<T> {
-    const args = Array.from(arguments)
-    const spec = ops.buildWhereSpec(args, false)
+  where(key: string, ...rest: readonly unknown[]): LazyCollection<T> {
+    const spec = ops.buildWhereSpec([key, ...rest], false)
     return this.filter((item) =>
       spec.truthy ? Boolean(dataGet(item, key)) : operatorForWhere(dataGet(item, key), spec.operator, spec.value),
     )

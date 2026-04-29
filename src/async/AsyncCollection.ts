@@ -77,7 +77,8 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
 
   async count(): Promise<number> {
     let n = 0
-    for await (const _ of this.source()) n++
+    const it = this.source()[Symbol.asyncIterator]()
+    for (let next = await it.next(); !next.done; next = await it.next()) n++
     return n
   }
 

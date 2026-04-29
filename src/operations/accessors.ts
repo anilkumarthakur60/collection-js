@@ -21,9 +21,9 @@ export function firstOrFailOf<T>(items: readonly T[], predicate?: Predicate<T>):
 }
 
 export interface FirstWhereSpec {
+  operator: Operator
   /** Truthy check on the key when both operator and value are absent. */
   truthy: boolean
-  operator: Operator
   value: unknown
 }
 

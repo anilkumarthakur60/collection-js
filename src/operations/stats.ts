@@ -62,11 +62,11 @@ export function percentileOf<T>(items: readonly T[], p: number, by?: RetrieverIn
 }
 
 export interface HistogramBin {
+  count: number
   /** Lower bound (inclusive). */
   from: number
   /** Upper bound (exclusive, except for the last bin which is inclusive). */
   to: number
-  count: number
 }
 
 /**

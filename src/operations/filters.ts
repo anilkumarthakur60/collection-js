@@ -13,10 +13,10 @@ export function rejectOf<T>(items: readonly T[], predicate: Predicate<T>): T[] {
 }
 
 export interface WhereSpec {
-  truthy: boolean
   operator: Operator
-  value: unknown
   strict: boolean
+  truthy: boolean
+  value: unknown
 }
 
 export function buildWhereSpec(args: readonly unknown[], strict: boolean): WhereSpec {
