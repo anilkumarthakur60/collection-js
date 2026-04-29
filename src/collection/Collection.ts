@@ -278,12 +278,16 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   // ─── Filtering ───────────────────────────────────────────────────────────────
-  filter(predicate?: Predicate<T>): Collection<T> {
-    return new Collection(ops.filterOf(this.items, predicate))
+  filter<S extends T>(predicate: (item: T, index: number) => item is S): Collection<S>
+  filter(predicate?: (item: T, index: number) => unknown): Collection<T>
+  filter(predicate?: (item: T, index: number) => unknown): unknown {
+    return new Collection(ops.filterOf(this.items, predicate as Predicate<T> | undefined))
   }
 
-  reject(predicate: Predicate<T>): Collection<T> {
-    return new Collection(ops.rejectOf(this.items, predicate))
+  reject<S extends T>(predicate: (item: T, index: number) => item is S): Collection<Exclude<T, S>>
+  reject(predicate: (item: T, index: number) => unknown): Collection<T>
+  reject(predicate: (item: T, index: number) => unknown): unknown {
+    return new Collection(ops.rejectOf(this.items, predicate as Predicate<T>))
   }
 
   where(key: string, _operatorOrValue?: unknown, _value?: unknown): Collection<T> {
@@ -327,6 +331,11 @@ export class Collection<T> implements Enumerable<T> {
 
   whereNotNull(key: string): Collection<T> {
     return new Collection(ops.whereNotNullOf(this.items, key))
+  }
+
+  /** Strip `null`/`undefined` from the collection and narrow the element type. */
+  compact(): Collection<NonNullable<T>> {
+    return new Collection(this.items.filter((item): item is NonNullable<T> => item != null))
   }
 
   whereInstanceOf<R>(Ctor: ClassConstructor<R> | (abstract new (...args: never[]) => R)): Collection<R> {
@@ -477,8 +486,12 @@ export class Collection<T> implements Enumerable<T> {
     return new Collection(ops.splitInOf(this.items, groups).map((c) => new Collection(c)))
   }
 
-  partition(predicate: Predicate<T>): [Collection<T>, Collection<T>] {
-    const [a, b] = ops.partitionOf(this.items, predicate)
+  partition<S extends T>(
+    predicate: (item: T, index: number) => item is S,
+  ): [Collection<S>, Collection<Exclude<T, S>>]
+  partition(predicate: (item: T, index: number) => unknown): [Collection<T>, Collection<T>]
+  partition(predicate: (item: T, index: number) => unknown): unknown {
+    const [a, b] = ops.partitionOf(this.items, predicate as Predicate<T>)
     return [new Collection(a), new Collection(b)]
   }
 
@@ -867,6 +880,128 @@ export class Collection<T> implements Enumerable<T> {
     this.dump()
     throw new ItemNotFoundException('Dump-and-die: Collection inspection terminated.')
   }
+
+  // ─── Stats ──────────────────────────────────────────────────────────────────
+  variance(by?: RI<T, number>): number | undefined { return ops.varianceOf(this.items, by) }
+  sampleVariance(by?: RI<T, number>): number | undefined { return ops.sampleVarianceOf(this.items, by) }
+  stddev(by?: RI<T, number>): number | undefined { return ops.stddevOf(this.items, by) }
+  sampleStddev(by?: RI<T, number>): number | undefined { return ops.sampleStddevOf(this.items, by) }
+  quantile(q: number, by?: RI<T, number>): number | undefined { return ops.quantileOf(this.items, q, by) }
+  percentileAt(p: number, by?: RI<T, number>): number | undefined { return ops.percentileOf(this.items, p, by) }
+  histogram(bins: number, options?: { by?: RI<T, number>; range?: readonly [number, number] }): ops.HistogramBin[] {
+    return ops.histogramOf(this.items, bins, options)
+  }
+  correlation(xBy: RI<T, number>, yBy: RI<T, number>): number | undefined {
+    return ops.correlationOf(this.items, xBy, yBy)
+  }
+
+  // ─── SQL-style joins ────────────────────────────────────────────────────────
+  joinOn<R, K extends PropertyKey>(
+    right: readonly R[] | Collection<R>,
+    leftKey: RI<T, K>,
+    rightKey: RI<R, K>,
+  ): Collection<[T, R]>
+  joinOn<R, K extends PropertyKey, M>(
+    right: readonly R[] | Collection<R>,
+    leftKey: RI<T, K>,
+    rightKey: RI<R, K>,
+    merge: (l: T, r: R) => M,
+  ): Collection<M>
+  joinOn<R, K extends PropertyKey, M = [T, R]>(
+    right: readonly R[] | Collection<R>,
+    leftKey: RI<T, K>,
+    rightKey: RI<R, K>,
+    merge?: (l: T, r: R) => M,
+  ): Collection<M> {
+    const list = right instanceof Collection ? right.toArray() : right
+    return new Collection(ops.joinOnOf<T, R, K, M>(this.items, list, leftKey, rightKey, merge))
+  }
+
+  leftJoin<R, K extends PropertyKey>(
+    right: readonly R[] | Collection<R>,
+    leftKey: RI<T, K>,
+    rightKey: RI<R, K>,
+  ): Collection<[T, R | undefined]>
+  leftJoin<R, K extends PropertyKey, M>(
+    right: readonly R[] | Collection<R>,
+    leftKey: RI<T, K>,
+    rightKey: RI<R, K>,
+    merge: (l: T, r: R | undefined) => M,
+  ): Collection<M>
+  leftJoin<R, K extends PropertyKey, M = [T, R | undefined]>(
+    right: readonly R[] | Collection<R>,
+    leftKey: RI<T, K>,
+    rightKey: RI<R, K>,
+    merge?: (l: T, r: R | undefined) => M,
+  ): Collection<M> {
+    const list = right instanceof Collection ? right.toArray() : right
+    return new Collection(ops.leftJoinOf<T, R, K, M>(this.items, list, leftKey, rightKey, merge))
+  }
+
+  rightJoin<R, K extends PropertyKey>(
+    right: readonly R[] | Collection<R>,
+    leftKey: RI<T, K>,
+    rightKey: RI<R, K>,
+  ): Collection<[T | undefined, R]>
+  rightJoin<R, K extends PropertyKey, M>(
+    right: readonly R[] | Collection<R>,
+    leftKey: RI<T, K>,
+    rightKey: RI<R, K>,
+    merge: (l: T | undefined, r: R) => M,
+  ): Collection<M>
+  rightJoin<R, K extends PropertyKey, M = [T | undefined, R]>(
+    right: readonly R[] | Collection<R>,
+    leftKey: RI<T, K>,
+    rightKey: RI<R, K>,
+    merge?: (l: T | undefined, r: R) => M,
+  ): Collection<M> {
+    const list = right instanceof Collection ? right.toArray() : right
+    return new Collection(ops.rightJoinOf<T, R, K, M>(this.items, list, leftKey, rightKey, merge))
+  }
+
+  outerJoin<R, K extends PropertyKey>(
+    right: readonly R[] | Collection<R>,
+    leftKey: RI<T, K>,
+    rightKey: RI<R, K>,
+  ): Collection<[T | undefined, R | undefined]>
+  outerJoin<R, K extends PropertyKey, M>(
+    right: readonly R[] | Collection<R>,
+    leftKey: RI<T, K>,
+    rightKey: RI<R, K>,
+    merge: (l: T | undefined, r: R | undefined) => M,
+  ): Collection<M>
+  outerJoin<R, K extends PropertyKey, M = [T | undefined, R | undefined]>(
+    right: readonly R[] | Collection<R>,
+    leftKey: RI<T, K>,
+    rightKey: RI<R, K>,
+    merge?: (l: T | undefined, r: R | undefined) => M,
+  ): Collection<M> {
+    const list = right instanceof Collection ? right.toArray() : right
+    return new Collection(ops.outerJoinOf<T, R, K, M>(this.items, list, leftKey, rightKey, merge))
+  }
+
+  // ─── itertools-style ────────────────────────────────────────────────────────
+  scan<R>(fn: (carry: R, item: T, index: number) => R, initial: R): Collection<R> {
+    return new Collection(ops.scanOf(this.items, fn, initial))
+  }
+  pairwise(): Collection<[T, T]> { return new Collection(ops.pairwiseOf(this.items)) }
+  enumerate(start: number = 0): Collection<[number, T]> { return new Collection(ops.enumerateOf(this.items, start)) }
+  cycle(n: number = Infinity): Collection<T> {
+    if (n === Infinity) {
+      throw new Error('cycle(Infinity) on Collection materialises — use lazy().cycle() for infinite cycles')
+    }
+    return new Collection([...ops.cycleOf(this.items, n)])
+  }
+  interleave(...others: readonly (readonly T[] | Collection<T>)[]): Collection<T> {
+    const sources: readonly T[][] = [
+      this.items.slice(),
+      ...others.map((o) => (o instanceof Collection ? o.toArray() : [...o])),
+    ]
+    return new Collection(ops.interleaveOf(...sources))
+  }
+  permutations(r?: number): Collection<T[]> { return new Collection([...ops.permutationsOf(this.items, r)]) }
+  combinations(r: number): Collection<T[]> { return new Collection([...ops.combinationsOf(this.items, r)]) }
+  powerSet(): Collection<T[]> { return new Collection([...ops.powerSetOf(this.items)]) }
 
   // ─── Macroable surface ──────────────────────────────────────────────────────
   // Real implementations are installed by `applyMacroable(Collection)` below.
