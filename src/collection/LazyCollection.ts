@@ -416,10 +416,15 @@ export class LazyCollection<T> implements Enumerable<T> {
     if (count < 0) return new LazyCollection<T>(this.all().slice(count))
     const src = this.source
     return new LazyCollection<T>(function* () {
+      if (count <= 0) return
+      // Use a manual iterator so we never pull an extra value past the limit —
+      // important for `remember()`, throttling, and infinite generators.
+      const it = src()[Symbol.iterator]()
       let n = 0
-      for (const item of src()) {
-        if (n >= count) return
-        yield item
+      while (n < count) {
+        const next = it.next()
+        if (next.done) return
+        yield next.value
         n++
       }
     })

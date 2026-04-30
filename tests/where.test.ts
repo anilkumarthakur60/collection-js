@@ -105,7 +105,7 @@ describe('whereInstanceOf', () => {
 describe('whereNotBetween', () => {
   it('filters items outside min/max range', () => {
     const items = [{ v: 1 }, { v: 5 }, { v: 10 }, { v: 15 }]
-    const result = collect(items).whereNotBetween('v', 5, 10)
+    const result = collect(items).whereNotBetween('v', [5, 10])
     expect(result.all()).toEqual([{ v: 1 }, { v: 15 }])
   })
 })
