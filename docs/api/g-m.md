@@ -2,19 +2,26 @@
 
 ## `get`
 
-Returns the item at a given key. If the key does not exist, `null` is returned (or an optional default value).
+Returns the item at a given **numeric index** (negative indices count from the end). If the index is out of range, `undefined` is returned, or an optional default value (which may be a factory function).
 
 **Simple Example:**
 
 ```typescript
-const items = collect({ name: 'Anil', age: 25 })
+const items = collect(['a', 'b', 'c'])
 
-items.get('name')
-// => 'Anil'
-
-items.get('country', 'Unknown')
-// => 'Unknown'
+items.get(1) // => 'b'
+items.get(-1) // => 'c'
+items.get(10, 'fallback') // => 'fallback'
 ```
+
+::: tip Looking up an object key?
+`get` is index-based. To read a property from an element, use plain access or the `value(key)` helper:
+
+```typescript
+collect([{ name: 'Anil' }]).value('name') // => 'Anil'
+```
+
+:::
 
 ---
 
@@ -24,32 +31,31 @@ Groups the collection's items by a given key or callback.
 
 **Simple Key Example:**
 
-```typescript
+````typescript
 const users = collect([
   { id: 1, account_id: 'A' },
   { id: 2, account_id: 'B' },
   { id: 3, account_id: 'A' }
 ])
 
-const groups = users.groupBy('account_id')
+This is a **terminal** method — it returns a plain object (not a chainable collection).
 
-groups.all()
+```typescript
+users.groupBy('account_id')
 /*
 {
-    'A': [{ id: 1 }, { id: 3 }],
-    'B': [{ id: 2 }]
+    'A': [{ id: 1, account_id: 'A' }, { id: 3, account_id: 'A' }],
+    'B': [{ id: 2, account_id: 'B' }]
 }
 */
-```
+````
 
 **Complex Callback Example:**
 
 ```typescript
 const numbers = collect([1, 2, 3, 4, 5, 6])
 
-const parity = numbers.groupBy((num) => (num % 2 === 0 ? 'even' : 'odd'))
-
-parity.all()
+numbers.groupBy((num) => (num % 2 === 0 ? 'even' : 'odd'))
 /*
 {
     odd: [1, 3, 5],
@@ -67,7 +73,7 @@ Determines if a given key exists in the collection.
 **Simple Example:**
 
 ```typescript
-const items = collect({ a: 1, b: 2, c: 3 })
+const items = collect([{ a: 1, b: 2, c: 3 }])
 
 items.has('b') // => true
 items.has(['a', 'd']) // => false (requires ALL keys)
@@ -82,7 +88,7 @@ Determines whether any of the given keys exist in the collection.
 **Simple Example:**
 
 ```typescript
-const items = collect({ a: 1, b: 2 })
+const items = collect([{ a: 1, b: 2 }])
 
 items.hasAny(['b', 'c']) // => true
 ```
@@ -91,13 +97,16 @@ items.hasAny(['b', 'c']) // => true
 
 ## `hasMany` / `hasSole`
 
-These methods verify whether multiple keys, or exactly one solitary key, are present in the collection/object.
+`hasSole` returns `true` when the collection contains exactly one item; `hasMany` returns `true` when it contains more than one. Both accept an optional predicate, in which case they count only the matching items.
 
 ```typescript
-const items = collect({ role: 'admin' })
+collect([1]).hasSole() // => true
+collect([1, 2]).hasSole() // => false
+collect([1, 2, 3]).hasMany() // => true
 
-items.hasSole(['role', 'salary']) // => true (only role exists)
-items.hasMany(['role', 'salary']) // => false
+// With a predicate (count matching items):
+collect([{ age: 2 }, { age: 3 }]).hasSole((u) => u.age === 2) // => true
+collect([{ age: 2 }, { age: 2 }]).hasMany((u) => u.age === 2) // => true
 ```
 
 ---
@@ -146,14 +155,18 @@ intersection.all()
 
 ## `intersectAssoc` / `intersectByKeys`
 
-Comparisons that respect object keys and values (Assoc) or strictly keys (ByKeys).
+Per object element, keeps only the key/value pairs that also appear in the comparison object (`intersectAssoc`), or only the listed keys (`intersectByKeys`). The comparison argument is an **array** of objects (or a single-element one to represent a dictionary).
 
 ```typescript
-const user = collect({ id: 1, theme: 'dark' })
+const user = collect([{ id: 1, theme: 'dark' }])
 
-// Keeps key/value pairs that identically exist in both
-user.intersectAssoc({ theme: 'dark', verified: true }).all()
-// => { theme: 'dark' }
+// Keep key/value pairs present in both
+user.intersectAssoc([{ theme: 'dark', verified: true }]).all()
+// => [{ theme: 'dark' }]
+
+// Keep only the listed keys
+user.intersectByKeys(['theme']).all()
+// => [{ theme: 'dark' }]
 ```
 
 ---
@@ -193,32 +206,40 @@ Keys the collection by the given key. If multiple items have the same key, only 
 
 **Simple Example:**
 
+````typescript
+This is a **terminal** method — it returns a plain object (not a chainable collection).
+
 ```typescript
 const items = collect([
   { id: 'usr_1', email: 'alice@' },
   { id: 'usr_2', email: 'bob@' }
 ])
 
-items.keyBy('id').all()
+items.keyBy('id')
 /*
 {
     usr_1: { id: 'usr_1', email: 'alice@' },
     usr_2: { id: 'usr_2', email: 'bob@' }
 }
 */
-```
+````
 
 ---
 
 ## `keys`
 
-Returns all of the collection's dictionary keys.
+Returns the keys of the collection. For a list of objects it returns the union of the elements' property names; otherwise it returns the numeric indices as strings.
 
 **Simple Example:**
 
 ```typescript
-collect({ name: 'Anil', os: 'Mac' }).keys().all()
+collect([{ name: 'Anil', os: 'Mac' }])
+  .keys()
+  .all()
 // => ['name', 'os']
+
+collect(['a', 'b', 'c']).keys().all()
+// => ['0', '1', '2']
 ```
 
 ---
@@ -331,7 +352,7 @@ collect([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
 ## `mapWithKeys`
 
-Loops over the collection and expects you to return a single key/value array or tuple. It then constructs a dictionary object out of those return values.
+Loops over the collection, expecting a `[key, value]` tuple from the callback, and builds an object from those pairs. This is a **terminal** method — it returns a plain object (not a chainable collection).
 
 **Complex Example:**
 
@@ -341,11 +362,7 @@ const items = collect([
   { name: 'Jane', dev: 'Vue' }
 ])
 
-const dictionary = items.mapWithKeys((item) => {
-  return [item.name, item.dev]
-})
-
-dictionary.all()
+items.mapWithKeys((item) => [item.name, item.dev])
 // => { 'John': 'React', 'Jane': 'Vue' }
 ```
 
@@ -353,7 +370,7 @@ dictionary.all()
 
 ## `max` / `min`
 
-Returns the maximum or minimum value in the collection.
+Returns the maximum or minimum value in the collection by natural order. Works on numbers, strings, and `Date`s; `null`/`undefined` entries are ignored. For fully-typed non-numeric results, use `maxBy<R>` / `minBy<R>`.
 
 **Simple Example:**
 
@@ -361,7 +378,10 @@ Returns the maximum or minimum value in the collection.
 collect([10, 20, 30]).max() // => 30
 collect([10, 20, 30]).min() // => 10
 
-// Plucking nested details
+// Strings compare lexicographically
+collect(['banana', 'apple', 'cherry']).max() // => 'cherry'
+
+// By key / callback
 collect([{ score: 50 }, { score: 99 }]).max('score') // => 99
 ```
 
@@ -382,7 +402,7 @@ collect([10, 10, 20, 40]).mode() // => [10]
 
 ## `merge`
 
-Merges the given array or collection into the original collection. Overlapping string keys are overwritten.
+Merges the given **array(s) or collection(s)** into the original. List values are appended. When both the collection and the source each hold a single object, those objects are merged by key (later wins).
 
 **Simple Example:**
 
@@ -390,24 +410,26 @@ Merges the given array or collection into the original collection. Overlapping s
 collect(['a', 'b']).merge(['c', 'd']).all()
 // => ['a', 'b', 'c', 'd']
 
-collect({ a: 1 }).merge({ b: 2, a: 5 }).all()
-// => { a: 5, b: 2 }
+// Two single-object collections merge by key:
+collect([{ a: 1 }])
+  .merge([{ b: 2, a: 5 }])
+  .all()
+// => [{ a: 5, b: 2 }]
 ```
 
 ---
 
 ## `mergeRecursive`
 
-Merges dictionaries recursively. Instead of overwriting string keys, it will convert overlapping keys into depth-nested arrays.
+Recursively merges object elements. Overlapping array values are concatenated; overlapping scalar values are combined into arrays. The source is an **array/collection**.
 
 **Complex Example:**
 
 ```typescript
-const one = collect({ titles: ['Manager'] })
-const merged = one.mergeRecursive({ titles: ['Developer'] })
+const one = collect([{ titles: ['Manager'] }])
 
-merged.all()
-// => { titles: ['Manager', 'Developer'] }
+one.mergeRecursive([{ titles: ['Developer'] }]).all()
+// => [{ titles: ['Manager', 'Developer'] }]
 ```
 
 ---
