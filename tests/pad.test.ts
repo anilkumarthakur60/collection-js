@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('pad', () => {
   it('pads to the right when size is positive', () => {

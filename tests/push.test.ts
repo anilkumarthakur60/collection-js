@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('push', () => {
   it('appends a value to the collection', () => {

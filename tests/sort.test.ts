@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('sort', () => {
   it('sorts numbers in ascending order', () => {

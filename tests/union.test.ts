@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('union', () => {
   it('adds items not already in the collection', () => {

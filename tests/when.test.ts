@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('when', () => {
   it('calls callback when condition is true', () => {

@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('shuffle', () => {
   it('returns collection with same items', () => {

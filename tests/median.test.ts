@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('median', () => {
   it('returns median of odd-length collection', () => {

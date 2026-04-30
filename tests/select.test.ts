@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('select', () => {
   it('selects specific keys from objects', () => {

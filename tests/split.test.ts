@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('split', () => {
   it('splits into 2 groups', () => {

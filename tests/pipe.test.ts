@@ -1,4 +1,4 @@
-import { collect, Collection } from '../src/collect'
+import { collect, Collection } from '../src'
 
 describe('pipe', () => {
   it('passes the collection to a callback and returns the result', () => {

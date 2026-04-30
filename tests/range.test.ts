@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('range', () => {
   it('creates a range of numbers', () => {

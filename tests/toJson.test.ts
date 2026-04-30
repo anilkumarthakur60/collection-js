@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('toJson', () => {
   it('returns JSON string of items', () => {
