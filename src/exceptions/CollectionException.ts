@@ -1,7 +1,7 @@
-export abstract class CollectionException extends Error {
-  protected constructor(message: string, name: string) {
+export class CollectionException extends Error {
+  constructor(message: string) {
     super(message)
-    this.name = name
+    this.name = 'CollectionException'
     Object.setPrototypeOf(this, new.target.prototype)
   }
 }

@@ -1,4 +1,4 @@
-import { collect, LazyCollection } from '../src/collect'
+import { collect, LazyCollection } from '../src'
 
 describe('remember', () => {
   it('returns the same items on first enumeration', () => {

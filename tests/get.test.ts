@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('get', () => {
   it('returns item at given index', () => {

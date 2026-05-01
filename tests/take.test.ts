@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('take', () => {
   it('takes first N items', () => {

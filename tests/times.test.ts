@@ -1,4 +1,4 @@
-import { collect, Collection } from '../src/collect'
+import { collect, Collection } from '../src'
 
 describe('Collection.times (static)', () => {
   it('creates a collection by calling callback N times', () => {

@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('skip', () => {
   it('skips the first N items', () => {

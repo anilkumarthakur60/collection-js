@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('flatMap', () => {
   it('maps and flattens one level', () => {

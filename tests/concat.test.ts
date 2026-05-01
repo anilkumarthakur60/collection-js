@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('concat', () => {
   it('appends an array to the collection', () => {

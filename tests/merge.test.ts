@@ -1,16 +1,12 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('merge', () => {
-  it('merges another array into the collection', () => {
+  it('appends another array onto the collection', () => {
     expect(collect([1, 2]).merge([3, 4]).all()).toEqual([1, 2, 3, 4])
   })
 
   it('merges another Collection', () => {
-    expect(
-      collect([1, 2])
-        .merge(collect([3, 4]))
-        .all()
-    ).toEqual([1, 2, 3, 4])
+    expect(collect([1, 2]).merge(collect([3, 4])).all()).toEqual([1, 2, 3, 4])
   })
 
   it('merges multiple arrays', () => {
@@ -22,36 +18,41 @@ describe('merge', () => {
   })
 
   it('merging into empty collection returns the merged items', () => {
-    expect(collect([]).merge([1, 2, 3]).all()).toEqual([1, 2, 3])
+    expect(collect<number>([]).merge([1, 2, 3]).all()).toEqual([1, 2, 3])
   })
 
-  it('does not mutate original collection', () => {
+  it('does not mutate original when reassigned', () => {
     const c = collect([1, 2])
-    c.merge([3])
+    const merged = c.merge([3])
     expect(c.all()).toEqual([1, 2])
+    expect(merged.all()).toEqual([1, 2, 3])
+  })
+
+  it('merges associative records by overwriting matching keys', () => {
+    const result = collect([{ product_id: 1, price: 100 }]).merge([{ price: 200, discount: false }])
+    expect(result.all()).toEqual([{ product_id: 1, price: 200, discount: false }])
   })
 })
 
 describe('mergeRecursive', () => {
-  it('merges arrays recursively', () => {
-    const result = collect([1, 2]).mergeRecursive([3, 4]).all()
-    expect(result).toEqual([1, 2, 3, 4])
+  it('merges objects recursively, combining matching keys into arrays', () => {
+    const result = collect([{ product_id: 1, price: 100 }])
+      .mergeRecursive([{ product_id: 2, price: 200, discount: false }])
+      .all()
+    expect(result).toEqual([{ product_id: [1, 2], price: [100, 200], discount: false }])
   })
 
-  it('merges objects recursively', () => {
-    const a = [{ name: 'Alice', scores: [10] }]
-    const b = [{ name: 'Bob', scores: [20] }]
-    const result = collect(a).mergeRecursive(b).all()
-    expect(result[0]).toHaveProperty('name', 'Bob')
-    expect(result[0]).toHaveProperty('scores')
+  it('merges arrays as concatenation', () => {
+    const result = collect([{ scores: [10, 20] }]).mergeRecursive([{ scores: [30] }]).all()
+    expect(result).toEqual([{ scores: [10, 20, 30] }])
   })
 
-  it('merges empty array', () => {
-    expect(collect([1, 2]).mergeRecursive([]).all()).toEqual([1, 2])
+  it('returns original when merging empty', () => {
+    expect(collect([{ a: 1 }]).mergeRecursive([]).all()).toEqual([{ a: 1 }])
   })
 
-  it('merges with multiple arrays', () => {
-    const result = collect([1]).mergeRecursive([2], [3]).all()
-    expect(result).toEqual([1, 2, 3])
+  it('merges with multiple sources', () => {
+    const result = collect([{ x: 1 }]).mergeRecursive([{ x: 2 }], [{ x: 3 }]).all()
+    expect(result).toEqual([{ x: [[1, 2], 3] }])
   })
 })

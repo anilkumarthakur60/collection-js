@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('reverse', () => {
   it('reverses the order of items', () => {

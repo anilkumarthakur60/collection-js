@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('push', () => {
   it('appends a value to the collection', () => {
@@ -13,7 +13,7 @@ describe('push', () => {
     expect(c.all()).toEqual([1, 2, 3, 4])
   })
 
-  it('mutates the collection in place', () => {
+  it('returns the collection itself for chaining', () => {
     const c = collect([1, 2])
     const returned = c.push(3)
     expect(returned).toBe(c)
@@ -27,49 +27,58 @@ describe('push', () => {
 })
 
 describe('prepend', () => {
-  it('adds a value at the beginning', () => {
-    expect(collect([2, 3]).prepend(1).all()).toEqual([1, 2, 3])
+  it('adds a value at the beginning (mutating, Laravel parity)', () => {
+    const c = collect([2, 3])
+    c.prepend(1)
+    expect(c.all()).toEqual([1, 2, 3])
   })
 
   it('works on empty collection', () => {
-    expect(collect<number>([]).prepend(1).all()).toEqual([1])
+    const c = collect<number>([])
+    c.prepend(1)
+    expect(c.all()).toEqual([1])
   })
 
-  it('does not mutate original', () => {
+  it('returns the collection for chaining', () => {
     const c = collect([2, 3])
-    c.prepend(1)
-    expect(c.all()).toEqual([2, 3])
+    expect(c.prepend(1)).toBe(c)
   })
 })
 
 describe('pull', () => {
-  it('removes a specific value from the collection', () => {
-    expect(collect([1, 2, 3, 2]).pull(2).all()).toEqual([1, 3])
+  it('removes the first matching value and returns it', () => {
+    const c = collect([1, 2, 3])
+    expect(c.pull(2)).toBe(2)
+    expect(c.all()).toEqual([1, 3])
   })
 
-  it('returns same collection when value not found', () => {
-    expect(collect([1, 2, 3]).pull(99).all()).toEqual([1, 2, 3])
+  it('returns undefined when value not found', () => {
+    const c = collect([1, 2, 3])
+    expect(c.pull(99)).toBeUndefined()
+    expect(c.all()).toEqual([1, 2, 3])
   })
 
-  it('removes all occurrences', () => {
-    expect(collect([1, 2, 1, 2]).pull(1).all()).toEqual([2, 2])
+  it('removes only the first occurrence', () => {
+    const c = collect([1, 2, 1, 2])
+    expect(c.pull(1)).toBe(1)
+    expect(c.all()).toEqual([2, 1, 2])
   })
 
   it('works on empty collection', () => {
-    expect(collect([]).pull(1).all()).toEqual([])
+    expect(collect<number>([]).pull(1)).toBeUndefined()
   })
 })
 
 describe('put', () => {
-  it('sets a key on all items to the given value', () => {
+  it('returns a new Collection with a key set on every item', () => {
     const items = [
       { id: 1, active: false },
-      { id: 2, active: false }
+      { id: 2, active: false },
     ]
     const result = collect(items).put('active', true)
     expect(result.all()).toEqual([
       { id: 1, active: true },
-      { id: 2, active: true }
+      { id: 2, active: true },
     ])
   })
 

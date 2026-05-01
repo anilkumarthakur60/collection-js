@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('intersect', () => {
   it('returns items that exist in both collections', () => {
@@ -14,53 +14,60 @@ describe('intersect', () => {
   })
 
   it('returns empty for empty collection', () => {
-    expect(collect([]).intersect([1, 2]).all()).toEqual([])
+    expect(collect<number>([]).intersect([1, 2]).all()).toEqual([])
   })
 
   it('works with strings', () => {
     expect(collect(['a', 'b', 'c']).intersect(['b', 'c', 'd']).all()).toEqual(['b', 'c'])
   })
+
+  it('accepts a Collection argument', () => {
+    expect(collect([1, 2, 3]).intersect(collect([2, 3])).all()).toEqual([2, 3])
+  })
 })
 
 describe('intersectUsing', () => {
-  it('uses callback for comparison', () => {
+  it('uses comparator for equality', () => {
     const result = collect([1, 2, 3]).intersectUsing([2, 4], (a, b) => a - b)
     expect(result.all()).toEqual([2])
   })
 
-  it('returns empty when no items match', () => {
+  it('returns empty when comparator never matches', () => {
     const result = collect([1, 3, 5]).intersectUsing([2, 4], (a, b) => a - b)
     expect(result.all()).toEqual([])
   })
 })
 
 describe('intersectAssoc', () => {
-  it('returns items present in both arrays', () => {
-    expect(collect([1, 2, 3]).intersectAssoc([2, 3, 4]).all()).toEqual([2, 3])
-  })
-
-  it('returns empty when no match', () => {
-    expect(collect([1, 2]).intersectAssoc([3, 4]).all()).toEqual([])
+  it('keeps key/value pairs present in both objects', () => {
+    const items = [{ color: 'red', size: 'M', material: 'cotton' }]
+    const result = collect(items).intersectAssoc([{ color: 'blue', size: 'M', material: 'polyester' }])
+    expect(result.all()).toEqual([{ size: 'M' }])
   })
 })
 
 describe('intersectAssocUsing', () => {
-  it('intersects objects by key comparison callback', () => {
-    const items = [{ name: 'Alice', age: 30 }]
-    const values = { name: 'Alice', age: 30 }
-    const result = collect(items).intersectAssocUsing(values, (a, b) => a.localeCompare(b))
-    expect(result.count()).toBe(1)
+  it('uses comparator for both keys and values', () => {
+    const items = [{ color: 'red', Size: 'M', material: 'cotton' }]
+    const cmp = (a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase())
+    const result = collect(items).intersectAssocUsing(
+      { color: 'blue', size: 'M', material: 'polyester' },
+      cmp,
+    )
+    expect(result.all()).toEqual([{ Size: 'M' }])
   })
 })
 
 describe('intersectByKeys', () => {
-  it('returns items that match given keys', () => {
-    const result = collect(['a', 'b', 'c']).intersectByKeys(['a', 'c'] as unknown as string[])
-    expect(result.all()).toEqual(['a', 'c'])
+  it('keeps only keys present in the given list', () => {
+    const items = [{ serial: 'UX301', type: 'screen', year: 2009 }]
+    const result = collect(items).intersectByKeys(['type', 'year'])
+    expect(result.all()).toEqual([{ type: 'screen', year: 2009 }])
   })
 
-  it('returns empty when no items match', () => {
-    const result = collect([1, 2, 3]).intersectByKeys([4, 5] as unknown as number[])
-    expect(result.all()).toEqual([])
+  it('returns objects with no overlap as empty objects', () => {
+    const items = [{ a: 1 }]
+    const result = collect(items).intersectByKeys(['z'])
+    expect(result.all()).toEqual([{}])
   })
 })
