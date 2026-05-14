@@ -31,6 +31,21 @@ describe('max', () => {
   it('works with floats', () => {
     expect(collect([1.1, 2.5, 1.9]).max()).toBe(2.5)
   })
+
+  it('compares strings lexicographically', () => {
+    expect(collect(['banana', 'apple', 'cherry']).max()).toBe('cherry')
+  })
+
+  it('compares Date values chronologically', () => {
+    const a = new Date('2020-01-01')
+    const b = new Date('2023-06-15')
+    const c = new Date('2021-12-31')
+    expect(collect([a, b, c]).max()).toBe(b)
+  })
+
+  it('ignores null/undefined entries', () => {
+    expect(collect([3, null, 7, undefined, 5]).max()).toBe(7)
+  })
 })
 
 describe('min', () => {
@@ -54,5 +69,13 @@ describe('min', () => {
 
   it('works with negative numbers', () => {
     expect(collect([-1, -5, -3]).min()).toBe(-5)
+  })
+
+  it('compares strings lexicographically', () => {
+    expect(collect(['banana', 'apple', 'cherry']).min()).toBe('apple')
+  })
+
+  it('ignores null/undefined entries', () => {
+    expect(collect([3, null, 7, undefined, 5]).min()).toBe(3)
   })
 })

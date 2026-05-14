@@ -230,11 +230,11 @@ export class LazyCollection<T> implements Enumerable<T> {
   avg(by?: RetrieverInput<T, number>): number {
     return ops.averageOf(this.all(), by)
   }
-  max(by?: RetrieverInput<T, number>): number | undefined {
-    return ops.maxOf(this.all(), by)
+  max<R = number>(by?: RetrieverInput<T, R>): R | undefined {
+    return ops.maxOf<T, R>(this.all(), by)
   }
-  min(by?: RetrieverInput<T, number>): number | undefined {
-    return ops.minOf(this.all(), by)
+  min<R = number>(by?: RetrieverInput<T, R>): R | undefined {
+    return ops.minOf<T, R>(this.all(), by)
   }
   median(by?: RetrieverInput<T, number>): number | undefined {
     return ops.medianOf(this.all(), by)
@@ -276,23 +276,33 @@ export class LazyCollection<T> implements Enumerable<T> {
     return this.filter((item) => operatorForWhere(dataGet(item, key), spec.operator, spec.value))
   }
 
-  whereIn(key: string, values: readonly unknown[], strict = false): LazyCollection<T> {
-    return this.filter((item) => {
-      const got = dataGet(item, key)
-      return values.some((v) => (strict ? v === got || deepEqual(v, got) : looseEqual(v, got)))
-    })
+  whereIn(key: string, values: readonly unknown[]): LazyCollection<T> {
+    return this.whereInFilter(key, values, false, false)
   }
   whereInStrict(key: string, values: readonly unknown[]): LazyCollection<T> {
-    return this.whereIn(key, values, true)
+    return this.whereInFilter(key, values, true, false)
   }
-  whereNotIn(key: string, values: readonly unknown[], strict = false): LazyCollection<T> {
-    return this.filter((item) => {
-      const got = dataGet(item, key)
-      return !values.some((v) => (strict ? v === got || deepEqual(v, got) : looseEqual(v, got)))
-    })
+  whereNotIn(key: string, values: readonly unknown[]): LazyCollection<T> {
+    return this.whereInFilter(key, values, false, true)
   }
   whereNotInStrict(key: string, values: readonly unknown[]): LazyCollection<T> {
-    return this.whereNotIn(key, values, true)
+    return this.whereInFilter(key, values, true, true)
+  }
+
+  /** Shared engine for the four whereIn/whereNotIn variants. */
+  private whereInFilter(
+    key: string,
+    values: readonly unknown[],
+    strict: boolean,
+    negate: boolean
+  ): LazyCollection<T> {
+    return this.filter((item) => {
+      const got = dataGet(item, key)
+      const present = values.some((v) =>
+        strict ? v === got || deepEqual(v, got) : looseEqual(v, got)
+      )
+      return negate ? !present : present
+    })
   }
 
   whereBetween(key: string, range: readonly [unknown, unknown]): LazyCollection<T> {
@@ -314,6 +324,24 @@ export class LazyCollection<T> implements Enumerable<T> {
   }
   whereNotNull(key: string): LazyCollection<T> {
     return this.filter((item) => dataGet(item, key) != null)
+  }
+
+  /** Lazy SQL-`LIKE` filter (`%` = any run, `_` = single char). See {@link Collection.whereLike}. */
+  whereLike(key: string, pattern: string, caseSensitive = false): LazyCollection<T> {
+    const re = ops.likeToRegExp(pattern, caseSensitive)
+    return this.filter((item) => {
+      const value = dataGet(item, key)
+      return value != null && re.test(String(value))
+    })
+  }
+
+  /** Inverse of {@link whereLike}. */
+  whereNotLike(key: string, pattern: string, caseSensitive = false): LazyCollection<T> {
+    const re = ops.likeToRegExp(pattern, caseSensitive)
+    return this.filter((item) => {
+      const value = dataGet(item, key)
+      return !(value != null && re.test(String(value)))
+    })
   }
 
   whereInstanceOf<R>(

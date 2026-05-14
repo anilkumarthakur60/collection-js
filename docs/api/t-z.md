@@ -105,8 +105,11 @@ Returns the structural, serialized JSON equivalent string representing the items
 **Simple Example:**
 
 ```typescript
-collect({ name: 'anil' }).toJson()
-// => '{"name":"anil"}'
+collect([{ name: 'anil' }]).toJson()
+// => '[{"name":"anil"}]'
+
+collect([1, 2, 3]).toJson()
+// => '[1,2,3]'
 ```
 
 ---
@@ -118,12 +121,14 @@ Returns pretty-printed, indented JSON using `JSON.stringify` whitespace styling.
 **Simple Example:**
 
 ```typescript
-collect({ a: 1, b: 2 }).toPrettyJson()
+collect([{ a: 1, b: 2 }]).toPrettyJson()
 /*
-{
+[
+  {
     "a": 1,
     "b": 2
-}
+  }
+]
 */
 ```
 
@@ -147,33 +152,35 @@ items.all() // => ['APPLE']
 
 ## `undot`
 
-Expands a single-dimensional array that uses "dot" notation into a multi-dimensional associative dictionary.
+Expands a dot-keyed object into a nested one. Pass the dot-keyed object as a single element; the result is wrapped in a collection.
 
 **Complex Example:**
 
 ```typescript
-const items = collect({
-  'user.name': 'Anil',
-  'user.framework': 'Laravel'
-})
+const items = collect([
+  {
+    'user.name': 'Anil',
+    'user.framework': 'Laravel'
+  }
+])
 
 items.undot().all()
-// => { user: { name: 'Anil', framework: 'Laravel' } }
+// => [{ user: { name: 'Anil', framework: 'Laravel' } }]
 ```
 
 ---
 
 ## `union`
 
-Adds the given array to the collection. If the overlapping keys match, the _original_ collection's values override.
+Appends the items from the given array/collection that are not already present (compared by value), returning a new collection.
 
 **Simple Example:**
 
 ```typescript
-const original = collect({ a: 'X' })
+const original = collect(['a', 'b'])
 
-original.union({ a: 'Y', b: 'Z' }).all()
-// => { a: 'X', b: 'Z' }
+original.union(['b', 'c']).all()
+// => ['a', 'b', 'c']
 ```
 
 ---
@@ -303,6 +310,20 @@ collect([{ age: 10 }, { age: 20 }]).whereIn('age', [20, 30])
 
 ```typescript
 collect([{ name: 'Anil' }, { name: null }]).whereNull('name')
+```
+
+### `whereLike` / `whereNotLike`
+
+Filters by an SQL-`LIKE` pattern where `%` matches any run of characters and `_` matches exactly one. Matching is case-insensitive unless a third `caseSensitive` argument of `true` is passed. `whereNotLike` returns the complement.
+
+```typescript
+collect([{ name: 'Alice Smith' }, { name: 'Bob Jones' }]).whereLike('name', '%Smith')
+// => [{ name: 'Alice Smith' }]
+
+collect([{ sku: 'A1' }, { sku: 'A12' }]).whereLike('sku', 'A_')
+// => [{ sku: 'A1' }]
+
+collect([{ email: 'alice@x.com' }]).whereLike('email', 'alice%', true) // case-sensitive
 ```
 
 ### `whereInstanceOf`

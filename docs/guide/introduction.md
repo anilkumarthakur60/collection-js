@@ -4,7 +4,7 @@ Welcome to **@anilkumarthakur/collection-js**!
 
 This library provides a fluent, highly readable, and chainable API for working with arrays of data in JavaScript and TypeScript.
 
-It is heavily inspired by the beloved and incredibly powerful **Laravel Collection** API, bringing over 120+ methods of data-manipulation joy to the JavaScript ecosystem.
+It is heavily inspired by the beloved and incredibly powerful **Laravel Collection** API, bringing 150+ methods of data-manipulation joy to the JavaScript ecosystem — full Laravel parity plus statistics, SQL-style joins, combinatorics, async streams, and CSV/JSONL I/O.
 
 ## Why Collections?
 
@@ -42,8 +42,9 @@ const activeNames = collect(users).where('active', true).sortByDesc('age').pluck
 ## Features
 
 - 🔗 **Fluent & Chainable:** Never break your train of thought. Chain methods indefinitely.
-- 🦋 **TypeScript Native:** Deep type-inference helps ensure robust code.
-- ⚡ **Tree-Shakable:** Need just one method? Import only what you need to keep bundles small.
-- 💤 **Lazy Evaluation:** Handle infinite data or gigantic lists seamlessly with `LazyCollection`.
-- 🐘 **Laravel Parity:** Backed by 120+ identical algorithms pulled straight from Laravel 13.x.
-- ✅ **100% Tested:** Robustly tested against edge-cases.
+- 🦋 **Strict TypeScript:** Deep type-inference and a strict, `any`-free public surface.
+- ⚡ **Tree-Shakable:** Zero runtime dependencies; every method is also a standalone pure function.
+- 💤 **Lazy & Async:** Handle infinite data with `LazyCollection`, or stream `AsyncIterable` sources with `AsyncCollection`.
+- 🐘 **Laravel Parity:** Mirrors the Laravel 13.x Collections API one-to-one.
+- 📊 **Beyond Laravel:** Statistics, SQL-style joins, combinatorics, and CSV/JSONL I/O. See [Beyond Laravel](/guide/beyond-laravel).
+- ✅ **Thoroughly Tested:** Backed by a comprehensive, edge-case-driven test suite.

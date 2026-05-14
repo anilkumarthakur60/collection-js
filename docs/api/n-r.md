@@ -28,20 +28,15 @@ items.nth(2, 1).all()
 
 ## `only`
 
-Returns only the items in the collection with the specified keys (for dictionaries and objects).
+Keeps only the specified keys on each object element, returning a `Collection<Partial<T>>`.
 
 **Simple Example:**
 
 ```typescript
-const user = collect({
-  id: 1,
-  name: 'Anil',
-  role: 'Admin',
-  email: 'anil@example.com'
-})
+const user = collect([{ id: 1, name: 'Anil', role: 'Admin', email: 'anil@example.com' }])
 
 user.only(['id', 'email']).all()
-// => { id: 1, email: 'anil@example.com' }
+// => [{ id: 1, email: 'anil@example.com' }]
 ```
 
 ---
@@ -179,11 +174,11 @@ apps.pluck('title').all()
 // => ['Arc', 'Edge']
 ```
 
-**Complex Example (With index keys):**
-If you wish, you can pass a second argument to dictate what the resulting keys should be.
+**Complex Example (Keyed result):**
+Passing a second argument keys the result by that field. With two arguments `pluck` is **terminal** — it returns a plain object directly (no `.all()`).
 
 ```typescript
-apps.pluck('title', 'os').all()
+apps.pluck('title', 'os')
 // => { mac: 'Arc', windows: 'Edge' }
 ```
 
@@ -207,7 +202,7 @@ items.all() // => [1, 2]
 
 ## `prepend`
 
-Adds an item to the beginning of the collection.
+Adds an item to the beginning of the collection, **in place**.
 
 **Simple Example:**
 
@@ -216,28 +211,23 @@ const items = collect([1, 2, 3])
 
 items.prepend(0).all()
 // => [0, 1, 2, 3]
-
-// For objects, specify an associating key
-const dict = collect({ a: 1, b: 2 })
-dict.prepend('value', 'key').all()
-// => { key: 'value', a: 1, b: 2 }
 ```
 
 ---
 
 ## `pull`
 
-Removes and returns an item from the collection by its key. Functions like a destructor for an object property.
+Removes and returns the first item **equal to the given value**, mutating the collection in place. Returns `undefined` if no item matches.
 
 **Simple Example:**
 
 ```typescript
-const config = collect({ host: 'localhost', port: 3306 })
+const items = collect(['a', 'b', 'c'])
 
-const port = config.pull('port') // => 3306
+const removed = items.pull('b') // => 'b'
 
-config.all()
-// => { host: 'localhost' }
+items.all()
+// => ['a', 'c']
 ```
 
 ---
@@ -259,15 +249,15 @@ items.push(4).all()
 
 ## `put`
 
-Sets the given key and value in the collection dictionary.
+Sets the given key/value on **every object element**, returning a new collection.
 
 **Simple Example:**
 
 ```typescript
-const items = collect({ a: 1 })
+const items = collect([{ a: 1 }])
 
 items.put('b', 2).all()
-// => { a: 1, b: 2 }
+// => [{ a: 1, b: 2 }]
 ```
 
 ---
@@ -367,42 +357,36 @@ safe.all()
 
 ## `replace`
 
-Replaces the items in the collection with the matching corresponding items from the passed array/collection. Items that don't match are left untouched.
+Replaces elements at the given **numeric indices** with new values, returning a new collection. The argument is an index→value map.
 
 **Simple Example:**
 
 ```typescript
 const first = collect(['Taylor', 'Abigail', 'Otis'])
 
-// "Otis" is replaced by "Victoria" because they share index 2
-first.replace([1, 2, 'Victoria']).all()
+// Replace the element at index 2
+first.replace({ 2: 'Victoria' }).all()
 // => ['Taylor', 'Abigail', 'Victoria']
-
-// For dictionaries:
-const config = collect({ db: 'mysql', port: 3306 })
-config.replace({ port: 5432 }).all()
-// => { db: 'mysql', port: 5432 }
 ```
 
 ---
 
 ## `replaceRecursive`
 
-Works exactly like `replace`, but it will recurse deeply into dictionaries/arrays.
+Works like `replace`, but recurses deeply into nested objects/arrays. The patch argument is an **array** applied element-wise.
 
 **Complex Example:**
 
 ```typescript
-const items = collect({
-  os: 'Mac',
-  specs: {
-    ram: '16gb',
-    cpu: 'm1'
+const items = collect([
+  {
+    os: 'Mac',
+    specs: { ram: '16gb', cpu: 'm1' }
   }
-})
+])
 
-items.replaceRecursive({ specs: { ram: '32gb' } }).all()
-// => { os: 'Mac', specs: { ram: '32gb', cpu: 'm1' } }
+items.replaceRecursive([{ specs: { ram: '32gb' } }]).all()
+// => [{ os: 'Mac', specs: { ram: '32gb', cpu: 'm1' } }]
 ```
 
 ---
