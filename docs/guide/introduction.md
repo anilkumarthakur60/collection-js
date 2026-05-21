@@ -1,6 +1,6 @@
 # Introduction
 
-Welcome to **@anilkumarthakur/collection-js**!
+Welcome to **@anil-labs/collection-js**!
 
 This library provides a fluent, highly readable, and chainable API for working with arrays of data in JavaScript and TypeScript.
 
@@ -32,7 +32,7 @@ const activeNames = users
 ### Collection Approach (Fluent & Elegant)
 
 ```typescript
-import collect from '@anilkumarthakur/collection-js'
+import collect from '@anil-labs/collection-js'
 
 const activeNames = collect(users).where('active', true).sortByDesc('age').pluck('name').all()
 

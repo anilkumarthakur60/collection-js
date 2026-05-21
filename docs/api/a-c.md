@@ -7,7 +7,7 @@ Returns the item in the collection occurring immediately after the given item. R
 **Basic Setup:**
 
 ```typescript
-import collect from '@anilkumarthakur/collection-js'
+import collect from '@anil-labs/collection-js'
 
 const items = collect([1, 2, 3, 4, 5])
 ```
