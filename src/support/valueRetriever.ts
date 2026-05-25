@@ -1,4 +1,4 @@
-import { dataGet } from './dataGet'
+import { dataGet } from '@/support/dataGet'
 
 export type RetrieverInput<T, R = unknown> = ((item: T, index: number) => R) | keyof T | string
 

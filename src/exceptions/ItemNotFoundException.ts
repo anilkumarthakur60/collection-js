@@ -1,4 +1,4 @@
-import { CollectionException } from './CollectionException'
+import { CollectionException } from '@/exceptions/CollectionException'
 
 export class ItemNotFoundException extends CollectionException {
   constructor(message: string = 'Item not found.') {

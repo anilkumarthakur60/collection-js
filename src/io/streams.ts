@@ -1,4 +1,4 @@
-import { AsyncCollection } from '../async/AsyncCollection'
+import { AsyncCollection } from '@/async/AsyncCollection'
 
 /**
  * Adapter for any Node `Readable` (or ReadableStream) that implements

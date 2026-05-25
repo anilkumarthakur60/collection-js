@@ -1,4 +1,4 @@
-import { isObjectLike } from './isObject'
+import { isObjectLike } from '@/support/isObject'
 
 /**
  * Resolve a nested value from an object/array using "dot" notation, mirroring

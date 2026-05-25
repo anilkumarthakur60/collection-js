@@ -11,6 +11,9 @@ const config: Config.InitialOptions = {
             },
         }],
     },
+    moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+    },
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     testMatch: ['**/tests/**/*.test.ts'],
 };

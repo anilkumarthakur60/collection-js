@@ -1,5 +1,5 @@
-import { CollectionException } from '../exceptions/CollectionException'
-import { shuffleOf } from './sorting'
+import { CollectionException } from '@/exceptions/CollectionException'
+import { shuffleOf } from '@/operations/sorting'
 
 export function randomOne<T>(
   items: readonly T[],

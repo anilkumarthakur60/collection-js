@@ -1,2 +1,2 @@
-export { collect } from './collect'
-export { lazy } from './lazy'
+export { collect } from '@/helpers/collect'
+export { lazy } from '@/helpers/lazy'

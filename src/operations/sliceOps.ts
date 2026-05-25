@@ -1,5 +1,5 @@
-import { looseEqual } from '../support/deepEqual'
-import type { Predicate } from '../support/types'
+import { looseEqual } from '@/support/deepEqual'
+import type { Predicate } from '@/support/types'
 
 export function takeOf<T>(items: readonly T[], count: number): T[] {
   if (count < 0) return items.slice(count)

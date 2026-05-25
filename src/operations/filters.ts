@@ -1,7 +1,7 @@
-import { dataGet } from '../support/dataGet'
-import { deepEqual, looseEqual } from '../support/deepEqual'
-import { operatorForWhere, isOperator } from '../support/operatorForWhere'
-import type { ClassConstructor, Operator, Predicate } from '../support/types'
+import { dataGet } from '@/support/dataGet'
+import { deepEqual, looseEqual } from '@/support/deepEqual'
+import { operatorForWhere, isOperator } from '@/support/operatorForWhere'
+import type { ClassConstructor, Operator, Predicate } from '@/support/types'
 
 export function filterOf<T>(items: readonly T[], predicate?: Predicate<T>): T[] {
   if (predicate === undefined) return items.filter((v) => Boolean(v))

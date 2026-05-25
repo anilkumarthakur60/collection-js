@@ -1,20 +1,20 @@
-import type { Enumerable } from '../contracts/Enumerable'
-import { ItemNotFoundException } from '../exceptions/ItemNotFoundException'
-import { UnexpectedValueException } from '../exceptions/UnexpectedValueException'
-import { applyMacroable, type MacroableTarget } from '../macros/Macroable'
-import * as ops from '../operations'
-import { deepClone } from '../support/deepClone'
-import { arrayWrap, ensureArray, toArray } from '../support/arrayWrap'
-import { valueRetriever } from '../support/valueRetriever'
+import type { Enumerable } from '@/contracts/Enumerable'
+import { ItemNotFoundException } from '@/exceptions/ItemNotFoundException'
+import { UnexpectedValueException } from '@/exceptions/UnexpectedValueException'
+import { applyMacroable, type MacroableTarget } from '@/macros/Macroable'
+import * as ops from '@/operations'
+import { deepClone } from '@/support/deepClone'
+import { arrayWrap, ensureArray, toArray } from '@/support/arrayWrap'
+import { valueRetriever } from '@/support/valueRetriever'
 import type {
   ClassConstructor,
   Comparator,
   Operator,
   Predicate,
   SortDirection
-} from '../support/types'
-import type { RetrieverInput } from '../support/valueRetriever'
-import { dataGet } from '../support/dataGet'
+} from '@/support/types'
+import type { RetrieverInput } from '@/support/valueRetriever'
+import { dataGet } from '@/support/dataGet'
 
 type RI<T, R = unknown> = RetrieverInput<T, R>
 

@@ -1,6 +1,6 @@
-import { dataGet, dataSet } from '../support/dataGet'
-import { deepClone } from '../support/deepClone'
-import { isObjectLike, isPlainObject } from '../support/isObject'
+import { dataGet, dataSet } from '@/support/dataGet'
+import { deepClone } from '@/support/deepClone'
+import { isObjectLike, isPlainObject } from '@/support/isObject'
 
 export function pluckOf<T>(
   items: readonly T[],

@@ -1,5 +1,5 @@
-import type { Arrayable } from './Arrayable'
-import type { Jsonable } from './Jsonable'
+import type { Arrayable } from '@/contracts/Arrayable'
+import type { Jsonable } from '@/contracts/Jsonable'
 
 /**
  * Shared contract between Collection<T> and LazyCollection<T>.

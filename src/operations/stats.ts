@@ -1,4 +1,4 @@
-import { valueRetriever, type RetrieverInput } from '../support/valueRetriever'
+import { valueRetriever, type RetrieverInput } from '@/support/valueRetriever'
 
 function toNumberArray<T>(items: readonly T[], by?: RetrieverInput<T, number>): number[] {
   const get = valueRetriever<T, number>(by)

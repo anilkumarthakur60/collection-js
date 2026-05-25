@@ -1,25 +1,25 @@
 {
   "name": "@anilkumarthakur/collection-js",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Provides 120+ chainable methods for elegant array manipulation.",
   "private": false,
   "license": "MIT",
   "type": "module",
-  "main": "dist/index.umd.js",
+  "main": "dist/index.umd.cjs",
   "module": "dist/index.es.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/src/index.d.ts",
   "sideEffects": false,
   "files": [
-    "/dist"
+    "dist"
   ],
   "publishConfig": {
     "access": "public"
   },
   "exports": {
     ".": {
+      "types": "./dist/src/index.d.ts",
       "import": "./dist/index.es.js",
-      "require": "./dist/index.umd.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.umd.cjs"
     }
   },
   "repository": {
@@ -33,9 +33,18 @@
   "engines": {
     "node": ">=16"
   },
+  "peerDependencies": {
+    "@types/node": ">=16"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "prepublishOnly": "npm run build && npm test",
     "preview": "vite preview",
     "test": "jest",
     "lint": "eslint . --fix",

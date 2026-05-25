@@ -1,5 +1,5 @@
-import { deepEqual, looseEqual } from '../support/deepEqual'
-import { valueRetriever, type RetrieverInput } from '../support/valueRetriever'
+import { deepEqual, looseEqual } from '@/support/deepEqual'
+import { valueRetriever, type RetrieverInput } from '@/support/valueRetriever'
 
 export function uniqueOf<T>(items: readonly T[], by?: RetrieverInput<T>, strict = false): T[] {
   const get = by !== undefined ? valueRetriever<T, unknown>(by) : (item: T) => item as unknown

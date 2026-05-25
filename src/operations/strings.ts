@@ -1,4 +1,4 @@
-import { dataGet } from '../support/dataGet'
+import { dataGet } from '@/support/dataGet'
 
 export function implodeOf<T>(
   items: readonly T[],

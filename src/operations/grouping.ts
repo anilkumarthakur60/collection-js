@@ -1,4 +1,4 @@
-import { valueRetriever, type RetrieverInput } from '../support/valueRetriever'
+import { valueRetriever, type RetrieverInput } from '@/support/valueRetriever'
 
 export function groupByOf<T, K extends PropertyKey = PropertyKey>(
   items: readonly T[],

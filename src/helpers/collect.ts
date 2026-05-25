@@ -1,4 +1,4 @@
-import { Collection } from '../collection/Collection'
+import { Collection } from '@/collection/Collection'
 
 /** Laravel's `collect()` helper — wraps any iterable/array-like into a Collection. */
 export function collect<T>(

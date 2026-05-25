@@ -1,4 +1,4 @@
-import type { MacroFn } from '../contracts/Macroable'
+import type { MacroFn } from '@/contracts/Macroable'
 
 /**
  * A reference to a class. We accept both regular and abstract constructors

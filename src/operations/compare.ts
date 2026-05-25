@@ -1,7 +1,7 @@
-import { dataGet } from '../support/dataGet'
-import { deepEqual, looseEqual } from '../support/deepEqual'
-import { isObjectLike } from '../support/isObject'
-import type { Predicate } from '../support/types'
+import { dataGet } from '@/support/dataGet'
+import { deepEqual, looseEqual } from '@/support/deepEqual'
+import { isObjectLike } from '@/support/isObject'
+import type { Predicate } from '@/support/types'
 
 export type ContainsArg<T> = T | Predicate<T> | Partial<T> | { [key: string]: unknown }
 

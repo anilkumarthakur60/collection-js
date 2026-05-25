@@ -1,4 +1,4 @@
-import { CollectionException } from './CollectionException'
+import { CollectionException } from '@/exceptions/CollectionException'
 
 export class UnexpectedValueException extends CollectionException {
   constructor(message: string = 'Unexpected value encountered.') {

@@ -1,4 +1,4 @@
-import { isArrayable } from '../contracts/Arrayable'
+import { isArrayable } from '@/contracts/Arrayable'
 
 /** Convert any iterable / Arrayable / single value into a plain array. */
 export function toArray<T>(value: Iterable<T> | ArrayLike<T> | T): T[] {

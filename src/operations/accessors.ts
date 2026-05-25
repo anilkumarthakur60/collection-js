@@ -1,10 +1,10 @@
-import { ItemNotFoundException } from '../exceptions/ItemNotFoundException'
-import { MultipleItemsFoundException } from '../exceptions/MultipleItemsFoundException'
-import { dataGet } from '../support/dataGet'
-import { isObjectLike } from '../support/isObject'
-import { looseEqual } from '../support/deepEqual'
-import { operatorForWhere, isOperator } from '../support/operatorForWhere'
-import type { Operator, Predicate } from '../support/types'
+import { ItemNotFoundException } from '@/exceptions/ItemNotFoundException'
+import { MultipleItemsFoundException } from '@/exceptions/MultipleItemsFoundException'
+import { dataGet } from '@/support/dataGet'
+import { isObjectLike } from '@/support/isObject'
+import { looseEqual } from '@/support/deepEqual'
+import { operatorForWhere, isOperator } from '@/support/operatorForWhere'
+import type { Operator, Predicate } from '@/support/types'
 
 export function firstOf<T>(items: readonly T[], predicate?: Predicate<T>): T | undefined {
   if (predicate === undefined) return items.length > 0 ? items[0] : undefined

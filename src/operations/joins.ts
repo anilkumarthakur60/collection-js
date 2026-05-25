@@ -1,4 +1,4 @@
-import { valueRetriever, type RetrieverInput } from '../support/valueRetriever'
+import { valueRetriever, type RetrieverInput } from '@/support/valueRetriever'
 
 export type JoinResult<L, R, M> = M extends (left: L, right: R) => infer U ? U : [L, R]
 

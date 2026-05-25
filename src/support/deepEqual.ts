@@ -1,4 +1,4 @@
-import { isObjectLike } from './isObject'
+import { isObjectLike } from '@/support/isObject'
 
 /**
  * Recursive structural equality for arrays, plain objects, primitives, Date, RegExp.

@@ -1,4 +1,4 @@
-import { valueRetriever, type RetrieverInput } from '../support/valueRetriever'
+import { valueRetriever, type RetrieverInput } from '@/support/valueRetriever'
 
 function toNumber(value: unknown): number {
   if (typeof value === 'number') return value

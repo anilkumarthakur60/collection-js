@@ -1,4 +1,4 @@
-import { CollectionException } from './CollectionException'
+import { CollectionException } from '@/exceptions/CollectionException'
 
 export class MultipleItemsFoundException extends CollectionException {
   public readonly count: number
