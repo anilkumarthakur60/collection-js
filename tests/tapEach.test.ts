@@ -1,4 +1,4 @@
-import { collect, LazyCollection } from '../src/collect'
+import { collect, LazyCollection } from '../src'
 
 describe('tapEach', () => {
   it('calls the callback for each item as they are pulled', () => {

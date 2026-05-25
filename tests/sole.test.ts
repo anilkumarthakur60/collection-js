@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 import { ItemNotFoundException } from '../src/exceptions/ItemNotFoundException'
 
 describe('sole', () => {

@@ -1,4 +1,4 @@
-import { collect, Collection } from '../src/collect'
+import { collect, Collection } from '../src'
 
 describe('zip', () => {
   it('zips two collections together', () => {

@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('percentage', () => {
   it('calculates percentage with default precision of 2', () => {

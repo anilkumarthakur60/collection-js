@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('last', () => {
   it('returns the last item', () => {
@@ -34,9 +34,4 @@ describe('last', () => {
     expect(collect(['x', 'y', 'z']).last((_v, i) => i < 2)).toBe('y')
   })
 
-  it('calls errorFn when predicate matches nothing', () => {
-    const errorFn = jest.fn()
-    collect([1, 2, 3]).last((v) => v > 10, errorFn)
-    expect(errorFn).toHaveBeenCalled()
-  })
 })

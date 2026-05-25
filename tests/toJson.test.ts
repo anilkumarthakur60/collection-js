@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('toJson', () => {
   it('returns JSON string of items', () => {
@@ -49,10 +49,12 @@ describe('toArray', () => {
     expect(collect([]).toArray()).toEqual([])
   })
 
-  it('returns same reference as internal items', () => {
+  it('returns a fresh array (use all() for reference)', () => {
     const items = [1, 2, 3]
     const c = collect(items)
-    expect(c.toArray()).toBe(items)
+    expect(c.toArray()).toEqual(items)
+    expect(c.toArray()).not.toBe(items)
+    expect(c.all()).toBe(items)
   })
 
   it('works with objects', () => {

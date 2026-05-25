@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('average / avg', () => {
   it('calculates average of numbers', () => {

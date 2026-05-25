@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('forPage', () => {
   it('returns correct page of items', () => {

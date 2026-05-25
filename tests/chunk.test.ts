@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('chunk', () => {
   it('breaks collection into chunks of given size', () => {

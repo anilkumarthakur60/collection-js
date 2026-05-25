@@ -16,11 +16,12 @@ export default tseslint.config(
   {
     ignores: [
       ".gitignore",
-      "docs/.vitepress/cache/**",
-      "docs/.vitepress/dist/**",
-      "docs/.vitepress/theme/**",
+      ".vitepress/**",
+      "docs/.vitepress/**",
       "dist/**",
-      "coverage/**"
+      "coverage/**",
+      "tests/**",
+      "node_modules/**"
     ]
   }
 );

@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('isEmpty', () => {
   it('returns true for empty collection', () => {

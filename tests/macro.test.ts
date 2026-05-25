@@ -1,4 +1,4 @@
-import { collect, Collection } from '../src/collect'
+import { collect, Collection } from '../src'
 
 describe('Collection.macro', () => {
   it('adds a custom method to the collection', () => {

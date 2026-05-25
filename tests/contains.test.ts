@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('contains', () => {
   it('returns true when value exists', () => {

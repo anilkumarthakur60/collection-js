@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('implode', () => {
   it('joins items with a glue string', () => {

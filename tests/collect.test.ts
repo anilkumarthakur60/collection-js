@@ -1,4 +1,4 @@
-import { collect, Collection } from '../src/collect'
+import { collect, Collection } from '../src'
 
 describe('collect (instance method)', () => {
   it('returns a new Collection with the same items', () => {

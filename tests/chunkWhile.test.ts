@@ -1,9 +1,10 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('chunkWhile', () => {
   it('groups consecutive equal values', () => {
+    // The third parameter is the in-progress chunk (Laravel parity).
     const result = collect([1, 1, 2, 2, 3]).chunkWhile(
-      (value, _i, array) => value === array[_i - 1]
+      (value, _i, chunk) => value === chunk[chunk.length - 1],
     )
     expect(result.count()).toBe(3)
     expect(result.all()[0].all()).toEqual([1, 1])
@@ -13,7 +14,7 @@ describe('chunkWhile', () => {
 
   it('groups consecutive ascending numbers', () => {
     const result = collect([1, 2, 3, 5, 6, 8]).chunkWhile(
-      (value, _i, array) => value === array[_i - 1] + 1
+      (value, _i, chunk) => value === chunk[chunk.length - 1] + 1,
     )
     expect(result.count()).toBe(3)
     expect(result.all()[0].all()).toEqual([1, 2, 3])
@@ -27,7 +28,7 @@ describe('chunkWhile', () => {
   })
 
   it('returns single chunk when all items satisfy predicate', () => {
-    const result = collect([1, 1, 1]).chunkWhile((v, _i, arr) => v === arr[_i - 1])
+    const result = collect([1, 1, 1]).chunkWhile((v, _i, chunk) => v === chunk[chunk.length - 1])
     expect(result.count()).toBe(1)
     expect(result.all()[0].all()).toEqual([1, 1, 1])
   })

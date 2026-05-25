@@ -1,4 +1,4 @@
-import { Collection } from '../src/collect'
+import { Collection } from '../src'
 
 describe('Collection.fromJson', () => {
   it('parses a JSON array of numbers', () => {

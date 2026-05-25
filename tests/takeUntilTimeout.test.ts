@@ -1,4 +1,4 @@
-import { collect, LazyCollection } from '../src/collect'
+import { collect, LazyCollection } from '../src'
 
 describe('takeUntilTimeout', () => {
   it('returns all items when timeout is far in the future', () => {

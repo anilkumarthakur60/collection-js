@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('every', () => {
   it('returns true when all items match predicate', () => {

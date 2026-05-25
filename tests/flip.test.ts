@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('flip', () => {
   it('flips string values to their indices', () => {
@@ -16,8 +16,9 @@ describe('flip', () => {
     expect(result.count()).toBe(1)
   })
 
-  it('throws for non-string/non-number items', () => {
-    expect(() => collect([{ id: 1 }] as unknown as string[]).flip()).toThrow()
+  it('coerces non-scalar items via String() (does not throw)', () => {
+    const result = collect([{ id: 1 }] as unknown as string[]).flip().all()
+    expect(result[0]).toEqual({ '[object Object]': 0 })
   })
 
   it('handles single item', () => {

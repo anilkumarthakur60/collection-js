@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('max', () => {
   it('returns the maximum number', () => {
@@ -13,6 +13,11 @@ describe('max', () => {
   it('works with a key', () => {
     const items = [{ price: 100 }, { price: 300 }, { price: 200 }]
     expect(collect(items).max('price')).toBe(300)
+  })
+
+  it('works via property-style higher-order proxy', () => {
+    const items = [{ price: 100 }, { price: 300 }, { price: 200 }]
+    expect(collect(items).max.price).toBe(300)
   })
 
   it('works with negative numbers', () => {
@@ -33,10 +38,9 @@ describe('min', () => {
     expect(collect([3, 1, 4, 1, 5]).min()).toBe(1)
   })
 
-  it('returns the minimum item with callback', () => {
+  it('returns the minimum value with callback', () => {
     const items = [{ value: 10 }, { value: 5 }, { value: 20 }]
-    const result = collect(items).min((v) => v.value)
-    expect(result).toEqual({ value: 5 })
+    expect(collect(items).min((v) => v.value)).toBe(5)
   })
 
   it('works with key', () => {

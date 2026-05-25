@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('dot', () => {
   it('flattens nested objects to dot notation', () => {
@@ -20,36 +20,30 @@ describe('dot', () => {
     expect(collect([]).dot()).toEqual({})
   })
 
-  it('merges multiple objects', () => {
-    const result = collect([{ a: 1 }, { b: 2 }]).dot()
-    expect(result).toEqual({ a: 1, b: 2 })
+  it('flattens arrays via numeric dot keys (Laravel parity)', () => {
+    const result = collect([{ items: [1, 2, 3] }]).dot()
+    expect(result).toEqual({ 'items.0': 1, 'items.1': 2, 'items.2': 3 })
   })
 
-  it('does not flatten arrays', () => {
-    const result = collect([{ items: [1, 2, 3] }]).dot()
-    expect(result).toEqual({ items: [1, 2, 3] })
+  it('treats multi-item collection as numerically-indexed object', () => {
+    const result = collect([{ a: 1 }, { b: 2 }]).dot()
+    expect(result).toEqual({ '0.a': 1, '1.b': 2 })
   })
 })
 
 describe('undot', () => {
   it('expands dot notation keys to nested objects', () => {
-    const result = collect([{ 'name.first': 'Marie', 'name.last': 'Valentine' }])
-      .undot()
-      .all()
+    const result = collect([{ 'name.first': 'Marie', 'name.last': 'Valentine' }]).undot().all()
     expect(result).toEqual([{ name: { first: 'Marie', last: 'Valentine' } }])
   })
 
   it('handles already expanded keys', () => {
-    const result = collect([{ a: 1, b: 2 }])
-      .undot()
-      .all()
+    const result = collect([{ a: 1, b: 2 }]).undot().all()
     expect(result).toEqual([{ a: 1, b: 2 }])
   })
 
   it('handles deeply nested dot keys', () => {
-    const result = collect([{ 'a.b.c': 42 }])
-      .undot()
-      .all()
+    const result = collect([{ 'a.b.c': 42 }]).undot().all()
     expect(result).toEqual([{ a: { b: { c: 42 } } }])
   })
 
@@ -59,9 +53,7 @@ describe('undot', () => {
   })
 
   it('merges multiple objects with dot keys', () => {
-    const result = collect([{ 'x.y': 1 }, { 'x.z': 2 }])
-      .undot()
-      .all()
+    const result = collect([{ 'x.y': 1 }, { 'x.z': 2 }]).undot().all()
     expect(result).toEqual([{ x: { y: 1, z: 2 } }])
   })
 })

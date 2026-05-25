@@ -1,4 +1,4 @@
-import { collect } from '../src/collect'
+import { collect } from '../src'
 
 describe('filter', () => {
   it('filters items based on callback', () => {
