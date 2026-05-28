@@ -77,7 +77,7 @@ Creates a Collection by invoking the callback a given amount of times.
 **Simple Example:**
 
 ```typescript
-import { Collection } from '@anilkumarthakur/collection-js'
+import { Collection } from '@anil-labs/collection-js'
 
 Collection.times(5, (i) => i * 10).all()
 // => [10, 20, 30, 40, 50]
@@ -231,7 +231,7 @@ Safely retrieves the raw data out of a potential or established collection refer
 **Simple Example:**
 
 ```typescript
-import { Collection } from '@anilkumarthakur/collection-js'
+import { Collection } from '@anil-labs/collection-js'
 
 Collection.unwrap(collect(['a'])) // => ['a']
 Collection.unwrap(['a']) // => ['a']

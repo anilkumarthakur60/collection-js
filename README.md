@@ -1,8 +1,8 @@
-# @anilkumarthakur/collection-js
+# @anil-labs/collection-js
 
 A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Full parity with the **Laravel 13.x Collections** API — plus statistics, SQL-style joins, combinatorics, async streams, and CSV/JSONL I/O that go beyond it.
 
-[![npm version](https://img.shields.io/npm/v/@anilkumarthakur/collection-js)](https://www.npmjs.com/package/@anilkumarthakur/collection-js)
+[![npm version](https://img.shields.io/npm/v/@anil-labs/collection-js)](https://www.npmjs.com/package/@anil-labs/collection-js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 - **Strict TypeScript** — written in strict mode with deep type inference; no `any` in the public surface.
@@ -14,13 +14,13 @@ A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Ful
 ## Installation
 
 ```bash
-npm install @anilkumarthakur/collection-js
+npm install @anil-labs/collection-js
 ```
 
 ## Quick Start
 
 ```typescript
-import collect from '@anilkumarthakur/collection-js'
+import collect from '@anil-labs/collection-js'
 
 collect([1, 2, 3, 4, 5])
   .filter((item) => item > 2)
@@ -74,7 +74,7 @@ collect(users).whereNotLike('name', 'A%', true) // case-sensitive: not starting 
 For large or infinite datasets, use generator-backed lazy evaluation — values are produced on demand:
 
 ```typescript
-import { LazyCollection } from '@anilkumarthakur/collection-js'
+import { LazyCollection } from '@anil-labs/collection-js'
 
 new LazyCollection(function* () {
   for (let i = 0; i < 1_000_000; i++) yield i
@@ -93,7 +93,7 @@ Lazy-only helpers: `tapEach`, `remember` (memoize pulled values), `takeUntilTime
 Stream and transform `AsyncIterable` sources with bounded concurrency:
 
 ```typescript
-import { AsyncCollection } from '@anilkumarthakur/collection-js'
+import { AsyncCollection } from '@anil-labs/collection-js'
 
 const results = await AsyncCollection.from(userIds)
   .mapAsync((id) => fetchUser(id), { concurrency: 8 }) // ≤ 8 in flight, source order preserved
@@ -136,7 +136,7 @@ collect([1, 2, 3])
 **CSV / JSONL / streams**
 
 ```typescript
-import { parseCsv, toCsv, parseJsonl, toJsonl, lines } from '@anilkumarthakur/collection-js'
+import { parseCsv, toCsv, parseJsonl, toJsonl, lines } from '@anil-labs/collection-js'
 
 const rows = collect(parseCsv(csvText, { header: true }))
 const csv = toCsv(rows.all())
@@ -154,7 +154,7 @@ users.where('role', 'admin').each.notify()
 Add your own methods at runtime — they participate in chaining like built-ins:
 
 ```typescript
-import { Collection } from '@anilkumarthakur/collection-js'
+import { Collection } from '@anil-labs/collection-js'
 
 Collection.macro('toUpper', function (this: Collection<string>) {
   return this.map((s) => s.toUpperCase())
