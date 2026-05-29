@@ -25,14 +25,23 @@ console.log(multiplied.all()) // [2, 4, 6]
 
 ## Immutability & Chaining
 
-By default, Collections should be treated as **immutable**. Most methods (like `map`, `filter`, `merge`) will return a completely new Collection instance, leaving the original data untouched:
+Most methods (like `map`, `filter`, `merge`) return a completely new Collection instance, leaving the original data untouched:
 
 ```typescript
 const original = collect([1, 2, 3])
-const appended = original.push(4)
+const doubled = original.map((n) => n * 2)
 
 original.all() // [1, 2, 3]
-appended.all() // [1, 2, 3, 4]
+doubled.all() // [2, 4, 6]
+```
+
+A small set of methods mutate the collection **in place** to match Laravel's behavior, returning the same instance: `push`, `prepend`, `pop`, `shift`, `pull`, `forget`, `splice`, `transform`, and `put`.
+
+```typescript
+const items = collect([1, 2, 3])
+items.push(4) // mutates `items` and returns it
+
+items.all() // [1, 2, 3, 4]
 ```
 
 ## Macroable (Extending Collections)

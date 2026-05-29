@@ -45,8 +45,8 @@ users.where('role', 'admin').sortByDesc('score').pluck('name').all()
 users.groupBy('role')
 // => { admin: [...], user: [...] }
 
-users.avg('score')    // => 88.75
-users.max('score')    // => 95
+users.avg('score') // => 88.75
+users.max('score') // => 95
 users.median('score') // => 90
 
 const [admins, regular] = users.partition((u) => u.role === 'admin')
@@ -64,9 +64,9 @@ collect(orders).where('customer.country', 'FR').sum('total')
 `whereLike` / `whereNotLike` filter by an SQL-`LIKE` pattern, where `%` matches any run of characters and `_` matches a single one (case-insensitive by default):
 
 ```typescript
-collect(users).whereLike('name', '%Smith')       // ends with "Smith"
-collect(users).whereLike('email', '%@gmail.com')  // gmail addresses
-collect(users).whereNotLike('name', 'A%', true)   // case-sensitive: not starting with "A"
+collect(users).whereLike('name', '%Smith') // ends with "Smith"
+collect(users).whereLike('email', '%@gmail.com') // gmail addresses
+collect(users).whereNotLike('name', 'A%', true) // case-sensitive: not starting with "A"
 ```
 
 ## Lazy Collections
@@ -126,9 +126,11 @@ collect(orders).joinOn(customers, 'customerId', 'id', (order, customer) => ({
 **Combinatorics & itertools** — `scan` · `pairwise` · `enumerate` · `cycle` · `interleave` · `permutations` · `combinations` · `powerSet`
 
 ```typescript
-collect([1, 2, 3]).permutations().all()        // all 3! orderings
+collect([1, 2, 3]).permutations().all() // all 3! orderings
 collect([1, 2, 3, 4]).combinations(2).all()
-collect([1, 2, 3]).scan((sum, n) => sum + n, 0).all() // running totals: [1, 3, 6]
+collect([1, 2, 3])
+  .scan((sum, n) => sum + n, 0)
+  .all() // running totals: [1, 3, 6]
 ```
 
 **CSV / JSONL / streams**
@@ -143,7 +145,7 @@ const csv = toCsv(rows.all())
 ## Higher-Order Messages
 
 ```typescript
-users.sum.score          // => 355   (property-style)
+users.sum.score // => 355   (property-style)
 users.where('role', 'admin').each.notify()
 ```
 
@@ -167,57 +169,75 @@ collect(['a', 'b']).toUpper().all() // => ['A', 'B']
 <summary>Click to expand the full method list</summary>
 
 ### Creation
+
 `make` · `collect` · `fromJson` · `fromEntries` · `fromMap` · `fromSet` · `times` · `range` · `wrap` · `unwrap` · `empty` · `lazy`
 
 ### Filtering
+
 `filter` · `reject` · `where` · `whereStrict` · `whereBetween` · `whereNotBetween` · `whereIn` · `whereInStrict` · `whereNotIn` · `whereNotInStrict` · `whereNull` · `whereNotNull` · `whereLike` · `whereNotLike` · `whereInstanceOf` · `compact` · `first` · `firstOrFail` · `firstWhere` · `last` · `sole` · `unique` · `uniqueStrict` · `except` · `only` · `select`
 
 ### Transformation
+
 `map` · `mapInto` · `mapSpread` · `mapToGroups` · `mapWithKeys` · `flatMap` · `flatten` · `collapse` · `collapseWithKeys` · `chunk` · `chunkWhile` · `sliding` · `split` · `splitIn` · `dot` · `undot` · `flip` · `pluck` · `values` · `keys` · `zip` · `combine` · `crossJoin`
 
 ### Aggregation
+
 `sum` · `average` / `avg` · `min` · `max` · `minBy` · `maxBy` · `median` · `mode` · `count` · `countBy` · `percentage`
 
 ### Statistics
+
 `variance` · `sampleVariance` · `stddev` · `sampleStddev` · `quantile` · `percentileAt` · `histogram` · `correlation`
 
 ### Joins
+
 `joinOn` · `leftJoin` · `rightJoin` · `outerJoin`
 
 ### Itertools & combinatorics
+
 `scan` · `pairwise` · `enumerate` · `cycle` · `interleave` · `permutations` · `combinations` · `powerSet`
 
 ### Sorting
+
 `sort` · `sortBy` · `sortByDesc` · `sortDesc` · `sortKeys` · `sortKeysDesc` · `sortKeysUsing` · `reverse` · `shuffle`
 
 ### Searching
+
 `contains` · `containsStrict` · `containsOneItem` · `doesntContain` · `doesntContainStrict` · `search` · `has` · `hasAny` · `hasMany` · `hasSole` · `every` · `some`
 
 ### Iteration
+
 `each` · `eachSpread` · `tap` · `tapEach` · `transform` · `pipe` · `pipeInto` · `pipeThrough`
 
 ### Addition & Removal
+
 `push` · `prepend` · `concat` · `merge` · `mergeRecursive` · `union` · `diff` · `diffAssoc` · `diffAssocUsing` · `diffKeys` · `intersect` · `intersectUsing` · `intersectAssoc` · `intersectAssocUsing` · `intersectByKeys` · `pop` · `shift` · `pull` · `forget` · `splice`
 
 ### Partitioning
+
 `partition` · `groupBy` · `groupByMany` · `keyBy` · `take` · `takeUntil` · `takeWhile` · `skip` · `skipUntil` · `skipWhile` · `slice` · `forPage` · `nth` · `after` · `before`
 
 ### Conditional
+
 `when` · `whenEmpty` · `whenNotEmpty` · `unless` · `unlessEmpty` · `unlessNotEmpty`
 
 ### Conversion
+
 `all` · `toArray` · `toJson` · `toPrettyJson` · `toMap` · `toSet` · `implode` · `join` · `dump` · `dd`
 
 ### Misc
+
 `collect` · `clone` · `macro` · `ensure` · `pad` · `multiply` · `random` · `reduce` · `reduceSpread` · `value` · `isEmpty` · `isNotEmpty` · `duplicates` · `duplicatesStrict` · `put` · `get` · `replace` · `replaceRecursive`
 
 ### Lazy-only
+
 `remember` · `tapEach` · `takeUntilTimeout` · `throttle` · `withHeartbeat`
 
 ### Async (`AsyncCollection`)
+
 `map` · `mapAsync` · `filter` · `filterAsync` · `flatMap` · `take` · `skip` · `takeWhile` · `skipWhile` · `chunk` · `tap` · `forEach` · `eachAsync` · `reduce` · `first` · `last` · `every` · `some` · `count` · `toArray` · `collect`
 
 ### I/O
+
 `parseCsv` · `toCsv` · `parseJsonl` · `parseJsonlStream` · `toJsonl` · `fromReadable` · `lines`
 
 </details>

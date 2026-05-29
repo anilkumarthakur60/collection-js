@@ -2,7 +2,7 @@
 
 ## `after`
 
-Returns the item in the collection occurring immediately after the given item. Returns `null` if the item is not found or is the last item.
+Returns the item in the collection occurring immediately after the given item. Returns `undefined` if the item is not found or is the last item.
 
 **Basic Setup:**
 
@@ -19,7 +19,7 @@ items.after(3)
 // => 4
 
 items.after(5)
-// => null
+// => undefined
 ```
 
 **Complex Example (Custom Truth Test):**
@@ -84,7 +84,7 @@ orders.avg((order) => order.totals.price * 1.5) // With 50% tax
 
 ## `before`
 
-Returns the item in the collection occurring immediately before the given item. Returns `null` if the item is not found or is the first item.
+Returns the item in the collection occurring immediately before the given item. Returns `undefined` if the item is not found or is the first item.
 
 **Simple Example:**
 
@@ -219,15 +219,14 @@ const items = collect([1, 2, 3])
 
 ## `combine`
 
-Combines the values of the collection, as keys, with the values of another array or collection.
+Combines the values of the collection, as keys, with the values of another array or collection. This is a **terminal** method — it returns a plain object directly (not a chainable collection).
 
 **Simple Example:**
 
 ```typescript
 const keys = collect(['name', 'age'])
-const combined = keys.combine(['Alice', 25])
 
-combined.all()
+keys.combine(['Alice', 25])
 // => { name: 'Alice', age: 25 }
 ```
 
@@ -271,10 +270,10 @@ const users = collect([
   { id: 2, age: 30 }
 ])
 
-items.contains('age', '>=', 30) // => true
+users.contains('age', '>=', 30) // => true
 
 // Custom callback
-items.contains((user) => user.age > 25) // => true
+users.contains((user) => user.age > 25) // => true
 ```
 
 ---
@@ -323,27 +322,25 @@ collect([1, 2, 3, 4]).count()
 
 ## `countBy`
 
-Counts the occurrences of values in the collection. By default, it counts the items themselves.
+Counts the occurrences of values in the collection. By default, it counts the items themselves. This is a **terminal** method — it returns a `Record<string, number>` directly (not a chainable collection).
 
 **Simple Example:**
 
 ```typescript
 const collection = collect([1, 2, 2, 2, 3])
 
-collection.countBy().all()
+collection.countBy()
 // => { '1': 1, '2': 3, '3': 1 }
 ```
 
 **Complex Example (Custom String Resolution):**
-Pass a callback to map items to a string key, grouping the results.
+Pass a callback to map items to a key, grouping the results.
 
 ```typescript
 const emails = collect(['alice@gmail.com', 'bob@yahoo.com', 'charlie@gmail.com'])
 
 // Count how many users use each top-level domain
-const domains = emails.countBy((email) => email.split('@')[1])
-
-domains.all()
+emails.countBy((email) => email.split('@')[1])
 // => { 'gmail.com': 2, 'yahoo.com': 1 }
 ```
 
