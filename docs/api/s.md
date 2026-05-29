@@ -2,7 +2,7 @@
 
 ## `search`
 
-Searches the collection for the given value and returns its key (or index) if found. Returns `false` or `undefined` if the item is not found.
+Searches the collection for the given value (or a callback) and returns its index if found. Returns `false` if the item is not found.
 
 **Simple Example:**
 
@@ -245,41 +245,41 @@ items.sortDesc().all()
 
 ## `sortKeys` / `sortKeysDesc`
 
-Sorts the collection dictionary by its underlying keys.
+Reorders the keys of each object element. Returns a collection wrapping the reordered object(s).
 
 **Simple Example:**
 
 ```typescript
-const object = collect({ z: 1, c: 2, a: 3 })
+const object = collect([{ z: 1, c: 2, a: 3 }])
 
 object.sortKeys().all()
-// => { a: 3, c: 2, z: 1 }
+// => [{ a: 3, c: 2, z: 1 }]
 
 object.sortKeysDesc().all()
-// => { z: 1, c: 2, a: 3 }
+// => [{ z: 1, c: 2, a: 3 }]
 ```
 
 ---
 
 ## `sortKeysUsing`
 
-Sorts the object's keys using the given callback logic.
+Reorders each object element's keys using the given comparator.
 
 **Complex Example:**
 
 ```typescript
-const object = collect({ b: 2, a: 1, c: 3 })
+const object = collect([{ b: 2, a: 1, c: 3 }])
 
-// Use custom reverse order calculation
+// Custom reverse-alphabetical order
 object.sortKeysUsing((key1, key2) => key2.localeCompare(key1)).all()
-// => { c: 3, b: 2, a: 1 }
+// => [{ c: 3, b: 2, a: 1 }]
 ```
 
 ---
 
 ## `splice`
 
-Removes and returns a slice of items starting at the specified index. This **preserves** the original Array/Collection untouched.
+Removes and returns a slice of items starting at the specified index. Like JavaScript's `Array.prototype.splice`, this **mutates** the collection in place and returns the removed items as a new collection.
 
 **Simple Example:**
 
@@ -290,6 +290,9 @@ const chunk = collection.splice(2)
 
 chunk.all()
 // => [3, 4, 5]
+
+collection.all()
+// => [1, 2] (the original was modified)
 ```
 
 ---

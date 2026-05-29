@@ -39,53 +39,52 @@ difference.all()
 
 ## `diffAssoc`
 
-Compares the collection against another collection or array based on **keys and values**. This is particularly useful for extracting the changed attributes out of an object.
+Compares an array of objects against another, keeping the elements whose key/value pairs are not fully present in the comparison set. The comparison argument must be an array (or collection) of objects.
 
 **Simple Example:**
 
 ```typescript
-const color = collect({ color: 'orange', type: 'fruit', remain: 6 })
-const diff = color.diffAssoc({ color: 'yellow', type: 'fruit', remain: 3, used: 6 })
+const items = collect([{ color: 'orange', type: 'fruit', remain: 6 }])
+
+const diff = items.diffAssoc([{ color: 'yellow', type: 'fruit', remain: 3, used: 6 }])
 
 diff.all()
-// => { color: 'orange', remain: 6 }
+// => [{ color: 'orange', type: 'fruit', remain: 6 }]  (kept — it differs from the comparison object)
 ```
 
 ---
 
 ## `diffAssocUsing`
 
-Operates like `diffAssoc`, but allows you to pass a custom callback function to perform the comparison.
+Operates like `diffAssoc`, but compares whole elements with a custom comparator (returning `0` when two elements are considered equal). The comparison argument is an array/collection.
 
 **Complex Example:**
 
 ```typescript
-const color = collect({ color: 'orange', type: 'fruit', remain: 6 })
-const compare = { color: 'ORANGE', type: 'fruit' }
+const items = collect([{ id: 1 }, { id: 2 }])
 
-// Custom comparison neglecting exact case
-const diff = color.diffAssocUsing(compare, (a, b) => {
-  return String(a).toLowerCase() === String(b).toLowerCase() ? 0 : 1
-})
+// Keep elements that are not "equal" to any element in the comparison set
+const diff = items.diffAssocUsing([{ id: 2 }], (a, b) => (a.id === b.id ? 0 : 1))
 
 diff.all()
-// => { remain: 6 } // 'orange' and 'ORANGE' are considered equal
+// => [{ id: 1 }]
 ```
 
 ---
 
 ## `diffKeys`
 
-Compares the collection against another based on its **keys** only. It will return the key / value pairs from the original collection that aren't present in the given data.
+For each object element, drops the keys present in the given list of keys, keeping the rest.
 
 **Simple Example:**
 
 ```typescript
-const original = collect({ a: 'foo', b: 'bar', c: 'baz' })
-const diff = original.diffKeys({ a: 'foo', d: 'x' })
+const original = collect([{ a: 'foo', b: 'bar', c: 'baz' }])
+
+const diff = original.diffKeys(['a', 'd'])
 
 diff.all()
-// => { b: 'bar', c: 'baz' }
+// => [{ b: 'bar', c: 'baz' }]
 ```
 
 ---
@@ -122,24 +121,19 @@ items.doesntContainStrict(2) // => false
 
 ## `dot`
 
-Flattens a multi-dimensional associative array (objects) into a single level array that uses "dot" notation to indicate depth.
+Flattens a nested object into a single-level object whose keys use "dot" notation to indicate depth. This is a **terminal** method — it returns a plain object directly (not a chainable collection). Pass the source object as a single collection element.
 
 **Complex Example (Flattening nested configurations):**
 
 ```typescript
-const config = collect({
-  db: {
-    host: 'localhost',
-    port: 3306
-  },
-  logging: {
-    errors: true
+const config = collect([
+  {
+    db: { host: 'localhost', port: 3306 },
+    logging: { errors: true }
   }
-})
+])
 
-const flat = config.dot()
-
-flat.all()
+config.dot()
 /*
 {
     'db.host': 'localhost',
@@ -168,30 +162,30 @@ collect([1, 2, 3])
 
 ## `duplicates`
 
-Retrieves and returns all of the duplicate values from a collection.
+Retrieves the duplicate values from a collection. This is a **terminal** method — it returns a plain object keyed by the original indices (not a chainable collection).
 
 **Simple Example:**
 
 ```typescript
 const items = collect(['a', 'b', 'a', 'c', 'b'])
 
-items.duplicates().all()
-// => { '2': 'a', '4': 'b' } // Returns the original indices as keys
+items.duplicates()
+// => { '2': 'a', '4': 'b' } // keys are the original indices
 ```
 
 ---
 
 ## `duplicatesStrict`
 
-Returns all duplicates utilizing strict equality (`===`).
+Returns all duplicates utilizing strict equality (`===`). Like `duplicates`, this is a **terminal** method returning a plain object.
 
 **Simple Example:**
 
 ```typescript
 const items = collect([1, 2, '1'])
 
-items.duplicatesStrict().all()
-// => {} // Loose match won't trigger strict duplicates
+items.duplicatesStrict()
+// => {} // 1 and '1' are not strictly equal, so neither counts as a duplicate
 ```
 
 ---
@@ -243,16 +237,26 @@ coords.eachSpread((x, y) => {
 
 ## `ensure`
 
-Verifies that all elements of a collection are of a given type. Alternatively you can provide an array of types, or instances. Throws an `UnexpectedValueException` if verification fails.
+Verifies that every element of a collection matches a given type, throwing an `UnexpectedValueException` otherwise. Use **primitive type strings** (`'number'`, `'string'`, `'boolean'`, `'object'`, `'array'`) for primitives, and **constructors** for class instances. You may pass several types.
 
 **Simple Example:**
 
 ```typescript
 const items = collect([1, 2, 3, 4])
 
-items.ensure(Number) // Will succeed
-items.ensure(String) // Will throw Error
+items.ensure('number') // Will succeed
+items.ensure('string') // Throws UnexpectedValueException
+
+// Class instances use the constructor:
+collect([new User(), new User()]).ensure(User)
+
+// Multiple accepted types:
+collect([1, 'two']).ensure('number', 'string')
 ```
+
+::: warning
+Use the string `'number'`, not the `Number` constructor — primitives are not `instanceof Number`, so `ensure(Number)` would throw for `[1, 2, 3]`.
+:::
 
 ---
 
@@ -271,17 +275,15 @@ collect([1, 2, 3, 4]).every((i) => i > 2) // => false
 
 ## `except`
 
-Returns all items in the collection except for those with the specified keys.
+Drops the specified keys from each object element, returning a `Collection<Partial<T>>`.
 
 **Simple Example:**
 
 ```typescript
-const user = collect({ id: 1, name: 'Alice', password: 'secret' })
+const user = collect([{ id: 1, name: 'Alice', password: 'secret' }])
 
-const returned = user.except(['password'])
-
-returned.all()
-// => { id: 1, name: 'Alice' }
+user.except(['password']).all()
+// => [{ id: 1, name: 'Alice' }]
 ```
 
 ---
@@ -313,7 +315,7 @@ collect([1, 2, 3, null, false, '', 4]).filter().all()
 
 ## `first`
 
-Returns the first element in the collection that passes a given truth test. You can return a default fallback if none match.
+Returns the first element in the collection that passes a given truth test, or `undefined` when nothing matches. (There is no default-value argument — use `??` to supply a fallback.)
 
 **Simple Example:**
 
@@ -322,15 +324,15 @@ collect([1, 2, 3, 4]).first((i) => i > 2)
 // => 3
 ```
 
-**Complex Example (Without Truth Test / Default value):**
+**Complex Example (Without Truth Test / Fallback):**
 
 ```typescript
-// No truth test returns the absolute first object
+// No truth test returns the first item
 collect([1, 2, 3]).first()
 // => 1
 
-// With a fallback default
-collect([1, 2, 3]).first((i) => i > 5, 0)
+// No match returns undefined; use ?? for a fallback
+collect([1, 2, 3]).first((i) => i > 5) ?? 0
 // => 0
 ```
 
@@ -419,30 +421,35 @@ collection.flatten(Infinity).all()
 
 ## `flip`
 
-Swaps the collection's keys with their corresponding values (for objects/dictionaries).
+Maps each scalar value to its index, returning a collection that wraps the resulting object. (It operates on the collection's elements, so pass an array of values — not a pre-built object.)
 
 **Simple Example:**
 
 ```typescript
-const collection = collect({ name: 'anil', framework: 'laravel' })
+const collection = collect(['name', 'framework'])
 
 collection.flip().all()
-// => { anil: 'name', laravel: 'framework' }
+// => [{ name: 0, framework: 1 }]
 ```
 
 ---
 
 ## `forget`
 
-Removes an item from the collection by its key.
+Removes data from the collection **in place**. A numeric key removes the element at that index; a string key removes that property from every object element. Returns the same collection.
 
 **Simple Example:**
 
 ```typescript
-const collection = collect({ name: 'anil', framework: 'laravel' })
+// String key: strip a property from each object element
+collect([{ name: 'anil', framework: 'laravel' }])
+  .forget('framework')
+  .all()
+// => [{ name: 'anil' }]
 
-collection.forget('framework').all()
-// => { name: 'anil' }
+// Numeric key: remove the element at an index
+collect(['a', 'b', 'c']).forget(1).all()
+// => ['a', 'c']
 ```
 
 ---
@@ -467,13 +474,16 @@ chunk.all()
 
 ## `fromJson`
 
-Transforms a valid JSON string directly into a Collection.
+Transforms a valid JSON string directly into a Collection. This is a **static** method on the `Collection` class. A decoded object is wrapped as a single element; a decoded array becomes the collection's items.
 
 **Simple Example:**
 
 ```typescript
-const collection = collect().fromJson('{"name": "Alice", "age": 25}')
+import { Collection } from '@anilkumarthakur/collection-js'
 
-collection.all()
-// => { name: 'Alice', age: 25 }
+Collection.fromJson('[1, 2, 3]').all()
+// => [1, 2, 3]
+
+Collection.fromJson('{"name": "Alice", "age": 25}').all()
+// => [{ name: 'Alice', age: 25 }]
 ```

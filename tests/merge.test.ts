@@ -32,6 +32,16 @@ describe('merge', () => {
     const result = collect([{ product_id: 1, price: 100 }]).merge([{ price: 200, discount: false }])
     expect(result.all()).toEqual([{ product_id: 1, price: 200, discount: false }])
   })
+
+  it('appends rather than collapsing a list of multiple objects', () => {
+    const result = collect([{ a: 1 }, { b: 2 }]).merge([{ c: 3 }])
+    expect(result.all()).toEqual([{ a: 1 }, { b: 2 }, { c: 3 }])
+  })
+
+  it('appends when the right-hand side is a list of objects', () => {
+    const result = collect([{ a: 1 }]).merge([{ b: 2 }, { c: 3 }])
+    expect(result.all()).toEqual([{ a: 1 }, { b: 2 }, { c: 3 }])
+  })
 })
 
 describe('mergeRecursive', () => {

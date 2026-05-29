@@ -10,20 +10,20 @@ hero:
       text: Get Started
       link: /guide/introduction
     - theme: alt
-      text: API Reference (120+ Methods)
+      text: API Reference (150+ Methods)
       link: /api/
 
 features:
   - title: ⚡️ Fluent & Chainable
     details: Replace complex loops and confusing array methods with elegant, highly readable, chainable logic.
-  - title: 🦋 TypeScript Ready
-    details: Written in TypeScript. Provides deep type inference to ensure safe data transformations.
+  - title: 🦋 Strict TypeScript
+    details: Written in strict TypeScript with deep type inference for safe data transformations — no `any` in the public surface.
   - title: 🐘 Laravel Parity
-    details: Complete coverage of over 120 methods from the Laravel 13.x Collections API.
-  - title: 💤 Lazy Collections
-    details: Handle large amounts of data efficiently with generator-based lazy evaluation logic.
+    details: Full coverage of the Laravel 13.x Collections API, so it feels instantly familiar.
+  - title: 💤 Lazy & Async
+    details: Process huge or infinite datasets with generator-backed LazyCollection, and stream AsyncIterable sources with bounded concurrency.
+  - title: 📊 Beyond Laravel
+    details: Statistics, SQL-style joins, combinatorics, and CSV / JSONL / stream I/O built in.
   - title: 🌳 Tree-Shakable
-    details: Designed with modularity in mind. All methods can be individually imported to minimize bundle size.
-  - title: ✅ 100% Tested
-    details: Every single method is backed by comprehensive tests to ensure reliability in production environments.
+    details: Zero runtime dependencies, and every method is also a standalone pure function you can import directly.
 ---

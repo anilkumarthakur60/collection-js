@@ -123,13 +123,22 @@ export function mergeRecursiveOf<T>(
   return result as T[]
 }
 
-/** Shallow merge: object-keyed merge if all are objects, else array concat. */
+/**
+ * Shallow merge mirroring Laravel: a collection wrapping a single plain object
+ * models an associative array, so merging two such collections overwrites
+ * matching string keys (`{a,b}` ⊕ `{b,c}` → `{a,b',c}`). Any other shape —
+ * including a genuine list of multiple objects — is treated positionally and
+ * the values are appended. This avoids silently collapsing `[{a},{b}]` into a
+ * single object.
+ */
 export function mergeOf<T, U>(items: readonly T[], other: readonly U[]): (T | U)[] {
-  if (items.every((i) => isPlainObject(i)) && other.every((i) => isPlainObject(i))) {
-    const merged: Record<string, unknown> = {}
-    for (const item of items) Object.assign(merged, item as Record<string, unknown>)
-    for (const item of other) Object.assign(merged, item as Record<string, unknown>)
-    return [merged] as unknown as (T | U)[]
+  if (
+    items.length === 1 &&
+    other.length === 1 &&
+    isPlainObject(items[0]) &&
+    isPlainObject(other[0])
+  ) {
+    return [{ ...(items[0] as object), ...(other[0] as object) }] as unknown as (T | U)[]
   }
   return [...items, ...other] as (T | U)[]
 }

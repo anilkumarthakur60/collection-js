@@ -97,3 +97,35 @@ export function whereInstanceOfOf<T, R>(
   const ctor = Ctor as AnyCtor
   return items.filter((item) => item instanceof ctor) as unknown as R[]
 }
+
+/**
+ * Compile an SQL-`LIKE`-style pattern into an anchored RegExp. `%` matches any
+ * run of characters (including none) and `_` matches exactly one; every other
+ * character is matched literally. Matching is case-insensitive unless
+ * `caseSensitive` is set.
+ */
+export function likeToRegExp(pattern: string, caseSensitive = false): RegExp {
+  let body = ''
+  for (const ch of pattern) {
+    if (ch === '%') body += '.*'
+    else if (ch === '_') body += '.'
+    else body += ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  }
+  return new RegExp(`^${body}$`, caseSensitive ? '' : 'i')
+}
+
+/** Keep items whose `key` value matches an SQL-`LIKE` pattern (or its inverse). */
+export function whereLikeOf<T>(
+  items: readonly T[],
+  key: string,
+  pattern: string,
+  caseSensitive = false,
+  negate = false
+): T[] {
+  const re = likeToRegExp(pattern, caseSensitive)
+  return items.filter((item) => {
+    const value = dataGet(item, key)
+    const matched = value != null && re.test(String(value))
+    return negate ? !matched : matched
+  })
+}
