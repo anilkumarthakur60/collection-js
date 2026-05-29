@@ -19,7 +19,8 @@ export default defineConfig({
           { text: 'Introduction', link: '/guide/introduction' },
           { text: 'Installation', link: '/guide/installation' },
           { text: 'Usage', link: '/guide/usage' },
-          { text: 'Lazy Collections', link: '/guide/lazy-collections' }
+          { text: 'Lazy Collections', link: '/guide/lazy-collections' },
+          { text: 'Beyond Laravel', link: '/guide/beyond-laravel' }
         ]
       },
       {

@@ -10,6 +10,26 @@ function toNumber(value: unknown): number {
   return 0
 }
 
+/**
+ * Order-aware comparison used by `maxOf`/`minOf`. Unlike summing, max/min must
+ * preserve the original value type, so we compare numbers numerically, strings
+ * lexicographically, `Date`s/`bigint`s by their natural order, and fall back to
+ * numeric coercion (then string compare) for mixed input. Mirrors PHP/Laravel,
+ * where `max()`/`min()` operate on any comparable, not just numbers.
+ */
+function compareForExtent(a: unknown, b: unknown): number {
+  if (typeof a === 'number' && typeof b === 'number') return a - b
+  if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime()
+  if (typeof a === 'bigint' && typeof b === 'bigint') return a < b ? -1 : a > b ? 1 : 0
+  if (typeof a === 'string' && typeof b === 'string') return a < b ? -1 : a > b ? 1 : 0
+  const na = Number(a)
+  const nb = Number(b)
+  if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb
+  const sa = String(a)
+  const sb = String(b)
+  return sa < sb ? -1 : sa > sb ? 1 : 0
+}
+
 export function sumOf<T>(items: readonly T[], by?: RetrieverInput<T, number>): number {
   const get = valueRetriever<T, number>(by)
   let total = 0
@@ -22,26 +42,40 @@ export function averageOf<T>(items: readonly T[], by?: RetrieverInput<T, number>
   return sumOf(items, by) / items.length
 }
 
-export function maxOf<T>(items: readonly T[], by?: RetrieverInput<T, number>): number | undefined {
-  if (items.length === 0) return undefined
-  const get = valueRetriever<T, number>(by)
-  let max = -Infinity
+export function maxOf<T, R = number>(
+  items: readonly T[],
+  by?: RetrieverInput<T, R>
+): R | undefined {
+  const get = valueRetriever<T, R>(by)
+  let max: R | undefined = undefined
+  let seen = false
   for (let i = 0; i < items.length; i++) {
-    const v = toNumber(get(items[i], i))
-    if (v > max) max = v
+    const v = get(items[i], i)
+    if (v == null) continue
+    if (!seen || compareForExtent(v, max) > 0) {
+      max = v
+      seen = true
+    }
   }
-  return max === -Infinity ? undefined : max
+  return max
 }
 
-export function minOf<T>(items: readonly T[], by?: RetrieverInput<T, number>): number | undefined {
-  if (items.length === 0) return undefined
-  const get = valueRetriever<T, number>(by)
-  let min = Infinity
+export function minOf<T, R = number>(
+  items: readonly T[],
+  by?: RetrieverInput<T, R>
+): R | undefined {
+  const get = valueRetriever<T, R>(by)
+  let min: R | undefined = undefined
+  let seen = false
   for (let i = 0; i < items.length; i++) {
-    const v = toNumber(get(items[i], i))
-    if (v < min) min = v
+    const v = get(items[i], i)
+    if (v == null) continue
+    if (!seen || compareForExtent(v, min) < 0) {
+      min = v
+      seen = true
+    }
   }
-  return min === Infinity ? undefined : min
+  return min
 }
 
 export function medianOf<T>(

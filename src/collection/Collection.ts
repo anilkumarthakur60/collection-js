@@ -19,6 +19,19 @@ import { dataGet } from '@/support/dataGet'
 type RI<T, R = unknown> = RetrieverInput<T, R>
 
 /**
+ * Callable shape for the `max`/`min` higher-order getters. With no argument the
+ * extent of the elements themselves is returned (`T | undefined`); a callback
+ * narrows to its own return type; a string key falls back to `number` since the
+ * field type cannot be known statically. The property form (`coll.max.votes`)
+ * works at runtime but is not modelled here.
+ */
+interface ExtentFn<T> {
+  (): T | undefined
+  <R>(by: (item: T, index: number) => R): R | undefined
+  (by: string): number | undefined
+}
+
+/**
  * Build a callable proxy: invoking it with arguments runs `impl(...args)`;
  * accessing a property returns `impl((item) => dataGet(item, key))`.
  *
@@ -139,17 +152,17 @@ export class Collection<T> implements Enumerable<T> {
   get avg(): (by?: RI<T, number> | string) => number {
     return this.average
   }
-  get max(): (by?: RI<T, number> | string) => number | undefined {
+  get max(): ExtentFn<T> {
     const items = this.items
-    return callableHigherOrder<number | undefined>((by) =>
-      ops.maxOf(items, by as RI<T, number>)
-    ) as (by?: RI<T, number> | string) => number | undefined
+    return callableHigherOrder<unknown>((by) =>
+      ops.maxOf(items, by as RI<T, unknown>)
+    ) as ExtentFn<T>
   }
-  get min(): (by?: RI<T, number> | string) => number | undefined {
+  get min(): ExtentFn<T> {
     const items = this.items
-    return callableHigherOrder<number | undefined>((by) =>
-      ops.minOf(items, by as RI<T, number>)
-    ) as (by?: RI<T, number> | string) => number | undefined
+    return callableHigherOrder<unknown>((by) =>
+      ops.minOf(items, by as RI<T, unknown>)
+    ) as ExtentFn<T>
   }
 
   // ─── Retrieval & access ──────────────────────────────────────────────────────
@@ -341,6 +354,20 @@ export class Collection<T> implements Enumerable<T> {
     return new Collection(ops.whereNotNullOf(this.items, key))
   }
 
+  /**
+   * Keep items whose `key` value matches an SQL-`LIKE` pattern, where `%`
+   * matches any run of characters and `_` matches a single one. Case-insensitive
+   * unless `caseSensitive` is `true`.
+   */
+  whereLike(key: string, pattern: string, caseSensitive = false): Collection<T> {
+    return new Collection(ops.whereLikeOf(this.items, key, pattern, caseSensitive, false))
+  }
+
+  /** Inverse of {@link whereLike}. */
+  whereNotLike(key: string, pattern: string, caseSensitive = false): Collection<T> {
+    return new Collection(ops.whereLikeOf(this.items, key, pattern, caseSensitive, true))
+  }
+
   /** Strip `null`/`undefined` from the collection and narrow the element type. */
   compact(): Collection<NonNullable<T>> {
     return new Collection(this.items.filter((item): item is NonNullable<T> => item != null))
@@ -484,11 +511,11 @@ export class Collection<T> implements Enumerable<T> {
   avgBy(by?: RI<T, number>): number {
     return ops.averageOf(this.items, by)
   }
-  maxBy(by?: RI<T, number>): number | undefined {
-    return ops.maxOf(this.items, by)
+  maxBy<R = number>(by?: RI<T, R>): R | undefined {
+    return ops.maxOf<T, R>(this.items, by)
   }
-  minBy(by?: RI<T, number>): number | undefined {
-    return ops.minOf(this.items, by)
+  minBy<R = number>(by?: RI<T, R>): R | undefined {
+    return ops.minOf<T, R>(this.items, by)
   }
   median(by?: RI<T, number>): number | undefined {
     return ops.medianOf(this.items, by)
