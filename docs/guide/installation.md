@@ -4,24 +4,24 @@ The package is published natively on npm and requires **Node.js 16+**.
 
 ## Package Managers
 
-Install the `@anilkumarthakur/collection-js` package via your preferred package manager:
+Install the `@anil-labs/collection-js` package via your preferred package manager:
 
 ::: code-group
 
 ```bash [npm]
-npm install @anilkumarthakur/collection-js
+npm install @anil-labs/collection-js
 ```
 
 ```bash [yarn]
-yarn add @anilkumarthakur/collection-js
+yarn add @anil-labs/collection-js
 ```
 
 ```bash [pnpm]
-pnpm add @anilkumarthakur/collection-js
+pnpm add @anil-labs/collection-js
 ```
 
 ```bash [bun]
-bun add @anilkumarthakur/collection-js
+bun add @anil-labs/collection-js
 ```
 
 :::
@@ -35,7 +35,7 @@ There are three ways to import and use the library depending on your architectur
 The most common way to create a collection is using the default `collect` helper.
 
 ```typescript
-import collect from '@anilkumarthakur/collection-js'
+import collect from '@anil-labs/collection-js'
 
 const items = collect([1, 2, 3])
 ```
@@ -45,7 +45,7 @@ const items = collect([1, 2, 3])
 If you prefer instantiating objects directly via `new`:
 
 ```typescript
-import { Collection } from '@anilkumarthakur/collection-js'
+import { Collection } from '@anil-labs/collection-js'
 
 const items = new Collection([1, 2, 3])
 ```
@@ -57,7 +57,7 @@ Every collection method is also available as a pure function under the `operatio
 These functions are executed immediately and operate on plain arrays — they do not return chainable instances unless you re-wrap them with `collect`.
 
 ```typescript
-import { operations } from '@anilkumarthakur/collection-js'
+import { operations } from '@anil-labs/collection-js'
 
 const names = operations.pluckOf([{ name: 'Alice' }, { name: 'Bob' }], 'name')
 // => ['Alice', 'Bob']
@@ -66,7 +66,7 @@ const names = operations.pluckOf([{ name: 'Alice' }, { name: 'Bob' }], 'name')
 A handful of support helpers are also exported at the top level for advanced use:
 
 ```typescript
-import { dataGet, deepEqual, valueRetriever } from '@anilkumarthakur/collection-js'
+import { dataGet, deepEqual, valueRetriever } from '@anil-labs/collection-js'
 
 dataGet({ user: { name: 'Ada' } }, 'user.name') // => 'Ada'
 ```

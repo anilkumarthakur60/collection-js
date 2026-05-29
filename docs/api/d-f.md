@@ -7,7 +7,7 @@ Dumps the collection's items and halts execution of the script (throws an Error)
 **Simple Example:**
 
 ```typescript
-import collect from '@anilkumarthakur/collection-js'
+import collect from '@anil-labs/collection-js'
 
 const items = collect([1, 2, 3])
 
@@ -479,7 +479,7 @@ Transforms a valid JSON string directly into a Collection. This is a **static** 
 **Simple Example:**
 
 ```typescript
-import { Collection } from '@anilkumarthakur/collection-js'
+import { Collection } from '@anil-labs/collection-js'
 
 Collection.fromJson('[1, 2, 3]').all()
 // => [1, 2, 3]

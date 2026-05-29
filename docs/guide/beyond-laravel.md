@@ -66,7 +66,7 @@ collect([1, 2]).powerSet().all() // [[],[1],[2],[1,2]]
 `AsyncCollection` mirrors the lazy API for `AsyncIterable` sources, with bounded-parallelism `mapAsync` / `filterAsync` / `eachAsync`. Concurrent operators preserve source order.
 
 ```typescript
-import { AsyncCollection } from '@anilkumarthakur/collection-js'
+import { AsyncCollection } from '@anil-labs/collection-js'
 
 const active = await AsyncCollection.from(userIds)
   .mapAsync((id) => fetchUser(id), { concurrency: 8 })
@@ -86,7 +86,7 @@ import {
   toJsonl,
   fromReadable,
   lines
-} from '@anilkumarthakur/collection-js'
+} from '@anil-labs/collection-js'
 
 // CSV ⇄ objects (RFC 4180 quoting handled)
 const rows = collect(parseCsv(csvText, { header: true }))
