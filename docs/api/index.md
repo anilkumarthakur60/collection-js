@@ -14,7 +14,8 @@ A collection always wraps an **array**. There is no separate "associative array"
 - Methods that reduce to a keyed structure — `groupBy`, `keyBy`, `countBy`, `mapWithKeys`, `mapToGroups`, `combine`, `dot`, `duplicates`, `duplicatesStrict`, `pluck(value, key)` — are **terminal** and return a plain object/`Record` directly (no `.all()`).
 - `get(index)` takes a numeric index (not an object key); `pull(value)` removes by value. For object-key lookups use `dataGet`, or plain property access on the element.
 - Object-comparison arguments (`merge`, `diff*`, `intersect*`, `replace*`) must be **arrays/collections**, not bare objects.
-  :::
+
+:::
 
 ## Creation
 
