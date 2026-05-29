@@ -5,7 +5,7 @@ The `Collection` class provides a fluid, convenient wrapper for working with arr
 To create a collection, pass an array into the `collect` function, or the `Collection` constructor.
 
 ```typescript
-import collect from '@anilkumarthakur/collection-js'
+import collect from '@anil-labs/collection-js'
 
 const items = collect([1, 2, 3])
 ```
@@ -51,7 +51,7 @@ Collections are "macroable", which allows you to add your own methods to the Col
 You can use the `macro` method to register custom behavior. This is typically done during the bootstrapping phase of your application.
 
 ```typescript
-import { Collection } from '@anilkumarthakur/collection-js'
+import { Collection } from '@anil-labs/collection-js'
 
 Collection.macro('toUpper', function () {
   return this.map((item: string) => item.toUpperCase())
