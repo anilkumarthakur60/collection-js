@@ -145,13 +145,13 @@ export function crossJoinOf<T>(...arrays: readonly (readonly T[])[]): T[][] {
 
 export function duplicatesOf<T>(
   items: readonly T[],
-  by?: (item: T) => unknown,
+  by?: (item: T, index: number) => unknown,
   strict = false
 ): Map<number, T> {
   const seen: unknown[] = []
   const dupes = new Map<number, T>()
   for (let i = 0; i < items.length; i++) {
-    const key = by ? by(items[i]) : items[i]
+    const key = by ? by(items[i], i) : items[i]
     const found = strict
       ? seen.some((s) => s === key || deepEqual(s, key))
       : seen.some((s) => looseEqual(s, key))

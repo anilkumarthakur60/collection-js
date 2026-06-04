@@ -1,3 +1,5 @@
+import type { RetrieverInput } from '@/support/valueRetriever'
+
 export type PlainObject = Record<string, unknown>
 
 export type Scalar = string | number | bigint | boolean | symbol
@@ -10,7 +12,8 @@ export type SortDirection = 'asc' | 'desc'
 
 export type Predicate<T> = (item: T, key: number) => boolean
 
-export type Iteratee<T, R = unknown> = ((item: T, key: number) => R) | keyof T | string
+/** Back-compat alias of {@link RetrieverInput} — the two were duplicate shapes. */
+export type Iteratee<T, R = unknown> = RetrieverInput<T, R>
 
 export type ValueOf<T, K> = K extends keyof T ? T[K] : unknown
 
