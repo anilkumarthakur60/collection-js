@@ -17,7 +17,9 @@ describe('flip', () => {
   })
 
   it('coerces non-scalar items via String() (does not throw)', () => {
-    const result = collect([{ id: 1 }] as unknown as string[]).flip().all()
+    const result = collect([{ id: 1 }] as unknown as string[])
+      .flip()
+      .all()
     expect(result[0]).toEqual({ '[object Object]': 0 })
   })
 

@@ -4,7 +4,7 @@ describe('parseCsv', () => {
   it('parses rows without header', () => {
     expect(parseCsv('a,b,c\n1,2,3')).toEqual([
       ['a', 'b', 'c'],
-      ['1', '2', '3'],
+      ['1', '2', '3']
     ])
   })
 
@@ -12,7 +12,7 @@ describe('parseCsv', () => {
     const result = parseCsv('name,age,active\nAlice,30,true\nBob,25,false', { header: true })
     expect(result).toEqual([
       { name: 'Alice', age: 30, active: true },
-      { name: 'Bob', age: 25, active: false },
+      { name: 'Bob', age: 25, active: false }
     ])
   })
 
@@ -50,15 +50,86 @@ describe('parseCsv', () => {
     const result = parseCsv('a,b,c,d\nnull,true,42,1.5', { header: true })
     expect(result).toEqual([{ a: null, b: true, c: 42, d: 1.5 }])
   })
+
+  it('handles a quoted field containing newlines', () => {
+    expect(parseCsv('a,b\n"line1\nline2",2', { header: true, raw: true })).toEqual([
+      { a: 'line1\nline2', b: '2' }
+    ])
+  })
+
+  it('handles a quoted field containing CRLF', () => {
+    expect(parseCsv('"x\r\ny",z')).toEqual([['x\r\ny', 'z']])
+  })
+
+  it('handles embedded quotes and a newline in the same quoted field', () => {
+    expect(parseCsv('"say ""hi""\nok",2')).toEqual([['say "hi"\nok', '2']])
+  })
+
+  it('handles empty quoted fields', () => {
+    expect(parseCsv('"",b\nc,""')).toEqual([
+      ['', 'b'],
+      ['c', '']
+    ])
+  })
+
+  it('keeps a trailing empty field before EOL', () => {
+    expect(parseCsv('a,\n1,2')).toEqual([
+      ['a', ''],
+      ['1', '2']
+    ])
+  })
+})
+
+// Audit fix: "CSV parser does not strip a leading UTF-8 BOM". Excel and many
+// Windows tools prepend U+FEFF; the first header key used to become '\uFEFFname',
+// silently breaking row['name'] lookups.
+describe('regression: parseCsv strips a leading UTF-8 BOM', () => {
+  const BOM = '\uFEFF'
+
+  it('BOM with header:true yields clean header keys', () => {
+    const rows = parseCsv(`${BOM}name,age\r\nAlice,30`, { header: true })
+    expect(rows).toEqual([{ name: 'Alice', age: 30 }])
+    expect(Object.keys(rows[0] as object)).toEqual(['name', 'age'])
+  })
+
+  it('BOM with header:false yields a clean first cell', () => {
+    expect(parseCsv(`${BOM}a,b\n1,2`)).toEqual([
+      ['a', 'b'],
+      ['1', '2']
+    ])
+  })
+
+  it('BOM before a quoted first field still enters quote mode', () => {
+    expect(parseCsv(`${BOM}"a,x",b`)).toEqual([['a,x', 'b']])
+  })
+
+  it('BOM-only input parses as empty', () => {
+    expect(parseCsv(BOM)).toEqual([])
+    expect(parseCsv(BOM, { header: true })).toEqual([])
+  })
+
+  it('does not strip U+FEFF appearing mid-field', () => {
+    expect(parseCsv(`a${BOM}b,c`)).toEqual([[`a${BOM}b`, 'c']])
+  })
 })
 
 describe('toCsv', () => {
   it('serializes object rows with auto-detected columns', () => {
-    expect(toCsv([{ a: 1, b: 'x' }, { a: 2, b: 'y' }])).toBe('a,b\n1,x\n2,y')
+    expect(
+      toCsv([
+        { a: 1, b: 'x' },
+        { a: 2, b: 'y' }
+      ])
+    ).toBe('a,b\n1,x\n2,y')
   })
 
   it('serializes array rows', () => {
-    expect(toCsv([['1', 'a'], ['2', 'b']])).toBe('1,a\n2,b')
+    expect(
+      toCsv([
+        ['1', 'a'],
+        ['2', 'b']
+      ])
+    ).toBe('1,a\n2,b')
   })
 
   it('quotes values containing the delimiter', () => {

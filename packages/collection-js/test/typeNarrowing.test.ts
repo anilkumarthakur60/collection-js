@@ -10,7 +10,8 @@ describe('filter with type guard narrows result element type', () => {
   it('filters mixed-type arrays', () => {
     const mixed: (string | number)[] = [1, 'two', 3, 'four']
     // $ExpectType Collection<string>
-    const strings = mixed.length > 0 ? collect(mixed).filter((v): v is string => typeof v === 'string') : null
+    const strings =
+      mixed.length > 0 ? collect(mixed).filter((v): v is string => typeof v === 'string') : null
     expect(strings?.all()).toEqual(['two', 'four'])
   })
 })
@@ -45,7 +46,11 @@ describe('compact', () => {
   })
 
   it('returns empty for an all-null input', () => {
-    expect(collect([null, undefined] as Array<number | null | undefined>).compact().all()).toEqual([])
+    expect(
+      collect([null, undefined] as Array<number | null | undefined>)
+        .compact()
+        .all()
+    ).toEqual([])
   })
 })
 

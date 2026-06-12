@@ -7,14 +7,14 @@ describe('sliding', () => {
     expect(flatten(collect([1, 2, 3, 4, 5]).sliding(3))).toEqual([
       [1, 2, 3],
       [2, 3, 4],
-      [3, 4, 5],
+      [3, 4, 5]
     ])
   })
 
   it('with step of 2', () => {
     expect(flatten(collect([1, 2, 3, 4, 5]).sliding(2, 2))).toEqual([
       [1, 2],
-      [3, 4],
+      [3, 4]
     ])
   })
 
@@ -38,7 +38,7 @@ describe('sliding', () => {
     expect(flatten(collect([1, 2, 3, 4]).sliding(2, 1))).toEqual([
       [1, 2],
       [2, 3],
-      [3, 4],
+      [3, 4]
     ])
   })
 })

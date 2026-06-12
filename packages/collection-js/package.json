@@ -1,0 +1,73 @@
+{
+  "name": "@anil-labs/collection-js",
+  "version": "0.1.0",
+  "description": "A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Provides 120+ chainable methods for elegant array manipulation. Framework-independent — works in Node, any JS framework, or straight off a CDN.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/index.global.js",
+  "jsdelivr": "./dist/index.global.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "collection",
+    "data-structure",
+    "typescript",
+    "javascript",
+    "library",
+    "laravel",
+    "laravel-collections",
+    "collection-js",
+    "array",
+    "fluent",
+    "chainable",
+    "functional",
+    "lazy",
+    "async"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "author": "Er. Anil Kumar Thakur <anilkumarthakur60@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anilkumarthakur60/collection-js.git",
+    "directory": "packages/collection-js"
+  },
+  "homepage": "https://github.com/anilkumarthakur60/collection-js/tree/main/packages/collection-js#readme",
+  "bugs": "https://github.com/anilkumarthakur60/collection-js/issues",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "@vitest/coverage-v8": "^4.1.8",
+    "tsup": "^8.5.1",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.8"
+  }
+}

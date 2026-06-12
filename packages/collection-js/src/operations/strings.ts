@@ -1,4 +1,4 @@
-import { dataGet } from '@/support/dataGet'
+import { dataGet, toStringValue } from '@/support/dataGet'
 
 export function implodeOf<T>(
   items: readonly T[],
@@ -11,7 +11,7 @@ export function implodeOf<T>(
     return items.map((item, i) => glueOrFormatter(item, i)).join(sep)
   }
   if (key !== undefined) {
-    return items.map((item) => String(dataGet(item, key) ?? '')).join(glueOrFormatter)
+    return items.map((item) => toStringValue(dataGet(item, key))).join(glueOrFormatter)
   }
   return items.map((item) => String(item ?? '')).join(glueOrFormatter)
 }

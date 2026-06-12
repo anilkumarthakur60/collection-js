@@ -6,7 +6,7 @@ describe('split', () => {
   it('splits into 2 groups of equal size', () => {
     expect(flatten(collect([1, 2, 3, 4]).split(2))).toEqual([
       [1, 2],
-      [3, 4],
+      [3, 4]
     ])
   })
 
@@ -14,14 +14,14 @@ describe('split', () => {
     expect(flatten(collect([1, 2, 3, 4, 5, 6]).split(3))).toEqual([
       [1, 2],
       [3, 4],
-      [5, 6],
+      [5, 6]
     ])
   })
 
   it('distributes the remainder across the leading groups', () => {
     expect(flatten(collect([1, 2, 3, 4, 5]).split(2))).toEqual([
       [1, 2, 3],
-      [4, 5],
+      [4, 5]
     ])
   })
 
@@ -38,7 +38,7 @@ describe('splitIn', () => {
   it('splits collection into n groups', () => {
     expect(flatten(collect([1, 2, 3, 4]).splitIn(2))).toEqual([
       [1, 2],
-      [3, 4],
+      [3, 4]
     ])
   })
 
@@ -46,7 +46,7 @@ describe('splitIn', () => {
     expect(flatten(collect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).splitIn(3))).toEqual([
       [1, 2, 3, 4],
       [5, 6, 7, 8],
-      [9, 10],
+      [9, 10]
     ])
   })
 

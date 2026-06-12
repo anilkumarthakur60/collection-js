@@ -22,13 +22,19 @@ describe('diff', () => {
   })
 
   it('accepts a Collection argument', () => {
-    expect(collect([1, 2, 3]).diff(collect([2])).all()).toEqual([1, 3])
+    expect(
+      collect([1, 2, 3])
+        .diff(collect([2]))
+        .all()
+    ).toEqual([1, 3])
   })
 })
 
 describe('diffAssoc', () => {
   it('returns the entries that differ from the given object', () => {
-    const items = [{ color: 'orange', type: 'fruit', remain: 6 }]
+    const items: Array<{ color: string; type: string; remain: number; used?: number }> = [
+      { color: 'orange', type: 'fruit', remain: 6 }
+    ]
     const diff = collect(items).diffAssoc([{ color: 'yellow', type: 'fruit', remain: 3, used: 6 }])
     // Object retained because at least one key/value differs
     expect(diff.count()).toBe(1)

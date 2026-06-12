@@ -2,16 +2,29 @@ import { collect } from '../src'
 
 describe('scan', () => {
   it('emits the running accumulator at each step', () => {
-    expect(collect([1, 2, 3, 4]).scan((a, b) => a + b, 0).all()).toEqual([1, 3, 6, 10])
+    expect(
+      collect([1, 2, 3, 4])
+        .scan((a, b) => a + b, 0)
+        .all()
+    ).toEqual([1, 3, 6, 10])
   })
 
   it('returns empty for empty input', () => {
-    expect(collect<number>([]).scan((a, b) => a + b, 0).all()).toEqual([])
+    expect(
+      collect<number>([])
+        .scan((a, b) => a + b, 0)
+        .all()
+    ).toEqual([])
   })
 
   it('passes the index to the callback', () => {
     const seen: number[] = []
-    collect(['a', 'b', 'c']).scan((acc, _v, i) => { seen.push(i); return acc }, '').all()
+    collect(['a', 'b', 'c'])
+      .scan((acc, _v, i) => {
+        seen.push(i)
+        return acc
+      }, '')
+      .all()
     expect(seen).toEqual([0, 1, 2])
   })
 })
@@ -21,7 +34,7 @@ describe('pairwise', () => {
     expect(collect([1, 2, 3, 4]).pairwise().all()).toEqual([
       [1, 2],
       [2, 3],
-      [3, 4],
+      [3, 4]
     ])
   })
 
@@ -36,14 +49,14 @@ describe('enumerate', () => {
     expect(collect(['a', 'b', 'c']).enumerate().all()).toEqual([
       [0, 'a'],
       [1, 'b'],
-      [2, 'c'],
+      [2, 'c']
     ])
   })
 
   it('accepts a custom start offset', () => {
     expect(collect(['a', 'b']).enumerate(10).all()).toEqual([
       [10, 'a'],
-      [11, 'b'],
+      [11, 'b']
     ])
   })
 })
@@ -61,7 +74,7 @@ describe('cycle', () => {
 describe('interleave', () => {
   it('round-robins items from multiple sources', () => {
     expect(collect([1, 2, 3]).interleave([10, 20, 30], [100, 200, 300]).all()).toEqual([
-      1, 10, 100, 2, 20, 200, 3, 30, 300,
+      1, 10, 100, 2, 20, 200, 3, 30, 300
     ])
   })
 
@@ -78,7 +91,7 @@ describe('permutations', () => {
       [2, 1, 3],
       [2, 3, 1],
       [3, 1, 2],
-      [3, 2, 1],
+      [3, 2, 1]
     ])
   })
 
@@ -95,7 +108,7 @@ describe('combinations', () => {
       [1, 4],
       [2, 3],
       [2, 4],
-      [3, 4],
+      [3, 4]
     ])
   })
 

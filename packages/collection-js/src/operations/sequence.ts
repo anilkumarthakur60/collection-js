@@ -11,7 +11,7 @@ export function rangeOf(start: number, end: number, step: number = 1): number[] 
 }
 
 export function timesOf<T>(count: number, factory: (n: number) => T): T[] {
-  const out: T[] = new Array(count)
+  const out: T[] = new Array<T>(count)
   for (let i = 0; i < count; i++) out[i] = factory(i + 1)
   return out
 }

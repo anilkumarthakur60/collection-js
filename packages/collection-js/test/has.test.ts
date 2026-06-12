@@ -34,7 +34,7 @@ describe('hasAny', () => {
 
   it('returns false when no keys exist', () => {
     const items = [{ id: 1 }]
-    expect(collect(items).hasAny(['name', 'age'] as Array<keyof { id: number }>)).toBe(false)
+    expect(collect(items).hasAny(['name', 'age'])).toBe(false)
   })
 })
 

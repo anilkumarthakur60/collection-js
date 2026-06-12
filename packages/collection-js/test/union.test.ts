@@ -18,7 +18,7 @@ describe('union', () => {
   })
 
   it('adds all items when original is empty', () => {
-    expect(collect([]).union([1, 2, 3]).all()).toEqual([1, 2, 3])
+    expect(collect<number>([]).union([1, 2, 3]).all()).toEqual([1, 2, 3])
   })
 
   it('works with strings', () => {

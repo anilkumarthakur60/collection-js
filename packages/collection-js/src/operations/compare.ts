@@ -7,7 +7,7 @@ export type ContainsArg<T> = T | Predicate<T> | Partial<T> | { [key: string]: un
 
 function matchesShape(item: unknown, shape: Record<string, unknown>): boolean {
   if (!isObjectLike(item)) return false
-  const target = item as Record<string, unknown>
+  const target = item
   for (const key of Object.keys(shape)) {
     if (!looseEqual(target[key], shape[key])) return false
   }
@@ -65,7 +65,7 @@ export function resolveContainsSpec<T>(
     return { kind: 'keyValue', key: String(target), value }
   }
   if (isObjectLike(target) && !Array.isArray(target)) {
-    return { kind: 'shape', shape: target as Record<string, unknown> }
+    return { kind: 'shape', shape: target }
   }
   return { kind: 'value', value: target }
 }

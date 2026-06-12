@@ -2,6 +2,7 @@ import type { Enumerable } from '@/contracts/Enumerable'
 import { ItemNotFoundException } from '@/exceptions/ItemNotFoundException'
 import { UnexpectedValueException } from '@/exceptions/UnexpectedValueException'
 import { applyMacroable, type MacroableTarget } from '@/macros/Macroable'
+import { wireHigherOrderMessages } from '@/collection/HigherOrderProxy'
 import * as ops from '@/operations'
 import { deepClone } from '@/support/deepClone'
 import { arrayWrap, ensureArray, toArray } from '@/support/arrayWrap'
@@ -98,7 +99,7 @@ export class Collection<T> implements Enumerable<T> {
 
   static fromJson<T>(json: string): Collection<T> {
     const parsed = JSON.parse(json) as T | T[]
-    return new Collection<T>(arrayWrap(parsed) as T[])
+    return new Collection<T>(arrayWrap(parsed))
   }
 
   static times<T>(count: number, factory: (n: number) => T): Collection<T> {
@@ -111,7 +112,7 @@ export class Collection<T> implements Enumerable<T> {
 
   static wrap<T>(value: T | T[] | Collection<T> | null | undefined): Collection<T> {
     if (value instanceof Collection) return new Collection(value.toArray())
-    return new Collection<T>(arrayWrap(value as T | T[] | null | undefined))
+    return new Collection<T>(arrayWrap(value))
   }
 
   static unwrap<T>(value: T | T[] | Collection<T>): T | T[] {
@@ -139,16 +140,18 @@ export class Collection<T> implements Enumerable<T> {
   // Each is BOTH a callable (`coll.sum(by)`) AND a property accessor
   // (`coll.sum.votes`). The exact signature is hard to model in TS so we type
   // them as the callable form for autocompletion; the property form works at
-  // runtime and is documented separately.
+  // runtime and is documented separately. The remaining HIGHER_ORDER_TARGETS
+  // (each/map/filter/…) are wired by `wireHigherOrderMessages` after the class
+  // definition — see the bottom of this file.
   get sum(): (by?: RI<T, number> | string) => number {
     const items = this.items
-    return callableHigherOrder<number>((by) => ops.sumOf(items, by as RI<T, number>)) as (
+    return callableHigherOrder<number>((by) => ops.sumOf(items, by)) as (
       by?: RI<T, number> | string
     ) => number
   }
   get average(): (by?: RI<T, number> | string) => number {
     const items = this.items
-    return callableHigherOrder<number>((by) => ops.averageOf(items, by as RI<T, number>)) as (
+    return callableHigherOrder<number>((by) => ops.averageOf(items, by)) as (
       by?: RI<T, number> | string
     ) => number
   }
@@ -157,20 +160,20 @@ export class Collection<T> implements Enumerable<T> {
   }
   get max(): ExtentFn<T> {
     const items = this.items
-    return callableHigherOrder<unknown>((by) =>
-      ops.maxOf(items, by as RI<T, unknown>)
-    ) as ExtentFn<T>
+    return callableHigherOrder<unknown>((by) => ops.maxOf(items, by)) as ExtentFn<T>
   }
   get min(): ExtentFn<T> {
     const items = this.items
-    return callableHigherOrder<unknown>((by) =>
-      ops.minOf(items, by as RI<T, unknown>)
-    ) as ExtentFn<T>
+    return callableHigherOrder<unknown>((by) => ops.minOf(items, by)) as ExtentFn<T>
   }
 
   // ─── Retrieval & access ──────────────────────────────────────────────────────
+  /**
+   * All items as a native array. Returns a fresh shallow copy — mutating the
+   * result never corrupts the collection (alias of {@link toArray}).
+   */
   all(): T[] {
-    return this.items
+    return [...this.items]
   }
 
   first(predicate?: Predicate<T>): T | undefined {
@@ -250,11 +253,11 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   doesntContain(target: unknown, ...rest: readonly unknown[]): boolean {
-    return !this.contains(target as ops.ContainsArg<T>, ...rest)
+    return !this.contains(target, ...rest)
   }
 
   doesntContainStrict(target: unknown, ...rest: readonly unknown[]): boolean {
-    return !this.containsStrict(target as ops.ContainsArg<T>, ...rest)
+    return !this.containsStrict(target, ...rest)
   }
 
   containsOneItem(predicate?: Predicate<T>): boolean {
@@ -387,7 +390,7 @@ export class Collection<T> implements Enumerable<T> {
   whereInstanceOf<R>(
     Ctor: ClassConstructor<R> | (abstract new (...args: never[]) => R)
   ): Collection<R> {
-    return new Collection(ops.whereInstanceOfOf<T, R>(this.items, Ctor as ClassConstructor<R>))
+    return new Collection(ops.whereInstanceOfOf<T, R>(this.items, Ctor))
   }
 
   // ─── Transformation ──────────────────────────────────────────────────────────
@@ -404,14 +407,21 @@ export class Collection<T> implements Enumerable<T> {
       ops.mapSpreadOf(
         this.items as unknown as readonly (readonly unknown[])[],
         fn as (...args: unknown[]) => R
-      ) as R[]
+      )
     )
   }
 
+  /**
+   * Keyed result: returns a plain record whose group values are `Collection`s,
+   * so each group stays chainable (`c.mapToGroups(fn)['even'].count()`).
+   */
   mapToGroups<K extends PropertyKey, V>(
     fn: (item: T, index: number) => readonly [K, V]
-  ): Record<K, V[]> {
-    return ops.mapToGroupsOf(this.items, fn)
+  ): Record<K, Collection<V>> {
+    const groups = ops.mapToGroupsOf(this.items, fn)
+    const out = {} as Record<K, Collection<V>>
+    for (const k of Reflect.ownKeys(groups) as K[]) out[k] = new Collection(groups[k])
+    return out
   }
 
   mapWithKeys<K extends PropertyKey, V>(
@@ -425,11 +435,11 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   flatten(depth: number = Infinity): Collection<unknown> {
-    return new Collection(ops.flattenOf(this.items as readonly unknown[], depth))
+    return new Collection(ops.flattenOf(this.items, depth))
   }
 
   collapse<U>(this: Collection<readonly U[] | U>): Collection<U> {
-    return new Collection(ops.collapseOf(this.items as unknown as readonly (readonly U[] | U)[]))
+    return new Collection(ops.collapseOf(this.items))
   }
 
   collapseWithKeys(): Collection<Record<string, unknown>> {
@@ -445,7 +455,7 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   flip(): Collection<Record<string, number>> {
-    return new Collection([ops.flipOf(this.items as readonly unknown[])])
+    return new Collection([ops.flipOf(this.items)])
   }
 
   pluck(key: string): Collection<unknown>
@@ -575,8 +585,18 @@ export class Collection<T> implements Enumerable<T> {
     return new Collection(ops.nthOf(this.items, step, offset))
   }
 
-  groupBy<K extends PropertyKey = PropertyKey>(by: RI<T, K | readonly K[]>): Record<K, T[]> {
-    return ops.groupByOf<T, K>(this.items, by)
+  /**
+   * Keyed result: returns a plain record whose group values are `Collection`s,
+   * so Laravel-style chaining works per group:
+   * `users.groupBy('role')['admin'].count()`.
+   */
+  groupBy<K extends PropertyKey = PropertyKey>(
+    by: RI<T, K | readonly K[]>
+  ): Record<K, Collection<T>> {
+    const groups = ops.groupByOf<T, K>(this.items, by)
+    const out = {} as Record<K, Collection<T>>
+    for (const k of Reflect.ownKeys(groups) as K[]) out[k] = new Collection(groups[k])
+    return out
   }
 
   groupByMany(groupers: readonly RI<T>[]): Record<PropertyKey, unknown> {
@@ -689,7 +709,7 @@ export class Collection<T> implements Enumerable<T> {
   }
 
   mergeRecursive(...sources: readonly (readonly T[] | Collection<T>)[]): Collection<T> {
-    const lists = sources.map((s) => (s instanceof Collection ? s.toArray() : (s as readonly T[])))
+    const lists = sources.map((s) => (s instanceof Collection ? s.toArray() : s))
     return new Collection(ops.mergeRecursiveOf(this.items, ...lists))
   }
 
@@ -771,7 +791,7 @@ export class Collection<T> implements Enumerable<T> {
 
   crossJoin<U>(...others: readonly (readonly U[])[]): Collection<(T | U)[]> {
     const sources: readonly (T | U)[][] = [
-      this.items.slice() as (T | U)[],
+      this.items.slice(),
       ...others.map((o) => [...o] as (T | U)[])
     ]
     return new Collection<(T | U)[]>(ops.crossJoinOf<T | U>(...sources))
@@ -861,7 +881,7 @@ export class Collection<T> implements Enumerable<T> {
       if (this.items.length === 0)
         throw new TypeError('Reduce of empty collection with no initial value')
       let acc: T = this.items[0]
-      for (let i = 1; i < this.items.length; i++) acc = fn(acc as T, this.items[i], i) as T
+      for (let i = 1; i < this.items.length; i++) acc = fn(acc, this.items[i], i) as T
       return acc
     }
     return ops.reduceOf(this.items, fn as (c: R, i: T, k: number) => R, initial)
@@ -910,7 +930,7 @@ export class Collection<T> implements Enumerable<T> {
     callback: (c: this, value: boolean) => this | void,
     fallback?: (c: this, value: boolean) => this | void
   ): this {
-    return ops.whenOf(this, condition, callback, fallback) as this
+    return ops.whenOf(this, condition, callback, fallback)
   }
 
   unless(
@@ -918,11 +938,8 @@ export class Collection<T> implements Enumerable<T> {
     callback: (c: this, value: boolean) => this | void,
     fallback?: (c: this, value: boolean) => this | void
   ): this {
-    const inverted =
-      typeof condition === 'function'
-        ? (c: this) => !(condition as (c: this) => boolean)(c)
-        : !condition
-    return ops.whenOf(this, inverted, callback, fallback) as this
+    const inverted = typeof condition === 'function' ? (c: this) => !condition(c) : !condition
+    return ops.whenOf(this, inverted, callback, fallback)
   }
 
   whenEmpty(callback: (c: this) => this | void, fallback?: (c: this) => this | void): this {
@@ -979,7 +996,7 @@ export class Collection<T> implements Enumerable<T> {
   // ─── Combine & zip ──────────────────────────────────────────────────────────
   combine<V>(values: readonly V[] | Collection<V>): Record<string, V> {
     const list = values instanceof Collection ? values.toArray() : values
-    return ops.combineOf(this.items.map(String) as readonly string[], list)
+    return ops.combineOf(this.items.map(String), list)
   }
 
   zip<U>(values: readonly U[] | Collection<U>): Collection<[T, U | undefined]> {
@@ -1019,19 +1036,21 @@ export class Collection<T> implements Enumerable<T> {
   toSet(): Set<T> {
     return new Set(this.items)
   }
+  /** Shallow copy — mutating the result never corrupts the collection. */
   toJSON(): T[] {
-    return this.items
+    return [...this.items]
   }
   toString(): string {
     return this.toJson()
   }
+  /** Shallow copy — mutating the result never corrupts the collection. */
   valueOf(): T[] {
-    return this.items
+    return [...this.items]
   }
   [Symbol.toPrimitive](hint: string): string | number | T[] {
     if (hint === 'number') return this.items.length
     if (hint === 'string') return this.toJson()
-    return this.items
+    return [...this.items]
   }
 
   // ─── Cloning ────────────────────────────────────────────────────────────────
@@ -1218,10 +1237,17 @@ export class Collection<T> implements Enumerable<T> {
     throw new Error('Collection.macro is not yet wired — internal initialisation error.')
   }
   static hasMacro: MacroableTarget['hasMacro'] = () => false
+  static getMacro: MacroableTarget['getMacro'] = () => undefined
   static flushMacros: MacroableTarget['flushMacros'] = () => undefined
 }
 
 applyMacroable(Collection)
+
+// Higher-order messages: every target in HIGHER_ORDER_TARGETS supports the
+// property form (`users.map.name`, `users.where(...).each.notify()`). The
+// aggregation getters above (sum/avg/average/max/min) already implement their
+// own callable proxies and are skipped by the wiring.
+wireHigherOrderMessages(Collection.prototype)
 
 // Wired by LazyCollection module to break the ESM cycle.
 type LazyCtor = new <U>(items: Iterable<U>) => { all(): U[] } & Iterable<U>

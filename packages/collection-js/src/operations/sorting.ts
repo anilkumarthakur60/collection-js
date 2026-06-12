@@ -1,18 +1,28 @@
 import { valueRetriever, type RetrieverInput } from '@/support/valueRetriever'
 import type { Comparator, SortDirection } from '@/support/types'
 
+/**
+ * Stringify a value for comparison without relying on Object's default
+ * `[object Object]` stringification: objects compare by their JSON form.
+ */
+function toComparableString(value: unknown): string {
+  if (typeof value !== 'object' || value === null) return String(value)
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return Object.prototype.toString.call(value)
+  }
+}
+
 const defaultCompare: Comparator<unknown> = (a, b) => {
   if (a === b) return 0
   if (a == null) return 1
   if (b == null) return -1
   if (typeof a === 'number' && typeof b === 'number') return a - b
-  return String(a).localeCompare(String(b))
+  return toComparableString(a).localeCompare(toComparableString(b))
 }
 
-export function sortOf<T>(
-  items: readonly T[],
-  comparator: Comparator<T> = defaultCompare as Comparator<T>
-): T[] {
+export function sortOf<T>(items: readonly T[], comparator: Comparator<T> = defaultCompare): T[] {
   return [...items].sort(comparator)
 }
 
@@ -27,8 +37,7 @@ export function sortDescOf<T>(items: readonly T[]): T[] {
  * two-argument retriever callback can never be misread as a comparator.
  */
 export type SortBySpec<T> =
-  | RetrieverInput<T, unknown>
-  | readonly [RetrieverInput<T, unknown>, SortDirection]
+  RetrieverInput<T, unknown> | readonly [RetrieverInput<T, unknown>, SortDirection]
 
 export function sortByOf<T>(
   items: readonly T[],

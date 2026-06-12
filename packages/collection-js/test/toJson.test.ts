@@ -49,12 +49,13 @@ describe('toArray', () => {
     expect(collect([]).toArray()).toEqual([])
   })
 
-  it('returns a fresh array (use all() for reference)', () => {
+  it('returns a fresh array, as does all() (regression: all() leaked the live array)', () => {
     const items = [1, 2, 3]
     const c = collect(items)
     expect(c.toArray()).toEqual(items)
     expect(c.toArray()).not.toBe(items)
-    expect(c.all()).toBe(items)
+    expect(c.all()).not.toBe(items)
+    expect(c.all()).toEqual(items)
   })
 
   it('works with objects', () => {

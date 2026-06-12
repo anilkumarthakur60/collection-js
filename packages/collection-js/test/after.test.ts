@@ -18,7 +18,7 @@ describe('after', () => {
   })
 
   it('returns null for empty collection', () => {
-    expect(collect([]).after(1)).toBeUndefined()
+    expect(collect<number>([]).after(1)).toBeUndefined()
   })
 
   it('works with strings', () => {

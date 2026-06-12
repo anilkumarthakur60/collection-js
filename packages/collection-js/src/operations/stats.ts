@@ -1,22 +1,17 @@
-import { valueRetriever, type RetrieverInput } from '@/support/valueRetriever'
+import { numericValuesOf } from '@/operations/aggregations'
+import { type RetrieverInput } from '@/support/valueRetriever'
 
-function toNumberArray<T>(items: readonly T[], by?: RetrieverInput<T, number>): number[] {
-  const get = valueRetriever<T, number>(by)
-  const out: number[] = []
-  for (let i = 0; i < items.length; i++) {
-    const v = get(items[i], i)
-    const n = typeof v === 'number' ? v : Number(v)
-    if (Number.isFinite(n)) out.push(n)
-  }
-  return out
-}
+// All stats share the library-wide numeric coercion rule (see `coerceNumeric`
+// in aggregations.ts): numbers/numeric strings/booleans are used, everything
+// else (null, undefined, NaN, ±Infinity, non-numeric strings, objects) is
+// skipped — the same population that sum/average/median operate on.
 
 /** Population variance (divides by N). For sample variance, use `sampleVarianceOf`. */
 export function varianceOf<T>(
   items: readonly T[],
   by?: RetrieverInput<T, number>
 ): number | undefined {
-  const values = toNumberArray(items, by)
+  const values = numericValuesOf(items, by)
   if (values.length === 0) return undefined
   const mean = values.reduce((a, b) => a + b, 0) / values.length
   let acc = 0
@@ -29,7 +24,7 @@ export function sampleVarianceOf<T>(
   items: readonly T[],
   by?: RetrieverInput<T, number>
 ): number | undefined {
-  const values = toNumberArray(items, by)
+  const values = numericValuesOf(items, by)
   if (values.length < 2) return undefined
   const mean = values.reduce((a, b) => a + b, 0) / values.length
   let acc = 0
@@ -63,7 +58,7 @@ export function quantileOf<T>(
   by?: RetrieverInput<T, number>
 ): number | undefined {
   if (q < 0 || q > 1) throw new RangeError(`quantile q must be in [0,1] (got ${q})`)
-  const values = toNumberArray(items, by).sort((a, b) => a - b)
+  const values = numericValuesOf(items, by).sort((a, b) => a - b)
   if (values.length === 0) return undefined
   if (values.length === 1) return values[0]
   const pos = q * (values.length - 1)
@@ -101,7 +96,7 @@ export function histogramOf<T>(
   if (bins <= 0 || !Number.isInteger(bins)) {
     throw new RangeError(`bins must be a positive integer (got ${bins})`)
   }
-  const values = toNumberArray(items, options.by)
+  const values = numericValuesOf(items, options.by)
   if (values.length === 0) return []
 
   const [min, max] = options.range ?? [Math.min(...values), Math.max(...values)]
@@ -128,8 +123,8 @@ export function correlationOf<T>(
   yBy: RetrieverInput<T, number>
 ): number | undefined {
   if (items.length < 2) return undefined
-  const xs = toNumberArray(items, xBy)
-  const ys = toNumberArray(items, yBy)
+  const xs = numericValuesOf(items, xBy)
+  const ys = numericValuesOf(items, yBy)
   const n = Math.min(xs.length, ys.length)
   if (n < 2) return undefined
   let xSum = 0

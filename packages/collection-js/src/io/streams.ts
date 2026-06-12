@@ -19,19 +19,23 @@ export interface FromReadableOptions {
 }
 
 /**
- * Wrap a Node `Readable` (or any `AsyncIterable<Buffer | Uint8Array | string>`)
- * into an `AsyncCollection<string>`. Pass `{decodeAs: false}` to skip decoding.
+ * Wrap a Node `Readable` (or any `AsyncIterable<Uint8Array | string>`) into an
+ * `AsyncCollection<string>`. Pass `{decodeAs: false}` to skip decoding.
+ *
+ * The chunk type is deliberately `Uint8Array | string` (not `Buffer`): Node's
+ * `Buffer` extends `Uint8Array`, so every Node Readable remains assignable
+ * while the published d.ts stays platform-neutral (no `@types/node` needed).
  */
 export function fromReadable(
-  source: ReadableLike<Buffer | Uint8Array | string>,
+  source: ReadableLike<Uint8Array | string>,
   options: FromReadableOptions = {}
 ): AsyncCollection<string> {
   const encoding = options.decodeAs === false ? null : (options.decodeAs ?? 'utf-8')
   const decoder = encoding ? new TextDecoder(encoding) : null
   return new AsyncCollection<string>(async function* () {
-    for await (const chunk of source as AsyncIterable<Buffer | Uint8Array | string>) {
+    for await (const chunk of source) {
       if (typeof chunk === 'string') yield chunk
-      else if (decoder) yield decoder.decode(chunk as Uint8Array, { stream: true })
+      else if (decoder) yield decoder.decode(chunk, { stream: true })
       else yield String(chunk)
     }
     if (decoder) {
@@ -45,13 +49,12 @@ export function fromReadable(
  * Convert an arbitrary chunk stream into a line-by-line `AsyncCollection<string>`.
  * Handles \n and \r\n; trailing chunk without newline is emitted as the last line.
  */
-export function lines(source: ReadableLike<Buffer | Uint8Array | string>): AsyncCollection<string> {
+export function lines(source: ReadableLike<Uint8Array | string>): AsyncCollection<string> {
   return new AsyncCollection<string>(async function* () {
     let buffer = ''
     const decoder = new TextDecoder('utf-8')
-    for await (const chunk of source as AsyncIterable<Buffer | Uint8Array | string>) {
-      buffer +=
-        typeof chunk === 'string' ? chunk : decoder.decode(chunk as Uint8Array, { stream: true })
+    for await (const chunk of source) {
+      buffer += typeof chunk === 'string' ? chunk : decoder.decode(chunk, { stream: true })
       let idx: number
       while ((idx = buffer.indexOf('\n')) >= 0) {
         yield buffer.slice(0, idx).replace(/\r$/, '')

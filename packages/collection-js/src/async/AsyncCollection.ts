@@ -13,7 +13,7 @@ function resolveSource<T>(source: AsyncSource<T>): () => AsyncIterable<T> {
 function normalize<T>(value: AsyncIterable<T> | Iterable<T>): AsyncIterable<T> {
   if (Symbol.asyncIterator in (value as object)) return value as AsyncIterable<T>
   return (async function* () {
-    for (const item of value as Iterable<T>) yield item
+    for (const item of value as Iterable<T>) yield await Promise.resolve(item)
   })()
 }
 
@@ -47,7 +47,8 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
 
   static range(start: number, end: number, step: number = 1): AsyncCollection<number> {
     if (step === 0) throw new RangeError('range step must not be zero')
-    return new AsyncCollection<number>(async function* () {
+    // A sync generator suffices — AsyncSource accepts any Iterable factory.
+    return new AsyncCollection<number>(function* () {
       if (step > 0) for (let i = start; i <= end; i += step) yield i
       else for (let i = start; i >= end; i += step) yield i
     })
@@ -177,10 +178,20 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
     options: { concurrency?: number } = {}
   ): AsyncCollection<R> {
     const concurrency = options.concurrency ?? 4
+    if (concurrency <= 0 || !Number.isFinite(concurrency)) {
+      throw new RangeError(`concurrency must be a positive finite number (got ${concurrency})`)
+    }
     const src = this.source
+    type Outcome = { ok: true; value: R } | { error: unknown; ok: false }
     return new AsyncCollection<R>(async function* () {
       const it = src()[Symbol.asyncIterator]()
-      const pending = new Map<number, Promise<{ index: number; value: R }>>()
+      // Every dispatched task is stored as a promise that never rejects: the
+      // rejection is captured into an `Outcome` instead. This keeps every
+      // rejection observed even while a slow head-of-line task is still in
+      // flight (mirrors mapWithConcurrency in concurrent.ts) — otherwise a
+      // non-head failure would sit unobserved and crash the process under
+      // Node's default unhandled-rejection policy.
+      const pending = new Map<number, Promise<Outcome>>()
       let nextDispatch = 0
       let nextEmit = 0
       let exhausted = false
@@ -195,24 +206,34 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
         const idx = nextDispatch++
         pending.set(
           idx,
-          Promise.resolve(fn(next.value, idx)).then((value) => ({ index: idx, value }))
+          Promise.resolve()
+            .then(() => fn(next.value, idx))
+            .then(
+              (value): Outcome => ({ ok: true, value }),
+              (error: unknown): Outcome => ({ error, ok: false })
+            )
         )
       }
 
-      while (pending.size < concurrency && !exhausted) await dispatch()
+      try {
+        while (pending.size < concurrency && !exhausted) await dispatch()
 
-      while (pending.size > 0) {
-        const ready = pending.get(nextEmit)
-        if (ready) {
-          const { value } = await ready
+        // Indices are dispatched contiguously, so the head-of-line task is
+        // always present in `pending` while anything is pending.
+        while (pending.size > 0) {
+          const ready = pending.get(nextEmit)
+          if (ready === undefined) break
+          const outcome = await ready
           pending.delete(nextEmit)
-          yield value
           nextEmit++
+          if (!outcome.ok) throw outcome.error
+          yield outcome.value
           if (!exhausted) await dispatch()
-        } else {
-          // Head of line not done — wait for any task to settle, then loop.
-          await Promise.race(pending.values())
         }
+      } finally {
+        // Drain still-running tasks before propagating an error (or an early
+        // consumer break) so no task outcome is ever left unobserved.
+        await Promise.allSettled(pending.values())
       }
     })
   }

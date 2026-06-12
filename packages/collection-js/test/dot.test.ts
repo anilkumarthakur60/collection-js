@@ -33,17 +33,23 @@ describe('dot', () => {
 
 describe('undot', () => {
   it('expands dot notation keys to nested objects', () => {
-    const result = collect([{ 'name.first': 'Marie', 'name.last': 'Valentine' }]).undot().all()
+    const result = collect([{ 'name.first': 'Marie', 'name.last': 'Valentine' }])
+      .undot()
+      .all()
     expect(result).toEqual([{ name: { first: 'Marie', last: 'Valentine' } }])
   })
 
   it('handles already expanded keys', () => {
-    const result = collect([{ a: 1, b: 2 }]).undot().all()
+    const result = collect([{ a: 1, b: 2 }])
+      .undot()
+      .all()
     expect(result).toEqual([{ a: 1, b: 2 }])
   })
 
   it('handles deeply nested dot keys', () => {
-    const result = collect([{ 'a.b.c': 42 }]).undot().all()
+    const result = collect([{ 'a.b.c': 42 }])
+      .undot()
+      .all()
     expect(result).toEqual([{ a: { b: { c: 42 } } }])
   })
 
@@ -53,7 +59,30 @@ describe('undot', () => {
   })
 
   it('merges multiple objects with dot keys', () => {
-    const result = collect([{ 'x.y': 1 }, { 'x.z': 2 }]).undot().all()
+    const result = collect([{ 'x.y': 1 }, { 'x.z': 2 }])
+      .undot()
+      .all()
     expect(result).toEqual([{ x: { y: 1, z: 2 } }])
+  })
+})
+
+describe('undot prototype pollution (regression: dot keys could rewrite Object.prototype)', () => {
+  it('does not pollute Object.prototype via __proto__ dot keys', () => {
+    collect([{ '__proto__.polluted': 'yes' }]).undot()
+    expect(({} as Record<string, unknown>)['polluted']).toBeUndefined()
+    expect(Object.prototype).not.toHaveProperty('polluted')
+  })
+
+  it('does not traverse constructor/prototype segments', () => {
+    collect([{ 'constructor.prototype.polluted2': 'yes' }]).undot()
+    expect(({} as Record<string, unknown>)['polluted2']).toBeUndefined()
+    expect(Object.prototype).not.toHaveProperty('polluted2')
+  })
+
+  it('drops unsafe keys instead of expanding them', () => {
+    const result = collect([{ '__proto__.x': 1, 'a.b': 2 }])
+      .undot()
+      .all()
+    expect(result).toEqual([{ a: { b: 2 } }])
   })
 })

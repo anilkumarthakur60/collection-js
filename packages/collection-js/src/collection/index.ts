@@ -4,5 +4,9 @@
 export { Collection } from '@/collection/Collection'
 export { LazyCollection } from '@/collection/LazyCollection'
 export type { LazySource } from '@/collection/LazyCollection'
-export { createHigherOrderProxy, HIGHER_ORDER_TARGETS } from '@/collection/HigherOrderProxy'
+export {
+  createHigherOrderProxy,
+  wireHigherOrderMessages,
+  HIGHER_ORDER_TARGETS
+} from '@/collection/HigherOrderProxy'
 export type { HigherOrderTarget } from '@/collection/HigherOrderProxy'

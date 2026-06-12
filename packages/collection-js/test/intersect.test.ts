@@ -22,7 +22,11 @@ describe('intersect', () => {
   })
 
   it('accepts a Collection argument', () => {
-    expect(collect([1, 2, 3]).intersect(collect([2, 3])).all()).toEqual([2, 3])
+    expect(
+      collect([1, 2, 3])
+        .intersect(collect([2, 3]))
+        .all()
+    ).toEqual([2, 3])
   })
 })
 
@@ -41,7 +45,9 @@ describe('intersectUsing', () => {
 describe('intersectAssoc', () => {
   it('keeps key/value pairs present in both objects', () => {
     const items = [{ color: 'red', size: 'M', material: 'cotton' }]
-    const result = collect(items).intersectAssoc([{ color: 'blue', size: 'M', material: 'polyester' }])
+    const result = collect(items).intersectAssoc([
+      { color: 'blue', size: 'M', material: 'polyester' }
+    ])
     expect(result.all()).toEqual([{ size: 'M' }])
   })
 })
@@ -52,7 +58,7 @@ describe('intersectAssocUsing', () => {
     const cmp = (a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase())
     const result = collect(items).intersectAssocUsing(
       { color: 'blue', size: 'M', material: 'polyester' },
-      cmp,
+      cmp
     )
     expect(result.all()).toEqual([{ Size: 'M' }])
   })

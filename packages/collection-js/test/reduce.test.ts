@@ -32,6 +32,35 @@ describe('reduce', () => {
   })
 })
 
+describe('reduce without an initial value (audit: seed-from-first branch untested)', () => {
+  it('seeds the accumulator from the first element', () => {
+    expect(collect([1, 2, 3, 4]).reduce((acc, v) => acc + v)).toBe(10)
+    expect(collect(['a', 'b']).reduce((acc, v) => acc + v)).toBe('ab')
+  })
+
+  it('a single element is returned untouched without invoking the callback', () => {
+    const fn = vi.fn((acc: number, v: number) => acc + v)
+    expect(collect([7]).reduce(fn)).toBe(7)
+    expect(fn).not.toHaveBeenCalled()
+  })
+
+  it('starts the index at 1 when seeding from the first element', () => {
+    const indices: number[] = []
+    collect([10, 20, 30]).reduce((acc, v, i) => {
+      indices.push(i)
+      return acc + v
+    })
+    expect(indices).toEqual([1, 2])
+  })
+
+  it('throws a TypeError on an empty collection', () => {
+    expect(() => collect<number>([]).reduce((acc, v) => acc + v)).toThrow(TypeError)
+    expect(() => collect<number>([]).reduce((acc, v) => acc + v)).toThrow(
+      'Reduce of empty collection with no initial value'
+    )
+  })
+})
+
 describe('reduceSpread', () => {
   it('reduces with multiple accumulator values', () => {
     const result = collect([1, 2, 3]).reduceSpread(

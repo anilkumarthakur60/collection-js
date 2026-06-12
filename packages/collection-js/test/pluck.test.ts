@@ -23,8 +23,8 @@ describe('pluck', () => {
   })
 
   it('returns empty Collection for empty input', () => {
-    const result = collect([]).pluck('id' as never)
-    expect((result as Collection<never>).all()).toEqual([])
+    const result = collect([]).pluck('id')
+    expect(result.all()).toEqual([])
   })
 
   it('returns Collection instance without keyBy', () => {

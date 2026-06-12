@@ -17,7 +17,9 @@ describe('max', () => {
 
   it('works via property-style higher-order proxy', () => {
     const items = [{ price: 100 }, { price: 300 }, { price: 200 }]
-    expect(collect(items).max.price).toBe(300)
+    // The property form (`coll.max.price`) works via a runtime Proxy but is not
+    // modelled in the ExtentFn type, so cast for the property access.
+    expect((collect(items).max as unknown as { price: number | undefined }).price).toBe(300)
   })
 
   it('works with negative numbers', () => {

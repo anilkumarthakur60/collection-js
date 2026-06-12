@@ -42,7 +42,7 @@ describe('sortBy', () => {
     const items = [{ name: 'Charlie' }, { name: 'Alice' }, { name: 'Bob' }]
     expect(
       collect(items)
-        .sortBy((v) => v.name)
+        .sortBy((v: { name: string }) => v.name)
         .all()
     ).toEqual([{ name: 'Alice' }, { name: 'Bob' }, { name: 'Charlie' }])
   })
@@ -58,7 +58,7 @@ describe('sortByDesc', () => {
     const items = [{ v: 1 }, { v: 3 }, { v: 2 }]
     expect(
       collect(items)
-        .sortByDesc((x) => x.v)
+        .sortByDesc((x: { v: number }) => x.v)
         .all()
     ).toEqual([{ v: 3 }, { v: 2 }, { v: 1 }])
   })
@@ -101,5 +101,44 @@ describe('sortKeysUsing', () => {
       .sortKeysUsing((a, b) => a.localeCompare(b))
       .all()
     expect(Object.keys(result[0])).toEqual(['a', 'b'])
+  })
+})
+
+describe('sortBy with two-argument retriever callback (regression: arity-2 callbacks were misread as comparators)', () => {
+  it('treats an (item, index) callback as a retriever and sorts ascending', () => {
+    const items = [{ age: 3 }, { age: 1 }, { age: 2 }]
+    expect(
+      collect(items)
+        .sortBy((item, _index) => item.age)
+        .all()
+    ).toEqual([{ age: 1 }, { age: 2 }, { age: 3 }])
+  })
+
+  it('sortByDesc treats an (item, index) callback as a retriever and sorts descending', () => {
+    const items = [{ age: 3 }, { age: 1 }, { age: 2 }]
+    expect(
+      collect(items)
+        .sortByDesc((item, _index) => item.age)
+        .all()
+    ).toEqual([{ age: 3 }, { age: 2 }, { age: 1 }])
+  })
+
+  it('lazy sortBy treats an (item, index) callback as a retriever', () => {
+    const items = [{ age: 3 }, { age: 1 }, { age: 2 }]
+    expect(
+      collect(items)
+        .lazy()
+        .sortBy((item, _index) => item.age)
+        .all()
+    ).toEqual([{ age: 1 }, { age: 2 }, { age: 3 }])
+  })
+
+  it('still supports [retriever, direction] tuple specs', () => {
+    const items = [{ age: 1 }, { age: 3 }, { age: 2 }]
+    expect(
+      collect(items)
+        .sortBy([['age', 'desc']])
+        .all()
+    ).toEqual([{ age: 3 }, { age: 2 }, { age: 1 }])
   })
 })

@@ -2,30 +2,33 @@ import { collect, LazyCollection } from '../src'
 
 describe('withHeartbeat', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('yields all items unchanged', () => {
-    const result = collect([1, 2, 3]).lazy().withHeartbeat(1000, () => undefined).all()
+    const result = collect([1, 2, 3])
+      .lazy()
+      .withHeartbeat(1000, () => undefined)
+      .all()
     expect(result).toEqual([1, 2, 3])
   })
 
   it('returns a LazyCollection', () => {
-    const result = collect([1, 2]).lazy().withHeartbeat(1000, () => undefined)
+    const result = collect([1, 2])
+      .lazy()
+      .withHeartbeat(1000, () => undefined)
     expect(result).toBeInstanceOf(LazyCollection)
   })
 
   it('does not call the callback if the interval has not elapsed', () => {
     const heartbeats: number[] = []
     // Items are consumed synchronously so Date.now() barely advances
-    collect([1, 2, 3])
-      .lazy()
-      .withHeartbeat(60_000, () => heartbeats.push(Date.now()))
-      .all()
+    const lazy = collect([1, 2, 3]).lazy()
+    lazy.withHeartbeat(60_000, () => heartbeats.push(Date.now())).all()
     expect(heartbeats).toHaveLength(0)
   })
 
@@ -34,17 +37,15 @@ describe('withHeartbeat', () => {
     let now = 0
 
     // Advance clock by 600ms for every call so a 500ms interval fires
-    jest.spyOn(Date, 'now').mockImplementation(() => {
+    vi.spyOn(Date, 'now').mockImplementation(() => {
       now += 600
       return now
     })
 
-    collect([1, 2, 3])
-      .lazy()
-      .withHeartbeat(500, () => heartbeats.push(now))
-      .all()
+    const lazy = collect([1, 2, 3]).lazy()
+    lazy.withHeartbeat(500, () => heartbeats.push(now)).all()
 
-    jest.spyOn(Date, 'now').mockRestore()
+    vi.spyOn(Date, 'now').mockRestore()
 
     // Each of the 3 items advances clock by 600ms > 500ms interval
     expect(heartbeats.length).toBeGreaterThan(0)
@@ -71,8 +72,9 @@ describe('withHeartbeat', () => {
 
   it('default interval of 1000ms is used when iterating', () => {
     // Verify the method signature accepts intervalMs as first param and callback second
-    const cb = jest.fn()
-    collect([1]).lazy().withHeartbeat(1000, cb).all()
+    const cb = vi.fn()
+    const lazy = collect([1]).lazy()
+    lazy.withHeartbeat(1000, cb).all()
     // No assertion on call count — just verifying it doesn't throw
     expect(true).toBe(true)
   })

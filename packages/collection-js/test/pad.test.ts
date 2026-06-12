@@ -18,11 +18,11 @@ describe('pad', () => {
   })
 
   it('pads empty collection to the right', () => {
-    expect(collect([]).pad(3, 0).all()).toEqual([0, 0, 0])
+    expect(collect<number>([]).pad(3, 0).all()).toEqual([0, 0, 0])
   })
 
   it('pads empty collection to the left', () => {
-    expect(collect([]).pad(-3, 'x').all()).toEqual(['x', 'x', 'x'])
+    expect(collect<string>([]).pad(-3, 'x').all()).toEqual(['x', 'x', 'x'])
   })
 
   it('pads with number value', () => {

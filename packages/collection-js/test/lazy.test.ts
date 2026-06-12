@@ -12,7 +12,7 @@ describe('lazy', () => {
   })
 
   it('lazy collection for empty collection has no items', () => {
-    const lazy = collect([]).lazy()
+    const lazy = collect<number>([]).lazy()
     expect(lazy.all()).toEqual([])
   })
 

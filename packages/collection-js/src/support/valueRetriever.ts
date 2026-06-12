@@ -6,9 +6,7 @@ import { dataGet } from '@/support/dataGet'
  * strings assignable while preserving `keyof T` literal autocompletion.
  */
 export type RetrieverInput<T, R = unknown> =
-  | ((item: T, index: number) => R)
-  | keyof T
-  | (string & {})
+  ((item: T, index: number) => R) | keyof T | (string & {})
 
 /**
  * Convert a key, dot-path, or function into a normalized accessor. Used by
@@ -22,7 +20,7 @@ export function valueRetriever<T, R = unknown>(
     return (item: T) => item as unknown as R
   }
   if (typeof source === 'function') {
-    return source as (item: T, index: number) => R
+    return source
   }
   const key = String(source)
   if (key.includes('.') || key.includes('*')) {

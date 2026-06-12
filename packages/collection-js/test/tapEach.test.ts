@@ -13,10 +13,8 @@ describe('tapEach', () => {
 
   it('passes the index to the callback', () => {
     const indices: number[] = []
-    collect([10, 20, 30])
-      .lazy()
-      .tapEach((_v, i) => indices.push(i))
-      .all()
+    const lazy = collect([10, 20, 30]).lazy()
+    lazy.tapEach((_v, i) => indices.push(i)).all()
     expect(indices).toEqual([0, 1, 2])
   })
 
@@ -31,7 +29,9 @@ describe('tapEach', () => {
   })
 
   it('returns a LazyCollection', () => {
-    const result = collect([1, 2]).lazy().tapEach(() => undefined)
+    const result = collect([1, 2])
+      .lazy()
+      .tapEach(() => undefined)
     expect(result).toBeInstanceOf(LazyCollection)
   })
 
@@ -49,8 +49,30 @@ describe('tapEach', () => {
 
   it('works on an empty collection', () => {
     const tapped: number[] = []
-    const result = collect<number>([]).lazy().tapEach((v) => tapped.push(v)).all()
+    const result = collect<number>([])
+      .lazy()
+      .tapEach((v) => tapped.push(v))
+      .all()
     expect(result).toEqual([])
     expect(tapped).toEqual([])
+  })
+})
+
+describe('tapEach on the eager Collection (audit: only the lazy variant was tested)', () => {
+  it('invokes the callback immediately for every item and returns this', () => {
+    const tapped: Array<[number, number]> = []
+    const c = collect([5, 6])
+    const returned = c.tapEach((v, i) => tapped.push([i, v]))
+    expect(returned).toBe(c)
+    expect(tapped).toEqual([
+      [0, 5],
+      [1, 6]
+    ])
+  })
+
+  it('does not modify the collection', () => {
+    const c = collect([1, 2])
+    c.tapEach(() => undefined)
+    expect(c.all()).toEqual([1, 2])
   })
 })

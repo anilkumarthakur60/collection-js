@@ -33,5 +33,4 @@ describe('last', () => {
   it('predicate receives index', () => {
     expect(collect(['x', 'y', 'z']).last((_v, i) => i < 2)).toBe('y')
   })
-
 })

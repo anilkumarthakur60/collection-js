@@ -21,8 +21,14 @@ export { parseJsonl, toJsonl, parseJsonlStream } from '@/io/jsonl'
 export { fromReadable, lines } from '@/io/streams'
 export type { FromReadableOptions, ReadableLike } from '@/io/streams'
 
-// Higher-order messaging primitive (so users can build their own proxies)
-export { createHigherOrderProxy, HIGHER_ORDER_TARGETS } from '@/collection/HigherOrderProxy'
+// Higher-order messaging primitives. All HIGHER_ORDER_TARGETS are wired on
+// Collection and LazyCollection out of the box; `wireHigherOrderMessages`
+// lets subclasses opt their own prototypes in.
+export {
+  createHigherOrderProxy,
+  wireHigherOrderMessages,
+  HIGHER_ORDER_TARGETS
+} from '@/collection/HigherOrderProxy'
 export type { HigherOrderTarget } from '@/collection/HigherOrderProxy'
 
 // Macroable primitive (so users can extend Collection from their own code,
