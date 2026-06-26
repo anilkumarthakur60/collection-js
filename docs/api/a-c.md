@@ -40,7 +40,7 @@ users.after((user) => user.name === 'Bob')
 
 ## `all`
 
-Returns the underlying array represented by the collection.
+Returns the collection's items as a native array. The result is a fresh shallow copy — mutating it never corrupts the collection (`toArray()` is an alias).
 
 **Simple Example:**
 
@@ -79,6 +79,8 @@ orders.average('totals.price')
 orders.avg((order) => order.totals.price * 1.5) // With 50% tax
 // => 300
 ```
+
+Non-numeric values (`null`, `undefined`, `NaN`, non-numeric strings, objects) are **skipped** — excluded from both the sum and the divisor. An empty (or all-non-numeric) collection returns `0`, where Laravel returns `null`.
 
 ---
 

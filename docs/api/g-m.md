@@ -4,6 +4,8 @@
 
 Returns the item at a given **numeric index** (negative indices count from the end). If the index is out of range, `undefined` is returned, or an optional default value (which may be a factory function).
 
+Presence is decided by **bounds, not value**: an in-bounds element whose stored value is `undefined` is returned as-is — the default is only used for out-of-range indices.
+
 **Simple Example:**
 
 ```typescript
@@ -12,6 +14,8 @@ const items = collect(['a', 'b', 'c'])
 items.get(1) // => 'b'
 items.get(-1) // => 'c'
 items.get(10, 'fallback') // => 'fallback'
+
+collect([undefined, 5]).get(0, 99) // => undefined (present, so no default)
 ```
 
 ::: tip Looking up an object key?
@@ -27,28 +31,25 @@ collect([{ name: 'Anil' }]).value('name') // => 'Anil'
 
 ## `groupBy`
 
-Groups the collection's items by a given key or callback.
+Groups the collection's items by a given key or callback. This is a **terminal** method — it returns a plain object keyed by group. Each group value is a chainable `Collection`, so per-group chaining works: `users.groupBy('account_id')['A'].count()`.
 
 **Simple Key Example:**
 
-````typescript
+```typescript
 const users = collect([
   { id: 1, account_id: 'A' },
   { id: 2, account_id: 'B' },
   { id: 3, account_id: 'A' }
 ])
 
-This is a **terminal** method — it returns a plain object (not a chainable collection).
-
-```typescript
 users.groupBy('account_id')
 /*
 {
-    'A': [{ id: 1, account_id: 'A' }, { id: 3, account_id: 'A' }],
-    'B': [{ id: 2, account_id: 'B' }]
+    'A': Collection [{ id: 1, account_id: 'A' }, { id: 3, account_id: 'A' }],
+    'B': Collection [{ id: 2, account_id: 'B' }]
 }
 */
-````
+```
 
 **Complex Callback Example:**
 
@@ -58,8 +59,8 @@ const numbers = collect([1, 2, 3, 4, 5, 6])
 numbers.groupBy((num) => (num % 2 === 0 ? 'even' : 'odd'))
 /*
 {
-    odd: [1, 3, 5],
-    even: [2, 4, 6]
+    odd: Collection [1, 3, 5],
+    even: Collection [2, 4, 6]
 }
 */
 ```
@@ -262,7 +263,7 @@ collect([1, 2, 3, 4, 5]).last((i) => i < 4)
 
 ## `lazy`
 
-Converts a standard Collection into a `LazyCollection`. Lazy Collections utilize JavaScript Generators to parse infinite data with minimal memory constraints.
+Converts a standard Collection into a `LazyCollection`. Lazy Collections utilize JavaScript Generators to parse infinite data with minimal memory constraints. The bridge is fully typed — `lazy()` returns `LazyCollection<T>`, so the chain needs no casts.
 
 **Simple Example:**
 
@@ -284,7 +285,7 @@ Static method used to extend the `Collection` class with custom functions at run
 ```typescript
 import { Collection } from '@anil-labs/collection-js'
 
-Collection.macro('sumAndDouble', function () {
+Collection.macro('sumAndDouble', function (this: Collection<number>) {
   return this.sum() * 2
 })
 

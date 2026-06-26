@@ -1,6 +1,6 @@
 # @anil-labs/collection-js
 
-A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Full parity with the **Laravel 13.x Collections** API — plus statistics, SQL-style joins, combinatorics, async streams, and CSV/JSONL I/O that go beyond it.
+A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Near-complete parity with the **Laravel 13.x Collections** API (see [Laravel Compatibility](#laravel-compatibility) for the gaps) — plus statistics, SQL-style joins, combinatorics, async streams, and CSV/JSONL I/O that go beyond it.
 
 [![npm version](https://img.shields.io/npm/v/@anil-labs/collection-js)](https://www.npmjs.com/package/@anil-labs/collection-js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -8,7 +8,8 @@ A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Ful
 - **Strict TypeScript** — written in strict mode with deep type inference; no `any` in the public surface.
 - **Immutable by default** — methods return new collections; the handful of mutators mirror Laravel exactly.
 - **Three flavours** — eager `Collection`, generator-backed `LazyCollection`, and `AsyncCollection` for `AsyncIterable` sources.
-- **Tree-shakable** — every operation is also a standalone pure function you can import directly.
+- **Standalone operations** — every method is also a pure function (`operations.pluckOf(...)`), usable without the `Collection` class.
+- **Runs anywhere** — Node 18+, any framework, or straight off a CDN as a single `<script>` tag.
 - **Zero runtime dependencies.**
 
 ## Installation
@@ -16,6 +17,18 @@ A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Ful
 ```bash
 npm install @anil-labs/collection-js
 ```
+
+Requires Node.js 18+ — or no Node at all: the package ships a browser-ready global build, so a single script tag works with no bundler and no build step:
+
+```html
+<script src="https://unpkg.com/@anil-labs/collection-js"></script>
+<script>
+  const { collect } = CollectionJS
+  collect([1, 2, 3]).sum() // => 6
+</script>
+```
+
+See the [CDN usage guide](docs/guide/cdn.md) (runnable demo in [`examples/cdn`](examples/cdn)).
 
 ## Quick Start
 
@@ -42,8 +55,9 @@ const users = collect([
 users.where('role', 'admin').sortByDesc('score').pluck('name').all()
 // => ['Alice', 'Charlie']
 
-users.groupBy('role')
-// => { admin: [...], user: [...] }
+const byRole = users.groupBy('role')
+// => { admin: Collection, user: Collection } — each group stays chainable
+byRole['admin'].pluck('name').all() // => ['Alice', 'Charlie']
 
 users.avg('score') // => 88.75
 users.max('score') // => 95
@@ -144,9 +158,12 @@ const csv = toCsv(rows.all())
 
 ## Higher-Order Messages
 
+Every method in `HIGHER_ORDER_TARGETS` (`each`, `map`, `filter`, `sum`, `avg`, `max`, `min`, `groupBy`, `sortBy`, `unique`, …) also accepts its callback as a **property access**, on both `Collection` and `LazyCollection`:
+
 ```typescript
-users.sum.score // => 355   (property-style)
-users.where('role', 'admin').each.notify()
+users.sum.score // => 355   — property form of users.sum((u) => u.score)
+users.map.name.all() // => ['Alice', 'Bob', 'Charlie', 'Diana']
+users.where('role', 'admin').each.notify() // calls notify() on every admin
 ```
 
 ## Extending with Macros
@@ -244,7 +261,39 @@ collect(['a', 'b']).toUpper().all() // => ['A', 'B']
 
 ## Laravel Compatibility
 
-This library aims for full API parity with [Laravel 13.x Collections](https://laravel.com/docs/13.x/collections). If you're familiar with Laravel's `Collection` class, you'll feel right at home — `collect()` is the default export.
+This library tracks [Laravel 13.x Collections](https://laravel.com/docs/13.x/collections) closely — `collect()` is the default export and the overwhelming majority of methods match Laravel's names and behavior, so if you know Laravel's `Collection` you'll feel right at home.
+
+Parity is near-complete rather than total. Known gaps and deliberate divergences:
+
+- **Not implemented (yet):** `getOrPut`, `mapToDictionary`, `diffUsing`, `diffKeysUsing`.
+- **Keyed results are plain objects.** A collection always wraps an array, so `groupBy`, `keyBy`, `countBy`, `mapWithKeys`, `mapToGroups`, `combine`, `dot`, and `duplicates` return a `Record` rather than a keyed Collection. The group values of `groupBy`/`mapToGroups` are chainable `Collection`s.
+- **`get(index)` is index-based** (negative indices count from the end). For Laravel's key-based `get($key)`, use `value(key)` or `dataGet`.
+- **`put(key, value)` sets the key on every object element** (mutating in place), rather than setting a single keyed entry.
+- **`has(key)` checks item properties**, not collection keys.
+- **`avg()`/`average()` of an empty collection returns `0`** (Laravel returns `null`), and non-numeric values are skipped rather than coerced.
+- **`combine()` truncates to the shorter side** on a length mismatch (Laravel throws).
+
+Smaller signature differences are called out per-method in the [API reference](docs/api/index.md).
+
+## Repository & Development
+
+This repository is a pnpm workspace:
+
+| Path                                             | What it is                                                             |
+| ------------------------------------------------ | ---------------------------------------------------------------------- |
+| [`packages/collection-js`](packages/collection-js) | The published library — source, Vitest test suite, tsup build         |
+| [`examples/playground`](examples/playground)     | Vite + TypeScript playground wired to the workspace build              |
+| [`examples/cdn`](examples/cdn)                   | No-bundler demo of the CDN/global build                                |
+| [`docs`](docs)                                   | This documentation, a VitePress site                                   |
+
+```bash
+pnpm install     # bootstrap the workspace
+pnpm build       # build the library (ESM + CJS + browser IIFE)
+pnpm test        # run the test suite
+pnpm typecheck   # strict TS across the workspace
+pnpm lint        # eslint (type-aware on packages/*/src)
+pnpm docs:dev    # serve the docs site locally
+```
 
 ## License
 
