@@ -7,12 +7,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "example-vanilla",
-    "example-react",
-    "example-vue",
-    "example-svelte",
-    "example-solid",
-    "example-element"
-  ]
+  "ignore": []
 }
