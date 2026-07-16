@@ -1,6 +1,6 @@
 # Beyond Laravel
 
-In addition to full parity with Laravel 13.x Collections, this library ships features tuned for real-world data work in JavaScript and TypeScript. Everything below is fully typed and chainable.
+In addition to near-complete parity with Laravel 13.x Collections, this library ships features tuned for real-world data work in JavaScript and TypeScript. Everything below is fully typed and chainable.
 
 ## Statistics
 
@@ -63,7 +63,7 @@ collect([1, 2]).powerSet().all() // [[],[1],[2],[1,2]]
 
 ## Async Collections
 
-`AsyncCollection` mirrors the lazy API for `AsyncIterable` sources, with bounded-parallelism `mapAsync` / `filterAsync` / `eachAsync`. Concurrent operators preserve source order.
+`AsyncCollection` mirrors the lazy API for `AsyncIterable` sources, with bounded-parallelism `mapAsync` / `filterAsync` / `eachAsync`. Concurrent operators preserve source order, and `concurrency` must be a positive number. If a task fails, in-flight work is drained first and the operator then rejects with the first error — no unhandled rejections leak.
 
 ```typescript
 import { AsyncCollection } from '@anil-labs/collection-js'
@@ -88,7 +88,7 @@ import {
   lines
 } from '@anil-labs/collection-js'
 
-// CSV ⇄ objects (RFC 4180 quoting handled)
+// CSV ⇄ objects (RFC 4180 quoting handled; a leading UTF-8 BOM is stripped)
 const rows = collect(parseCsv(csvText, { header: true }))
 const csv = toCsv(rows.all())
 

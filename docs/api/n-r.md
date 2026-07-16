@@ -249,16 +249,22 @@ items.push(4).all()
 
 ## `put`
 
-Sets the given key/value on **every object element**, returning a new collection.
+Sets the given key/value on **every object element**. Like the other Laravel-style mutators, it mutates the collection **in place** and returns it — each element is replaced by a shallow copy with the key set, so the original item objects are untouched.
 
 **Simple Example:**
 
 ```typescript
 const items = collect([{ a: 1 }])
 
-items.put('b', 2).all()
+items.put('b', 2) // mutates `items` and returns it
+
+items.all()
 // => [{ a: 1, b: 2 }]
 ```
+
+::: warning Differs from Laravel
+Laravel's `put($key, $value)` sets a single keyed entry on the collection. Here a collection always wraps an array, so `put` stamps the key onto every element instead.
+:::
 
 ---
 
