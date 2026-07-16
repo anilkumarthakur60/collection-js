@@ -45,7 +45,7 @@ describe('firstWhere', () => {
   it('finds first item by key-value (loose)', () => {
     const items = [
       { id: 1, name: 'Alice' },
-      { id: 2, name: 'Bob' },
+      { id: 2, name: 'Bob' }
     ]
     expect(collect(items).firstWhere('name', 'Bob')).toEqual({ id: 2, name: 'Bob' })
   })

@@ -16,12 +16,15 @@ export async function mapWithConcurrency<T, R>(
     : toAsyncIterator(source)
   const results: R[] = []
   const inflight = new Set<Promise<void>>()
+  // First-settled rejection reasons land at index 0. An array (rather than an
+  // `unknown` sentinel compared against `undefined`) keeps a task that rejects
+  // WITH `undefined` as its reason counting as a failure.
+  const errors: unknown[] = []
   let nextIndex = 0
-  let firstError: unknown = undefined
   let exhausted = false
 
   const startNext = async (): Promise<void> => {
-    if (exhausted || firstError !== undefined) return
+    if (exhausted || errors.length > 0) return
     const next = await iterator.next()
     if (next.done) {
       exhausted = true
@@ -33,7 +36,7 @@ export async function mapWithConcurrency<T, R>(
         results[i] = value
       })
       .catch((err: unknown) => {
-        if (firstError === undefined) firstError = err
+        errors.push(err)
       })
     const wrapped = task.finally(() => {
       inflight.delete(wrapped)
@@ -42,23 +45,23 @@ export async function mapWithConcurrency<T, R>(
   }
 
   // Prime the pool, then keep replenishing as slots free up.
-  while (inflight.size < concurrency && !exhausted && firstError === undefined) {
+  while (inflight.size < concurrency && !exhausted && errors.length === 0) {
     await startNext()
   }
   while (inflight.size > 0) {
     await Promise.race(inflight)
-    if (firstError !== undefined) break
+    if (errors.length > 0) break
     while (inflight.size < concurrency && !exhausted) await startNext()
   }
   await Promise.allSettled(inflight)
-  if (firstError !== undefined) throw firstError
+  if (errors.length > 0) throw errors[0]
   return results
 }
 
 function isAsyncIterable<T>(value: unknown): value is AsyncIterable<T> {
-  return value !== null && typeof value === 'object' && Symbol.asyncIterator in (value as object)
+  return value !== null && typeof value === 'object' && Symbol.asyncIterator in value
 }
 
 async function* toAsyncIterator<T>(source: Iterable<T>): AsyncGenerator<T> {
-  for (const item of source) yield item
+  for (const item of source) yield await Promise.resolve(item)
 }

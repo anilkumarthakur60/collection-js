@@ -37,6 +37,35 @@ describe('where', () => {
   })
 })
 
+describe('where operator/truthy gaps (audit: != <> and single-arg form untested)', () => {
+  it('supports != operator (loose)', () => {
+    const items = [{ id: 1 }, { id: '2' }, { id: 3 }]
+    expect(collect(items).where('id', '!=', 2).all()).toEqual([{ id: 1 }, { id: 3 }])
+  })
+
+  it('supports <> operator as an alias of !=', () => {
+    const items = [{ id: 1 }, { id: 2 }]
+    expect(collect(items).where('id', '<>', 1).all()).toEqual([{ id: 2 }])
+  })
+
+  it('single-argument where(key) keeps items whose key is truthy', () => {
+    const items = [{ active: 1 }, { active: 0 }, { active: '' }, { active: 'yes' }]
+    expect(collect(items).where('active').all()).toEqual([{ active: 1 }, { active: 'yes' }])
+  })
+})
+
+describe('whereInStrict / whereNotInStrict (audit: untested)', () => {
+  it('whereInStrict keeps 1 but not "1"', () => {
+    const items = [{ v: 1 }, { v: '1' }, { v: 2 }]
+    expect(collect(items).whereInStrict('v', [1]).all()).toEqual([{ v: 1 }])
+  })
+
+  it('whereNotInStrict removes only identical-type matches', () => {
+    const items = [{ v: 1 }, { v: '1' }, { v: 2 }]
+    expect(collect(items).whereNotInStrict('v', [1]).all()).toEqual([{ v: '1' }, { v: 2 }])
+  })
+})
+
 describe('whereStrict', () => {
   it('filters with strict equality', () => {
     const items = [{ id: 1 }, { id: 2 }, { id: 1 }]

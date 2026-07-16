@@ -22,6 +22,7 @@ describe('each', () => {
     collect([1, 2, 3, 4, 5]).each((item) => {
       result.push(item)
       if (item === 3) return false
+      return undefined
     })
     expect(result).toEqual([1, 2, 3])
   })
@@ -62,6 +63,7 @@ describe('eachSpread', () => {
     ]).eachSpread((a: number) => {
       result.push(a)
       if (a === 3) return false
+      return undefined
     })
     expect(result).toEqual([1, 3])
   })

@@ -70,22 +70,38 @@ describe('pull', () => {
 })
 
 describe('put', () => {
-  it('returns a new Collection with a key set on every item', () => {
+  it('sets a key on every item', () => {
     const items = [
       { id: 1, active: false },
-      { id: 2, active: false },
+      { id: 2, active: false }
     ]
     const result = collect(items).put('active', true)
     expect(result.all()).toEqual([
       { id: 1, active: true },
-      { id: 2, active: true },
+      { id: 2, active: true }
     ])
   })
 
-  it('does not mutate original collection', () => {
-    const items = [{ id: 1, name: 'Alice' }]
-    const c = collect(items)
-    c.put('name', 'Bob')
-    expect(c.all()[0].name).toBe('Alice')
+  it('mutates the collection in place and returns it, matching Laravel (regression: put contradicted its own doc)', () => {
+    const c = collect([{ id: 1, name: 'Alice' }])
+    const result = c.put('name', 'Bob')
+    expect(c.all()).toEqual([{ id: 1, name: 'Bob' }])
+    expect(result.all()).toEqual([{ id: 1, name: 'Bob' }])
+  })
+
+  it('does not mutate the original item objects', () => {
+    const item = { id: 1, name: 'Alice' }
+    collect([item]).put('name', 'Bob')
+    expect(item.name).toBe('Alice')
+  })
+
+  it('can add a brand-new key, widening the element type (regression: put was typed to reject new keys)', () => {
+    const result = collect([{ a: 1 }, { a: 2 }]).put('b', 'x')
+    expect(result.all()).toEqual([
+      { a: 1, b: 'x' },
+      { a: 2, b: 'x' }
+    ])
+    // The widened type exposes the new key without casts.
+    expect(result.first()?.b).toBe('x')
   })
 })

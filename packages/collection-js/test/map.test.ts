@@ -80,8 +80,10 @@ describe('mapSpread', () => {
 describe('mapToGroups', () => {
   it('groups items by key-value pairs from callback', () => {
     const result = collect([1, 2, 3, 4]).mapToGroups((v) => [v % 2 === 0 ? 'even' : 'odd', v])
-    expect(result['even']).toEqual([2, 4])
-    expect(result['odd']).toEqual([1, 3])
+    expect(result['even'].all()).toEqual([2, 4])
+    expect(result['odd'].all()).toEqual([1, 3])
+    // Keyed-result contract: group values are chainable Collections.
+    expect(result['even'].count()).toBe(2)
   })
 
   it('returns empty object for empty collection', () => {

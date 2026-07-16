@@ -4,18 +4,18 @@ describe('keyBy', () => {
   it('keys items by a property', () => {
     const items = [
       { id: 'a', name: 'Alice' },
-      { id: 'b', name: 'Bob' },
+      { id: 'b', name: 'Bob' }
     ]
     expect(collect(items).keyBy('id')).toEqual({
       a: { id: 'a', name: 'Alice' },
-      b: { id: 'b', name: 'Bob' },
+      b: { id: 'b', name: 'Bob' }
     })
   })
 
   it('keys items by callback', () => {
     const items = [
       { code: 'US', label: 'United States' },
-      { code: 'CA', label: 'Canada' },
+      { code: 'CA', label: 'Canada' }
     ]
     const result = collect(items).keyBy((item) => item.code)
     expect(result['US']).toEqual({ code: 'US', label: 'United States' })
@@ -25,7 +25,7 @@ describe('keyBy', () => {
   it('overwrites duplicate keys with last value', () => {
     const items = [
       { type: 'A', val: 1 },
-      { type: 'A', val: 2 },
+      { type: 'A', val: 2 }
     ]
     expect(collect(items).keyBy('type')['A'].val).toBe(2)
   })
@@ -59,6 +59,10 @@ describe('keys', () => {
   })
 
   it('deduplicates keys across multiple objects', () => {
-    expect(collect([{ id: 1 }, { id: 2 }]).keys().all()).toEqual(['id'])
+    expect(
+      collect([{ id: 1 }, { id: 2 }])
+        .keys()
+        .all()
+    ).toEqual(['id'])
   })
 })

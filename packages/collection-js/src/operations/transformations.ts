@@ -1,7 +1,7 @@
 import type { ClassConstructor } from '@/support/types'
 
 export function mapOf<T, R>(items: readonly T[], fn: (item: T, index: number) => R): R[] {
-  const out: R[] = new Array(items.length)
+  const out: R[] = new Array<R>(items.length)
   for (let i = 0; i < items.length; i++) out[i] = fn(items[i], i)
   return out
 }

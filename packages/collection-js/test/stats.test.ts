@@ -50,7 +50,7 @@ describe('stats', () => {
     const items = [
       { x: 1, y: 2 },
       { x: 2, y: 4 },
-      { x: 3, y: 6 },
+      { x: 3, y: 6 }
     ]
     expect(collect(items).correlation('x', 'y')).toBeCloseTo(1, 5)
   })

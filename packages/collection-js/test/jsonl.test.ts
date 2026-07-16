@@ -24,6 +24,10 @@ describe('parseJsonl', () => {
     expect(caught?.message).toContain('line 2')
     expect((caught as { cause?: unknown }).cause).toBeDefined()
   })
+
+  it('handles CRLF line endings', () => {
+    expect(parseJsonl('{"a":1}\r\n{"a":2}\r\n')).toEqual([{ a: 1 }, { a: 2 }])
+  })
 })
 
 describe('toJsonl', () => {
@@ -57,12 +61,64 @@ describe('parseJsonlStream', () => {
     const it = parseJsonlStream(mockChunks('{"a":1}\nbad\n'))
     let caught: Error | undefined
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _ of it) void _
     } catch (e) {
       caught = e as Error
     }
     expect(caught).toBeInstanceOf(SyntaxError)
     expect(caught?.message).toContain('line 2')
+  })
+
+  async function drain<T>(source: AsyncGenerator<T>): Promise<T[]> {
+    const out: T[] = []
+    for await (const item of source) out.push(item)
+    return out
+  }
+
+  it('handles one JSON value split across many chunks', async () => {
+    const out = await drain(parseJsonlStream(mockChunks('{"a', '":', '42}\n{"b":true}')))
+    expect(out).toEqual([{ a: 42 }, { b: true }])
+  })
+
+  it('handles a chunk split inside a string value', async () => {
+    const out = await drain(parseJsonlStream(mockChunks('{"msg":"hel', 'lo, world"}\n')))
+    expect(out).toEqual([{ msg: 'hello, world' }])
+  })
+
+  it('handles CRLF split across chunks', async () => {
+    const out = await drain(parseJsonlStream(mockChunks('{"a":1}\r', '\n{"a":2}')))
+    expect(out).toEqual([{ a: 1 }, { a: 2 }])
+  })
+
+  it('handles a newline exactly at a chunk boundary', async () => {
+    const out = await drain(parseJsonlStream(mockChunks('{"a":1}\n', '{"a":2}\n')))
+    expect(out).toEqual([{ a: 1 }, { a: 2 }])
+  })
+
+  it('flushes a trailing value that has no final newline', async () => {
+    const out = await drain(parseJsonlStream(mockChunks('{"a":1}\n{"a":', '2}')))
+    expect(out).toEqual([{ a: 1 }, { a: 2 }])
+  })
+
+  it('ignores empty and whitespace-only chunks/lines', async () => {
+    const out = await drain(parseJsonlStream(mockChunks('', '{"a":1}\n \n', '', '\n{"a":2}\n')))
+    expect(out).toEqual([{ a: 1 }, { a: 2 }])
+  })
+
+  it('yields nothing for an empty stream', async () => {
+    expect(await drain(parseJsonlStream(mockChunks()))).toEqual([])
+  })
+
+  it('reports the correct line number when the invalid JSON is the unterminated tail', async () => {
+    const it = parseJsonlStream(mockChunks('{"a":1}\n{"a":2}\n', 'nope'))
+    let caught: Error | undefined
+    try {
+      for await (const _ of it) void _
+    } catch (e) {
+      caught = e as Error
+    }
+    expect(caught).toBeInstanceOf(SyntaxError)
+    expect(caught?.message).toContain('line 3')
+    expect((caught as { cause?: unknown } | undefined)?.cause).toBeDefined()
   })
 })

@@ -1,6 +1,26 @@
 import { isObjectLike } from '@/support/isObject'
 
 /**
+ * Coerce any value to a string for display/matching without triggering the
+ * unhelpful `[object Object]` — objects (and arrays) are JSON-serialized, other
+ * values go through `String()`. Never throws.
+ */
+export function toStringValue(value: unknown): string {
+  if (value === null || value === undefined) return ''
+  if (typeof value === 'string') return value
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return String(value)
+  }
+  if (typeof value === 'symbol') return value.toString()
+  if (typeof value === 'function') return value.toString()
+  try {
+    return JSON.stringify(value) ?? ''
+  } catch {
+    return Object.prototype.toString.call(value)
+  }
+}
+
+/**
  * Resolve a nested value from an object/array using "dot" notation, mirroring
  * Laravel's `data_get` helper. Supports `*` to traverse arrays and produces
  * arrays of leaf values when wildcards are used.
@@ -11,7 +31,7 @@ export function dataGet(
   defaultValue?: unknown
 ): unknown {
   if (target == null) return defaultValue
-  const segments = Array.isArray(path) ? [...path] : String(path).split('.')
+  const segments: string[] = typeof path === 'string' ? path.split('.') : [...path]
 
   let current: unknown = target
   for (let i = 0; i < segments.length; i++) {
@@ -21,9 +41,9 @@ export function dataGet(
       if (!Array.isArray(current)) return defaultValue
       const rest = segments.slice(i + 1)
       const collected: unknown[] = []
-      for (const entry of current) {
+      for (const entry of current as readonly unknown[]) {
         const value = rest.length === 0 ? entry : dataGet(entry, rest, undefined)
-        if (Array.isArray(value)) collected.push(...value)
+        if (Array.isArray(value)) collected.push(...(value as readonly unknown[]))
         else collected.push(value)
       }
       return collected
@@ -33,13 +53,13 @@ export function dataGet(
     if (Array.isArray(current)) {
       const idx = Number(segment)
       if (Number.isInteger(idx) && idx >= 0 && idx < current.length) {
-        current = current[idx]
+        current = (current as readonly unknown[])[idx]
         continue
       }
       return defaultValue
     }
-    if (isObjectLike(current) && segment in (current as Record<string, unknown>)) {
-      current = (current as Record<string, unknown>)[segment]
+    if (isObjectLike(current) && segment in current) {
+      current = current[segment]
       continue
     }
     return defaultValue

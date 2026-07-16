@@ -22,7 +22,7 @@ export function reduceSpreadOf<T, R extends readonly unknown[]>(
 ): R {
   let carry: R = initials
   for (let i = 0; i < items.length; i++) {
-    carry = fn(...carry, items[i], i) as R
+    carry = fn(...carry, items[i], i)
   }
   return carry
 }

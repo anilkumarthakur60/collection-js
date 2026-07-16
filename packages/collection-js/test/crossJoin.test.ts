@@ -12,7 +12,7 @@ describe('crossJoin', () => {
   })
 
   it('computes Cartesian product with two arrays', () => {
-    const result = collect([1, 2]).crossJoin(['a', 'b'], [true, false])
+    const result = collect([1, 2]).crossJoin<string | boolean>(['a', 'b'], [true, false])
     expect(result.all()).toEqual([
       [1, 'a', true],
       [1, 'a', false],

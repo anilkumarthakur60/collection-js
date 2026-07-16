@@ -1,13 +1,44 @@
 import { valueRetriever, type RetrieverInput } from '@/support/valueRetriever'
 
-function toNumber(value: unknown): number {
-  if (typeof value === 'number') return value
-  if (typeof value === 'string') {
-    const n = Number(value)
-    return Number.isNaN(n) ? 0 : n
-  }
+/**
+ * The single numeric-coercion rule shared by every numeric aggregate in the
+ * library — `sum`/`average`/`median` here and `variance`/`stddev`/`quantile`/
+ * `percentile`/`histogram`/`correlation` in stats.ts:
+ *
+ * - finite numbers pass through unchanged
+ * - numeric strings are converted with `Number()`
+ * - booleans coerce to `1`/`0`
+ * - everything else — `null`, `undefined`, `NaN`, `±Infinity`, empty or
+ *   non-numeric strings, objects, Dates — is SKIPPED (never silently treated
+ *   as `0`), so e.g. `average` and `stddev` over the same data describe the
+ *   same population.
+ *
+ * `max`/`min` are order-based rather than sum-based: they compare raw values
+ * type-preservingly (numbers, strings, Dates, bigints) and skip only values
+ * with no defined order (`null`, `undefined`, `NaN`). `mode` counts raw
+ * values by identity and applies no numeric coercion at all.
+ *
+ * Returns the coerced number, or `undefined` when the value is skipped.
+ */
+export function coerceNumeric(value: unknown): number | undefined {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined
   if (typeof value === 'boolean') return value ? 1 : 0
-  return 0
+  if (typeof value === 'string' && value.trim() !== '') {
+    const n = Number(value)
+    if (Number.isFinite(n)) return n
+  }
+  return undefined
+}
+
+/** Numeric values of `items` under the shared coercion rule (see `coerceNumeric`). */
+export function numericValuesOf<T>(items: readonly T[], by?: RetrieverInput<T, unknown>): number[] {
+  const get = valueRetriever<T, unknown>(by)
+  const out: number[] = []
+  for (let i = 0; i < items.length; i++) {
+    const n = coerceNumeric(get(items[i], i))
+    if (n !== undefined) out.push(n)
+  }
+  return out
 }
 
 /**
@@ -31,15 +62,23 @@ function compareForExtent(a: unknown, b: unknown): number {
 }
 
 export function sumOf<T>(items: readonly T[], by?: RetrieverInput<T, number>): number {
-  const get = valueRetriever<T, number>(by)
+  const values = numericValuesOf(items, by)
   let total = 0
-  for (let i = 0; i < items.length; i++) total += toNumber(get(items[i], i))
+  for (const v of values) total += v
   return total
 }
 
+/**
+ * Average of the numeric values under the shared coercion rule: non-numeric
+ * entries are excluded from both the sum and the divisor (matching Laravel's
+ * `avg`, which skips nulls). Returns 0 when nothing numeric is present.
+ */
 export function averageOf<T>(items: readonly T[], by?: RetrieverInput<T, number>): number {
-  if (items.length === 0) return 0
-  return sumOf(items, by) / items.length
+  const values = numericValuesOf(items, by)
+  if (values.length === 0) return 0
+  let total = 0
+  for (const v of values) total += v
+  return total / values.length
 }
 
 export function maxOf<T, R = number>(
@@ -51,7 +90,7 @@ export function maxOf<T, R = number>(
   let seen = false
   for (let i = 0; i < items.length; i++) {
     const v = get(items[i], i)
-    if (v == null) continue
+    if (v == null || (typeof v === 'number' && Number.isNaN(v))) continue
     if (!seen || compareForExtent(v, max) > 0) {
       max = v
       seen = true
@@ -69,7 +108,7 @@ export function minOf<T, R = number>(
   let seen = false
   for (let i = 0; i < items.length; i++) {
     const v = get(items[i], i)
-    if (v == null) continue
+    if (v == null || (typeof v === 'number' && Number.isNaN(v))) continue
     if (!seen || compareForExtent(v, min) < 0) {
       min = v
       seen = true
@@ -82,9 +121,8 @@ export function medianOf<T>(
   items: readonly T[],
   by?: RetrieverInput<T, number>
 ): number | undefined {
-  if (items.length === 0) return undefined
-  const get = valueRetriever<T, number>(by)
-  const values = items.map((item, i) => toNumber(get(item, i))).sort((a, b) => a - b)
+  const values = numericValuesOf(items, by).sort((a, b) => a - b)
+  if (values.length === 0) return undefined
   const mid = Math.floor(values.length / 2)
   return values.length % 2 === 0 ? (values[mid - 1] + values[mid]) / 2 : values[mid]
 }

@@ -16,7 +16,7 @@ export function toArray<T>(value: Iterable<T> | ArrayLike<T> | T): T[] {
 /** Wrap a non-array value into an array. Null/undefined become an empty array. */
 export function arrayWrap<T>(value: T | T[] | null | undefined): T[] {
   if (value === null || value === undefined) return []
-  return Array.isArray(value) ? (value as T[]) : [value as T]
+  return Array.isArray(value) ? value : [value]
 }
 
 /** Identity transform — preserves the input when already an array. */

@@ -26,7 +26,12 @@ describe('whereLike', () => {
   })
 
   it('treats _ as a single-character wildcard', () => {
-    expect(collect([{ code: 'A1' }, { code: 'A12' }, { code: 'B1' }]).whereLike('code', 'A_').pluck('code').all()).toEqual(['A1'])
+    expect(
+      collect([{ code: 'A1' }, { code: 'A12' }, { code: 'B1' }])
+        .whereLike('code', 'A_')
+        .pluck('code')
+        .all()
+    ).toEqual(['A1'])
   })
 
   it('is case-insensitive by default', () => {
@@ -43,7 +48,12 @@ describe('whereLike', () => {
   })
 
   it('does not match null/undefined values', () => {
-    expect(collect([{ name: null }, { name: 'x' }]).whereLike('name', '%').pluck('name').all()).toEqual(['x'])
+    expect(
+      collect([{ name: null }, { name: 'x' }])
+        .whereLike('name', '%')
+        .pluck('name')
+        .all()
+    ).toEqual(['x'])
   })
 
   it('works on a LazyCollection', () => {
@@ -60,6 +70,8 @@ describe('whereNotLike', () => {
   })
 
   it('works on a LazyCollection', () => {
-    expect(lazy(users).whereNotLike('email', '%example%').pluck('name').all()).toEqual(['Bob Jones'])
+    expect(lazy(users).whereNotLike('email', '%example%').pluck('name').all()).toEqual([
+      'Bob Jones'
+    ])
   })
 })

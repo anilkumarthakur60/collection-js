@@ -1,4 +1,4 @@
-import { dataGet } from '@/support/dataGet'
+import { dataGet, toStringValue } from '@/support/dataGet'
 import { deepEqual, looseEqual } from '@/support/deepEqual'
 import { operatorForWhere, isOperator } from '@/support/operatorForWhere'
 import type { ClassConstructor, Operator, Predicate } from '@/support/types'
@@ -23,7 +23,7 @@ export function buildWhereSpec(args: readonly unknown[], strict: boolean): Where
   // args = [key] | [key, value] | [key, operator, value]
   if (args.length <= 1) return { truthy: true, operator: '=', value: undefined, strict }
   if (args.length >= 3 && isOperator(args[1])) {
-    return { truthy: false, operator: args[1] as Operator, value: args[2], strict }
+    return { truthy: false, operator: args[1], value: args[2], strict }
   }
   return { truthy: false, operator: strict ? '===' : '=', value: args[1], strict }
 }
@@ -125,7 +125,7 @@ export function whereLikeOf<T>(
   const re = likeToRegExp(pattern, caseSensitive)
   return items.filter((item) => {
     const value = dataGet(item, key)
-    const matched = value != null && re.test(String(value))
+    const matched = value != null && re.test(toStringValue(value))
     return negate ? !matched : matched
   })
 }

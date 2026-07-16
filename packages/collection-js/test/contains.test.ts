@@ -14,11 +14,11 @@ describe('contains', () => {
   })
 
   it('works with a predicate function', () => {
-    expect(collect([1, 2, 3]).contains((v) => v > 2)).toBe(true)
+    expect(collect([1, 2, 3]).contains((v: number) => v > 2)).toBe(true)
   })
 
   it('predicate returns false when no match', () => {
-    expect(collect([1, 2, 3]).contains((v) => v > 10)).toBe(false)
+    expect(collect([1, 2, 3]).contains((v: number) => v > 10)).toBe(false)
   })
 
   it('works with partial object match', () => {
@@ -80,7 +80,7 @@ describe('doesntContain', () => {
   })
 
   it('works with a predicate', () => {
-    expect(collect([1, 2, 3]).doesntContain((v) => v > 10)).toBe(true)
+    expect(collect([1, 2, 3]).doesntContain((v: number) => v > 10)).toBe(true)
   })
 })
 

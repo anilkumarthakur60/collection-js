@@ -9,24 +9,58 @@ import { operatorForWhere } from '@/support/operatorForWhere'
 import type { ClassConstructor, Comparator, Predicate } from '@/support/types'
 import { valueRetriever, type RetrieverInput } from '@/support/valueRetriever'
 import { Collection, setLazyConstructor } from '@/collection/Collection'
+import { wireHigherOrderMessages } from '@/collection/HigherOrderProxy'
 
 export type LazySource<T> = Iterable<T> | (() => Iterable<T>)
 
 /**
+ * Wrap a one-shot iterator source in a lazy replay buffer: the first pass
+ * pulls values on demand (never ahead of consumption) and caches them; later
+ * passes replay the cache before pulling further. Nothing is pulled at wrap
+ * time — the underlying iterator is not even created until the first value is
+ * requested — so infinite generators are safe.
+ */
+function replaySource<T>(acquire: () => Iterator<T>): () => Iterable<T> {
+  const cache: T[] = []
+  let iterator: Iterator<T> | undefined
+  let exhausted = false
+  return () =>
+    (function* () {
+      let i = 0
+      for (;;) {
+        if (i < cache.length) {
+          yield cache[i]
+          i++
+          continue
+        }
+        if (exhausted) return
+        iterator ??= acquire()
+        const next = iterator.next()
+        if (next.done) {
+          exhausted = true
+          return
+        }
+        cache.push(next.value)
+        yield next.value
+        i++
+      }
+    })()
+}
+
+/**
  * Normalize a source so each `source()` invocation produces a fresh iterable.
  * Concrete arrays/sets/maps are inherently re-iterable. One-shot iterators
- * (live generators) are materialised to an array up front to preserve the
+ * (live generator objects) are wrapped in a lazy replay buffer: construction
+ * pulls nothing (infinite generators stay usable) while the
  * "iterate-many-times" contract that operations like `count()` then `each()`
- * implicitly rely on.
+ * rely on is preserved by replaying already-pulled values from cache.
  */
 function resolveSource<T>(source: LazySource<T>): () => Iterable<T> {
   if (typeof source === 'function') return source
   if (Array.isArray(source) || source instanceof Set || source instanceof Map) {
     return () => source as Iterable<T>
   }
-  // Other iterables — be defensive: snapshot to array so re-iteration works.
-  const snapshot = Array.from(source as Iterable<T>)
-  return () => snapshot
+  return replaySource<T>(() => (source as Iterable<T>)[Symbol.iterator]())
 }
 
 /**
@@ -330,7 +364,8 @@ export class LazyCollection<T> implements Enumerable<T> {
   whereLike(key: string, pattern: string, caseSensitive = false): LazyCollection<T> {
     const re = ops.likeToRegExp(pattern, caseSensitive)
     return this.filter((item) => {
-      const value = dataGet(item, key)
+      // LIKE is only meaningful on scalar-ish values; mirror the eager op.
+      const value = dataGet(item, key) as string | number | boolean | bigint | null | undefined
       return value != null && re.test(String(value))
     })
   }
@@ -339,7 +374,7 @@ export class LazyCollection<T> implements Enumerable<T> {
   whereNotLike(key: string, pattern: string, caseSensitive = false): LazyCollection<T> {
     const re = ops.likeToRegExp(pattern, caseSensitive)
     return this.filter((item) => {
-      const value = dataGet(item, key)
+      const value = dataGet(item, key) as string | number | boolean | bigint | null | undefined
       return !(value != null && re.test(String(value)))
     })
   }
@@ -383,10 +418,17 @@ export class LazyCollection<T> implements Enumerable<T> {
     return ops.mapWithKeysOf(this.all(), fn)
   }
 
+  /**
+   * Keyed result (terminal — consumes the source): plain record whose group
+   * values are eager `Collection`s so each group stays chainable.
+   */
   mapToGroups<K extends PropertyKey, V>(
     fn: (item: T, index: number) => readonly [K, V]
-  ): Record<K, V[]> {
-    return ops.mapToGroupsOf(this.all(), fn)
+  ): Record<K, Collection<V>> {
+    const groups = ops.mapToGroupsOf(this.all(), fn)
+    const out = {} as Record<K, Collection<V>>
+    for (const k of Reflect.ownKeys(groups) as K[]) out[k] = new Collection(groups[k])
+    return out
   }
 
   flatMap<R>(fn: (item: T, index: number) => R | readonly R[]): LazyCollection<R> {
@@ -568,22 +610,51 @@ export class LazyCollection<T> implements Enumerable<T> {
     })
   }
 
+  /**
+   * Streaming: chunks are emitted as soon as the predicate breaks — the source
+   * is only consumed as far as the consumer pulls, so infinite generators work.
+   */
   chunkWhile(
     predicate: (item: T, key: number, chunk: readonly T[]) => boolean
   ): LazyCollection<LazyCollection<T>> {
-    return new LazyCollection<LazyCollection<T>>(
-      ops.chunkWhileOf(this.all(), predicate).map((c) => new LazyCollection<T>(c))
-    )
+    const src = this.source
+    return new LazyCollection<LazyCollection<T>>(function* () {
+      let current: T[] = []
+      let i = 0
+      for (const item of src()) {
+        if (current.length === 0 || predicate(item, i, current)) {
+          current.push(item)
+        } else {
+          yield new LazyCollection<T>(current)
+          current = [item]
+        }
+        i++
+      }
+      if (current.length > 0) yield new LazyCollection<T>(current)
+    })
   }
 
+  /**
+   * Lazily split into `[matching, non-matching]`. The source is shared through
+   * a replay buffer, so it is enumerated at most once and only as far as either
+   * side pulls — safe on infinite generators when combined with `take()`.
+   */
   partition(predicate: Predicate<T>): [LazyCollection<T>, LazyCollection<T>] {
-    const items = this.all()
-    const [a, b] = ops.partitionOf(items, predicate)
-    return [new LazyCollection(a), new LazyCollection(b)]
+    const shared = this.remember()
+    return [shared.filter(predicate), shared.filter((item, i) => !predicate(item, i))]
   }
 
-  groupBy(by: RetrieverInput<T, PropertyKey | readonly PropertyKey[]>): Record<PropertyKey, T[]> {
-    return ops.groupByOf<T, PropertyKey>(this.all(), by)
+  /**
+   * Keyed result (terminal — consumes the source): plain record whose group
+   * values are eager `Collection`s so each group stays chainable.
+   */
+  groupBy(
+    by: RetrieverInput<T, PropertyKey | readonly PropertyKey[]>
+  ): Record<PropertyKey, Collection<T>> {
+    const groups = ops.groupByOf<T, PropertyKey>(this.all(), by)
+    const out = {} as Record<PropertyKey, Collection<T>>
+    for (const k of Reflect.ownKeys(groups)) out[k] = new Collection(groups[k])
+    return out
   }
   keyBy(by: RetrieverInput<T, PropertyKey>): Record<PropertyKey, T> {
     return ops.keyByOf<T, PropertyKey>(this.all(), by)
@@ -640,9 +711,7 @@ export class LazyCollection<T> implements Enumerable<T> {
     return new LazyCollection<T>(ops.diffOf(this.all(), this.materialise(other)))
   }
   diffAssoc(other: readonly Partial<T>[] | LazyCollection<Partial<T>>): LazyCollection<T> {
-    return new LazyCollection<T>(
-      ops.diffAssocOf(this.all(), this.materialise(other) as readonly Partial<T>[])
-    )
+    return new LazyCollection<T>(ops.diffAssocOf(this.all(), this.materialise(other)))
   }
   diffKeys(otherKeys: readonly string[]): LazyCollection<T> {
     return new LazyCollection<T>(
@@ -656,7 +725,7 @@ export class LazyCollection<T> implements Enumerable<T> {
     return new LazyCollection<T>(
       ops.intersectAssocOf(
         this.all() as unknown as readonly object[],
-        this.materialise(other) as readonly Partial<object>[]
+        this.materialise(other)
       ) as unknown as T[]
     )
   }
@@ -670,17 +739,39 @@ export class LazyCollection<T> implements Enumerable<T> {
   }
   crossJoin<U>(...others: readonly (readonly U[])[]): LazyCollection<(T | U)[]> {
     return new LazyCollection<(T | U)[]>(
-      ops.crossJoinOf<T | U>(
-        this.all() as readonly (T | U)[],
-        ...(others as readonly (readonly (T | U)[])[])
-      )
+      ops.crossJoinOf<T | U>(this.all(), ...(others as readonly (readonly (T | U)[])[]))
     )
   }
+  /**
+   * Streaming: deduplicates with a running seen-set, yielding each first
+   * occurrence as it is pulled — safe on infinite generators with `take()`.
+   */
   unique(by?: RetrieverInput<T>): LazyCollection<T> {
-    return new LazyCollection<T>(ops.uniqueOf(this.all(), by, false))
+    return this.uniqueLazy(by, false)
   }
+  /** Strict-equality variant of {@link unique} — also streaming. */
   uniqueStrict(by?: RetrieverInput<T>): LazyCollection<T> {
-    return new LazyCollection<T>(ops.uniqueStrictOf(this.all(), by))
+    return this.uniqueLazy(by, true)
+  }
+
+  private uniqueLazy(by: RetrieverInput<T> | undefined, strict: boolean): LazyCollection<T> {
+    const src = this.source
+    const get = by !== undefined ? valueRetriever<T, unknown>(by) : (item: T) => item as unknown
+    return new LazyCollection<T>(function* () {
+      const seen: unknown[] = []
+      let i = 0
+      for (const item of src()) {
+        const key = get(item, i)
+        const found = strict
+          ? seen.some((s) => s === key || deepEqual(s, key))
+          : seen.some((s) => looseEqual(s, key))
+        if (!found) {
+          seen.push(key)
+          yield item
+        }
+        i++
+      }
+    })
   }
   duplicates(by?: RetrieverInput<T>): Record<number, T> {
     return new Collection(this.all()).duplicates(by)
@@ -701,9 +792,7 @@ export class LazyCollection<T> implements Enumerable<T> {
   }
 
   flip(): LazyCollection<Record<string, number>> {
-    return new LazyCollection<Record<string, number>>([
-      ops.flipOf(this.all() as readonly unknown[])
-    ])
+    return new LazyCollection<Record<string, number>>([ops.flipOf(this.all())])
   }
 
   pad(size: number, value: T): LazyCollection<T> {
@@ -715,7 +804,7 @@ export class LazyCollection<T> implements Enumerable<T> {
 
   combine<V>(values: readonly V[] | LazyCollection<V> | Collection<V>): Record<string, V> {
     const list = this.materialise(values)
-    return ops.combineOf(this.all().map(String) as readonly string[], list)
+    return ops.combineOf(this.all().map(String), list)
   }
 
   zip<U>(
@@ -725,11 +814,11 @@ export class LazyCollection<T> implements Enumerable<T> {
   }
 
   concat<U>(other: readonly U[] | LazyCollection<U> | Collection<U>): LazyCollection<T | U> {
-    const list = this.materialise<U>(other as readonly U[] | LazyCollection<U> | Collection<U>)
+    const list = this.materialise<U>(other)
     const src = this.source
     return new LazyCollection<T | U>(function* () {
-      for (const item of src()) yield item as T | U
-      for (const item of list) yield item as T | U
+      for (const item of src()) yield item
+      for (const item of list) yield item
     })
   }
 
@@ -802,18 +891,15 @@ export class LazyCollection<T> implements Enumerable<T> {
     callback: (c: this, value: boolean) => this | void,
     fallback?: (c: this, value: boolean) => this | void
   ): this {
-    return ops.whenOf(this, condition, callback, fallback) as this
+    return ops.whenOf(this, condition, callback, fallback)
   }
   unless(
     condition: boolean | ((c: this) => boolean),
     callback: (c: this, value: boolean) => this | void,
     fallback?: (c: this, value: boolean) => this | void
   ): this {
-    const inverted =
-      typeof condition === 'function'
-        ? (c: this) => !(condition as (c: this) => boolean)(c)
-        : !condition
-    return ops.whenOf(this, inverted, callback, fallback) as this
+    const inverted = typeof condition === 'function' ? (c: this) => !condition(c) : !condition
+    return ops.whenOf(this, inverted, callback, fallback)
   }
   whenEmpty(cb: (c: this) => this | void, fb?: (c: this) => this | void): this {
     return this.when(this.isEmpty(), cb, fb)
@@ -868,29 +954,29 @@ export class LazyCollection<T> implements Enumerable<T> {
 
   /**
    * Memoize values that have already been pulled. Subsequent iterations replay
-   * them from cache rather than re-running the source generator.
+   * them from cache rather than re-running the source generator. The source
+   * iterator is not created until the first value is actually requested.
    */
   remember(): LazyCollection<T> {
-    const cache: T[] = []
-    const sourceIter = this.source()[Symbol.iterator]()
-    let exhausted = false
+    const src = this.source
+    return new LazyCollection<T>(replaySource<T>(() => src()[Symbol.iterator]()))
+  }
+
+  /**
+   * Repeat the sequence `n` times (`Infinity` by default) — fully lazy, so
+   * `lazy(items).cycle().take(k)` works without materialising anything beyond
+   * the source itself. An empty source yields nothing (no infinite spin).
+   */
+  cycle(n: number = Infinity): LazyCollection<T> {
+    const src = this.source
     return new LazyCollection<T>(function* () {
-      let i = 0
-      while (true) {
-        if (i < cache.length) {
-          yield cache[i]
-          i++
-          continue
+      for (let round = 0; round < n; round++) {
+        let emitted = false
+        for (const item of src()) {
+          emitted = true
+          yield item
         }
-        if (exhausted) return
-        const next = sourceIter.next()
-        if (next.done) {
-          exhausted = true
-          return
-        }
-        cache.push(next.value)
-        yield next.value
-        i++
+        if (!emitted) return
       }
     })
   }
@@ -919,19 +1005,23 @@ export class LazyCollection<T> implements Enumerable<T> {
     throw new Error('LazyCollection.macro is not yet wired — internal initialisation error.')
   }
   static hasMacro: MacroableTarget['hasMacro'] = () => false
+  static getMacro: MacroableTarget['getMacro'] = () => undefined
   static flushMacros: MacroableTarget['flushMacros'] = () => undefined
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
   private materialise<U>(other: readonly U[] | LazyCollection<U> | Collection<U>): U[] {
     if (other instanceof LazyCollection) return other.all()
     if (other instanceof Collection) return other.toArray()
-    return [...(other as readonly U[])]
+    return [...other]
   }
 }
 
 applyMacroable(LazyCollection)
 
+// Higher-order messages, mirroring Collection: `lazyUsers.sum.votes`,
+// `lazyUsers.each.notify()`, `lazyUsers.map.name` all work. On LazyCollection
+// the aggregations are plain methods, so they are wired here too.
+wireHigherOrderMessages(LazyCollection.prototype)
+
 // Wire the back-reference so Collection.lazy() can construct us.
-setLazyConstructor(
-  LazyCollection as unknown as new <U>(items: Iterable<U>) => { all(): U[] } & Iterable<U>
-)
+setLazyConstructor(LazyCollection)

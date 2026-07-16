@@ -15,8 +15,8 @@ describe('groupBy', () => {
   it('groups by callback', () => {
     const items = [1, 2, 3, 4, 5, 6]
     const result = collect(items).groupBy((v) => (v % 2 === 0 ? 'even' : 'odd'))
-    expect(result['even']).toEqual([2, 4, 6])
-    expect(result['odd']).toEqual([1, 3, 5])
+    expect(result['even'].all()).toEqual([2, 4, 6])
+    expect(result['odd'].all()).toEqual([1, 3, 5])
   })
 
   it('returns empty object for empty collection', () => {
@@ -40,7 +40,7 @@ describe('groupBy', () => {
     const result = collect(['a', 'b', 'c']).groupBy((_item, index) =>
       index < 2 ? 'first' : 'rest'
     )
-    expect(result['first']).toEqual(['a', 'b'])
-    expect(result['rest']).toEqual(['c'])
+    expect(result['first'].all()).toEqual(['a', 'b'])
+    expect(result['rest'].all()).toEqual(['c'])
   })
 })

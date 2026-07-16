@@ -27,6 +27,11 @@ export function parseCsv(
   input: string,
   options: CsvParseOptions = {}
 ): string[][] | Record<string, string | number | boolean | null>[] {
+  // Strip a leading UTF-8 byte-order mark (U+FEFF). Excel and many Windows
+  // tools prepend one; without this the first header/field would silently
+  // contain the BOM and header lookups like row['name'] would miss.
+  if (input.charCodeAt(0) === 0xfeff) input = input.slice(1)
+
   const delimiter = options.delimiter ?? ','
   const quote = options.quote ?? '"'
   const useQuote = quote.length > 0

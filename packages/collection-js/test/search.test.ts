@@ -34,7 +34,7 @@ describe('search', () => {
   })
 
   it('returns false for empty collection', () => {
-    expect(collect([]).search(1)).toBe(false)
+    expect(collect<number>([]).search(1)).toBe(false)
   })
 
   it('strict mode finds correctly typed item', () => {

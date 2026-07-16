@@ -30,11 +30,11 @@ describe('tap', () => {
     expect(called).toBe(true)
   })
 
-  it('does not modify items via tap', () => {
+  it('does not modify items via tap (all() returns a safe copy)', () => {
     const c = collect([1, 2, 3])
     c.tap((collection) => {
       collection.all().push(999)
     })
-    expect(c.all()).toEqual([1, 2, 3, 999])
+    expect(c.all()).toEqual([1, 2, 3])
   })
 })

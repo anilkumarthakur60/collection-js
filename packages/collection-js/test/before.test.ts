@@ -14,7 +14,7 @@ describe('before', () => {
   })
 
   it('returns null for empty collection', () => {
-    expect(collect([]).before(1)).toBeUndefined()
+    expect(collect<number>([]).before(1)).toBeUndefined()
   })
 
   it('works with strings', () => {

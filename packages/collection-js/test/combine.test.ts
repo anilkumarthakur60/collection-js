@@ -16,7 +16,7 @@ describe('combine', () => {
   it('works with string keys and values', () => {
     expect(collect(['first', 'last']).combine(['John', 'Doe'])).toEqual({
       first: 'John',
-      last: 'Doe',
+      last: 'Doe'
     })
   })
 

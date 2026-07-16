@@ -29,7 +29,7 @@ export function groupByManyOf<T>(
   if (rest.length === 0) return top
   const out: Record<PropertyKey, unknown> = {}
   for (const key of Object.keys(top)) {
-    out[key] = groupByManyOf(top[key as keyof typeof top] as T[], rest)
+    out[key] = groupByManyOf(top[key as keyof typeof top], rest)
   }
   return out
 }

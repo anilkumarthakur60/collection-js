@@ -30,7 +30,7 @@ describe('value', () => {
   it('returns specific key from first item', () => {
     const items = [
       { id: 1, name: 'Alice' },
-      { id: 2, name: 'Bob' },
+      { id: 2, name: 'Bob' }
     ]
     expect(collect(items).value('name')).toBe('Alice')
   })

@@ -21,8 +21,8 @@ export function onlyOf<T extends object>(
   keys: readonly (keyof T | string)[]
 ): Partial<T>[] {
   const set = new Set(keys.map(String))
-  return items.map((item) => {
-    if (!isObjectLike(item)) return {} as Partial<T>
+  return items.map((item): Partial<T> => {
+    if (!isObjectLike(item)) return {}
     const out: Record<string, unknown> = {}
     for (const k of set) {
       if (k in (item as Record<string, unknown>)) out[k] = (item as Record<string, unknown>)[k]
@@ -37,7 +37,7 @@ export function exceptOf<T extends object>(
 ): Partial<T>[] {
   const set = new Set(keys.map(String))
   return items.map((item) => {
-    if (!isObjectLike(item)) return item as unknown as Partial<T>
+    if (!isObjectLike(item)) return item
     const out: Record<string, unknown> = {}
     for (const [k, v] of Object.entries(item as Record<string, unknown>)) {
       if (!set.has(k)) out[k] = v
@@ -68,8 +68,7 @@ export function keysOf<T>(items: readonly T[]): string[] {
   if (items.length === 0) return []
   if (items.every((item) => isPlainObject(item))) {
     const merged = new Set<string>()
-    for (const item of items)
-      for (const k of Object.keys(item as Record<string, unknown>)) merged.add(k)
+    for (const item of items) for (const k of Object.keys(item)) merged.add(k)
     return [...merged]
   }
   return items.map((_, i) => String(i))
@@ -133,7 +132,7 @@ export function replaceShallow<T>(items: readonly T[], replacements: Record<numb
 export function replaceRecursiveOf<T>(items: readonly T[], patches: readonly unknown[]): T[] {
   const merge = (target: unknown, patch: unknown): unknown => {
     if (Array.isArray(target) && Array.isArray(patch)) {
-      const out = [...target]
+      const out = [...(target as unknown[])]
       for (let i = 0; i < patch.length; i++) out[i] = merge(out[i], patch[i])
       return out
     }

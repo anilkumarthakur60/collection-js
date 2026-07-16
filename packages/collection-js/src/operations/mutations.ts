@@ -88,7 +88,7 @@ export function putOf<T extends object, K extends keyof T>(
   key: K,
   value: T[K]
 ): T[] {
-  return items.map((item) => ({ ...item, [key]: value }) as T)
+  return items.map((item) => ({ ...item, [key]: value }))
 }
 
 /** Recursive object merge (Laravel `mergeRecursive`). */
@@ -97,7 +97,7 @@ export function mergeRecursiveOf<T>(
   ...others: readonly (readonly T[])[]
 ): T[] {
   const merge = (a: unknown, b: unknown): unknown => {
-    if (Array.isArray(a) && Array.isArray(b)) return [...a, ...b]
+    if (Array.isArray(a) && Array.isArray(b)) return [...(a as unknown[]), ...(b as unknown[])]
     if (isPlainObject(a) && isPlainObject(b)) {
       const out: Record<string, unknown> = { ...(a as Record<string, unknown>) }
       for (const [k, v] of Object.entries(b as Record<string, unknown>)) {
