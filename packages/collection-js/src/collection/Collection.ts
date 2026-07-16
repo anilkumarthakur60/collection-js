@@ -15,6 +15,9 @@ import type {
 } from '@/support/types'
 import type { RetrieverInput } from '@/support/valueRetriever'
 import { dataGet } from '@/support/dataGet'
+// Type-only import — erased at compile time, so it cannot re-create the
+// runtime ESM cycle that `setLazyConstructor` exists to avoid.
+import type { LazyCollection } from '@/collection/LazyCollection'
 
 type RI<T, R = unknown> = RetrieverInput<T, R>
 
@@ -190,9 +193,17 @@ export class Collection<T> implements Enumerable<T> {
     return ops.lastOf(this.items, predicate)
   }
 
+  /**
+   * Get the element at `index` (negative indices count from the end). Presence
+   * is decided by bounds, not by value, so an in-bounds element whose value is
+   * `undefined` is returned as-is rather than being replaced by the default.
+   */
+  get(index: number): T | undefined
+  get(index: number, defaultValue: T | (() => T)): T
   get(index: number, defaultValue?: T | (() => T)): T | undefined {
-    const found = ops.getAt(this.items, index)
-    if (found !== undefined) return found
+    const len = this.items.length
+    const idx = index < 0 ? len + index : index
+    if (idx >= 0 && idx < len) return this.items[idx]
     if (defaultValue === undefined) return undefined
     return typeof defaultValue === 'function' ? (defaultValue as () => T)() : defaultValue
   }
@@ -475,22 +486,19 @@ export class Collection<T> implements Enumerable<T> {
     return new Collection(ops.sortByDescOf(this.items, spec))
   }
 
-  sortKeys(): Collection<T> {
-    return new Collection(
-      ops.sortKeysOf(this.items as unknown as readonly object[]) as unknown as T[]
-    )
+  sortKeys<U extends object>(this: Collection<U>): Collection<U> {
+    return new Collection(ops.sortKeysOf(this.items))
   }
 
-  sortKeysDesc(): Collection<T> {
-    return new Collection(
-      ops.sortKeysOf(this.items as unknown as readonly object[], true) as unknown as T[]
-    )
+  sortKeysDesc<U extends object>(this: Collection<U>): Collection<U> {
+    return new Collection(ops.sortKeysOf(this.items, true))
   }
 
-  sortKeysUsing(comparator: (a: string, b: string) => number): Collection<T> {
-    return new Collection(
-      ops.sortKeysUsingOf(this.items as unknown as readonly object[], comparator) as unknown as T[]
-    )
+  sortKeysUsing<U extends object>(
+    this: Collection<U>,
+    comparator: (a: string, b: string) => number
+  ): Collection<U> {
+    return new Collection(ops.sortKeysUsingOf(this.items, comparator))
   }
 
   reverse(): Collection<T> {
@@ -567,16 +575,16 @@ export class Collection<T> implements Enumerable<T> {
     return new Collection(ops.nthOf(this.items, step, offset))
   }
 
-  groupBy(by: RI<T, PropertyKey | readonly PropertyKey[]>): Record<PropertyKey, T[]> {
-    return ops.groupByOf<T, PropertyKey>(this.items, by)
+  groupBy<K extends PropertyKey = PropertyKey>(by: RI<T, K | readonly K[]>): Record<K, T[]> {
+    return ops.groupByOf<T, K>(this.items, by)
   }
 
   groupByMany(groupers: readonly RI<T>[]): Record<PropertyKey, unknown> {
     return ops.groupByManyOf(this.items, groupers)
   }
 
-  keyBy(by: RI<T, PropertyKey>): Record<PropertyKey, T> {
-    return ops.keyByOf<T, PropertyKey>(this.items, by)
+  keyBy<K extends PropertyKey = PropertyKey>(by: RI<T, K>): Record<K, T> {
+    return ops.keyByOf<T, K>(this.items, by)
   }
 
   // ─── Slice / take / skip ────────────────────────────────────────────────────
@@ -651,10 +659,19 @@ export class Collection<T> implements Enumerable<T> {
     return new Collection(removed)
   }
 
-  put<K extends keyof T & string>(key: K, value: T[K]): Collection<T> {
-    const items = this.items as unknown as Array<Record<string, unknown>>
-    const next = ops.putOf<Record<string, unknown>, string>(items, key, value as unknown)
-    return new Collection(next as unknown as T[])
+  /**
+   * Set `key` to `value` on every item. Like Laravel's `put`, this mutates the
+   * collection in place and returns it. The key may be brand-new — the element
+   * type widens to `T & Record<K, V>` so the added key is visible to callers.
+   * The original item objects are not touched; each is replaced by a copy.
+   */
+  put<U extends object, K extends PropertyKey, V>(
+    this: Collection<U>,
+    key: K,
+    value: V
+  ): Collection<U & Record<K, V>> {
+    this.items = this.items.map((item) => ({ ...item, [key]: value }) as U & Record<K, V>)
+    return this as Collection<U & Record<K, V>>
   }
 
   concat<U>(other: readonly U[] | Collection<U>): Collection<T | U> {
@@ -708,10 +725,8 @@ export class Collection<T> implements Enumerable<T> {
     )
   }
 
-  diffKeys(otherKeys: readonly string[]): Collection<T> {
-    return new Collection(
-      ops.diffKeysOf(this.items as unknown as readonly object[], otherKeys) as unknown as T[]
-    )
+  diffKeys<U extends object>(this: Collection<U>, otherKeys: readonly string[]): Collection<U> {
+    return new Collection(ops.diffKeysOf(this.items, otherKeys))
   }
 
   intersect(other: readonly T[] | Collection<T>): Collection<T> {
@@ -733,32 +748,25 @@ export class Collection<T> implements Enumerable<T> {
     )
   }
 
-  intersectAssoc(other: readonly Partial<T>[] | Collection<Partial<T>>): Collection<T> {
+  intersectAssoc<U extends object>(
+    this: Collection<U>,
+    other: readonly Partial<U>[] | Collection<Partial<U>>
+  ): Collection<U> {
     return new Collection(
-      ops.intersectAssocOf(
-        this.items as unknown as readonly object[],
-        (other instanceof Collection ? other.toArray() : other) as readonly Partial<object>[]
-      ) as unknown as T[]
+      ops.intersectAssocOf(this.items, other instanceof Collection ? other.toArray() : other)
     )
   }
 
-  intersectAssocUsing(
+  intersectAssocUsing<U extends object>(
+    this: Collection<U>,
     other: Record<string, unknown>,
     comparator: (a: string, b: string) => number
-  ): Collection<T> {
-    return new Collection(
-      ops.intersectAssocUsingOf(
-        this.items as unknown as readonly object[],
-        other,
-        comparator
-      ) as unknown as T[]
-    )
+  ): Collection<U> {
+    return new Collection(ops.intersectAssocUsingOf(this.items, other, comparator))
   }
 
-  intersectByKeys(keys: readonly string[]): Collection<T> {
-    return new Collection(
-      ops.intersectByKeysOf(this.items as unknown as readonly object[], keys) as unknown as T[]
-    )
+  intersectByKeys<U extends object>(this: Collection<U>, keys: readonly string[]): Collection<U> {
+    return new Collection(ops.intersectByKeysOf(this.items, keys))
   }
 
   crossJoin<U>(...others: readonly (readonly U[])[]): Collection<(T | U)[]> {
@@ -779,11 +787,7 @@ export class Collection<T> implements Enumerable<T> {
 
   duplicates(by?: RI<T>): Record<number, T> {
     const accessor = by !== undefined ? valueRetriever<T, unknown>(by) : undefined
-    const map = ops.duplicatesOf(
-      this.items,
-      accessor ? (item) => accessor(item, 0) : undefined,
-      false
-    )
+    const map = ops.duplicatesOf(this.items, accessor, false)
     const out: Record<number, T> = {}
     for (const [idx, item] of map) out[idx] = item
     return out
@@ -791,11 +795,7 @@ export class Collection<T> implements Enumerable<T> {
 
   duplicatesStrict(by?: RI<T>): Record<number, T> {
     const accessor = by !== undefined ? valueRetriever<T, unknown>(by) : undefined
-    const map = ops.duplicatesOf(
-      this.items,
-      accessor ? (item) => accessor(item, 0) : undefined,
-      true
-    )
+    const map = ops.duplicatesOf(this.items, accessor, true)
     const out: Record<number, T> = {}
     for (const [idx, item] of map) out[idx] = item
     return out
@@ -809,30 +809,24 @@ export class Collection<T> implements Enumerable<T> {
     return new Collection([...this.items])
   }
 
-  only(keys: readonly string[]): Collection<Partial<T>> {
-    return new Collection(
-      ops.onlyOf(this.items as unknown as readonly object[], keys) as Partial<T>[]
-    )
+  only<U extends object>(this: Collection<U>, keys: readonly string[]): Collection<Partial<U>> {
+    return new Collection(ops.onlyOf(this.items, keys))
   }
-  except(keys: readonly string[]): Collection<Partial<T>> {
-    return new Collection(
-      ops.exceptOf(this.items as unknown as readonly object[], keys) as Partial<T>[]
-    )
+  except<U extends object>(this: Collection<U>, keys: readonly string[]): Collection<Partial<U>> {
+    return new Collection(ops.exceptOf(this.items, keys))
   }
-  select<K extends keyof T>(keys: K | readonly K[]): Collection<Pick<T, K>> {
-    return new Collection(
-      ops.selectOf<T extends object ? T : never, K>(
-        this.items as unknown as readonly (T extends object ? T : never)[],
-        keys
-      ) as unknown as Pick<T, K>[]
-    )
+  select<U extends object, K extends keyof U>(
+    this: Collection<U>,
+    keys: K | readonly K[]
+  ): Collection<Pick<U, K>> {
+    return new Collection(ops.selectOf<U, K>(this.items, keys))
   }
 
   dot(): Record<string, unknown> {
-    return ops.dotOf(this.items as readonly unknown[])
+    return ops.dotOf(this.items)
   }
   undot(): Collection<Record<string, unknown>> {
-    return new Collection([ops.undotOf(this.items as readonly unknown[])])
+    return new Collection([ops.undotOf(this.items)])
   }
 
   // ─── Iteration helpers ──────────────────────────────────────────────────────
@@ -1049,12 +1043,13 @@ export class Collection<T> implements Enumerable<T> {
   }
   /**
    * Returns a LazyCollection. Wired by `setLazyConstructor` at module load
-   * time to avoid an ESM circular import between Collection ↔ LazyCollection.
+   * time to avoid an ESM circular import between Collection ↔ LazyCollection;
+   * the return type comes from a type-only import, so chaining is fully typed.
    */
-  lazy(): unknown {
+  lazy(): LazyCollection<T> {
     if (lazyConstructor === null)
       throw new Error('LazyCollection not registered yet — internal wiring error.')
-    return new lazyConstructor(this.items)
+    return new lazyConstructor(this.items) as LazyCollection<T>
   }
 
   // ─── Debug ──────────────────────────────────────────────────────────────────

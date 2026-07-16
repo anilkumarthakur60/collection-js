@@ -20,10 +20,15 @@ export function sortDescOf<T>(items: readonly T[]): T[] {
   return [...items].sort((a, b) => -defaultCompare(a, b))
 }
 
+/**
+ * A sortBy spec is always a value retriever (key, dot-path, or `(item, index)`
+ * callback), optionally wrapped in a `[retriever, direction]` tuple. Genuine
+ * comparators are deliberately not accepted — they belong to `sort()` — so a
+ * two-argument retriever callback can never be misread as a comparator.
+ */
 export type SortBySpec<T> =
   | RetrieverInput<T, unknown>
   | readonly [RetrieverInput<T, unknown>, SortDirection]
-  | Comparator<T>
 
 export function sortByOf<T>(
   items: readonly T[],
@@ -52,7 +57,6 @@ function isRetrieverTuple<T>(spec: unknown): spec is readonly [RetrieverInput<T>
 }
 
 function toComparator<T>(spec: SortBySpec<T>, descending: boolean): Comparator<T> {
-  if (typeof spec === 'function' && spec.length === 2) return spec as Comparator<T>
   if (isRetrieverTuple<T>(spec)) {
     const [retriever, dir] = spec
     return makeRetrieverComparator(retriever, dir === 'desc')

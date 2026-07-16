@@ -1,0 +1,18 @@
+# Build output
+**/dist/
+dist-demos/
+**/.vitepress/cache/
+**/.vitepress/dist/
+coverage/
+
+# Dependencies & lockfiles
+**/node_modules/
+pnpm-lock.yaml
+
+# Markdown is authored by hand (tables, aligned columns) — keep it as-is.
+*.md
+
+# Generated / vendored
+.vercel/
+.claude/
+LICENSE

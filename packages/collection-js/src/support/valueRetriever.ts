@@ -1,6 +1,14 @@
 import { dataGet } from '@/support/dataGet'
 
-export type RetrieverInput<T, R = unknown> = ((item: T, index: number) => R) | keyof T | string
+/**
+ * A value accessor: an `(item, index)` callback, a known key of `T`, or an
+ * arbitrary string (dot-paths, wildcard paths). `string & {}` keeps arbitrary
+ * strings assignable while preserving `keyof T` literal autocompletion.
+ */
+export type RetrieverInput<T, R = unknown> =
+  | ((item: T, index: number) => R)
+  | keyof T
+  | (string & {})
 
 /**
  * Convert a key, dot-path, or function into a normalized accessor. Used by
