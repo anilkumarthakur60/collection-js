@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>collection-js from a CDN</title>
+  </head>
+  <body>
+    <pre id="out"></pre>
+
+    <script src="../../packages/collection-js/dist/index.global.js"></script>
+    <script>
+      const { collect } = CollectionJS
+
+      const topScorers = collect([
+        { name: 'Alice', score: 95 },
+        { name: 'Bob', score: 80 },
+        { name: 'Charlie', score: 92 }
+      ])
+        .where('score', '>=', 90)
+        .sortByDesc('score')
+        .pluck('name')
+        .all()
+
+      document.querySelector('#out').textContent = JSON.stringify(topScorers)
+      // ["Alice", "Charlie"]
+    </script>
+  </body>
+</html>

@@ -50,4 +50,4 @@ Thumbs.db
 # Project-local scratch
 task.md
 createTestFile.sh
-index.html
+/index.html
