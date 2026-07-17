@@ -4,6 +4,7 @@ export default defineConfig({
   title: '@anil-labs/collection-js',
   description: 'A fluent, Laravel-inspired Collection library for JavaScript and TypeScript',
   cleanUrls: true,
+  base: process.env.DOCS_BASE || '/',
 
   themeConfig: {
     nav: [
