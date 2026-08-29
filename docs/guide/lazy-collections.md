@@ -20,7 +20,7 @@ const lazy = new LazyCollection(function* () {
 })
 ```
 
-Alternatively, use the `lazy()` helper — the `LazyCollection` counterpart of `collect()` — or the `.lazy()` method on a pre-existing standard Collection:
+Alternatively, use the `lazy()` helper  the `LazyCollection` counterpart of `collect()`  or the `.lazy()` method on a pre-existing standard Collection:
 
 ```typescript
 import { lazy } from '@anil-labs/collection-js'
@@ -72,7 +72,7 @@ const collection = lazy.collect()
 ## Infinite & One-Shot Sources
 
 The constructor never materialises its input. You can hand it a **live
-generator object** (not just a generator function) — even an infinite one —
+generator object** (not just a generator function)  even an infinite one 
 and nothing is pulled until a terminal operation asks for values:
 
 ```typescript
@@ -87,7 +87,7 @@ stream.take(5).all() // pulls exactly 5 values: [0, 1, 2, 3, 4]
 
 One-shot iterators are wrapped in a lazy **replay buffer**: values pulled once
 are cached, so a second pass (`count()` then `each()`, for example) replays the
-cache instead of re-running — or exhausting — the iterator.
+cache instead of re-running  or exhausting  the iterator.
 
 ## Streaming Operators
 
@@ -99,12 +99,12 @@ safe on infinite generators when combined with `take()`:
 lazy(ticker()).unique((n) => n % 3).take(3).all() // [0, 1, 2]
 
 const [evens, odds] = lazy(ticker()).partition((n) => n % 2 === 0)
-evens.take(2).all() // [0, 2] — the source is shared and enumerated once
+evens.take(2).all() // [0, 2]  the source is shared and enumerated once
 ```
 
 ## Cycling
 
-`cycle(n?)` repeats the sequence lazily — infinitely by default:
+`cycle(n?)` repeats the sequence lazily  infinitely by default:
 
 ```typescript
 lazy([1, 2]).cycle().take(5).all() // [1, 2, 1, 2, 1]

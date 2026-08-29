@@ -2,14 +2,14 @@ import { valueRetriever, type RetrieverInput } from '@/support/valueRetriever'
 
 /**
  * The single numeric-coercion rule shared by every numeric aggregate in the
- * library — `sum`/`average`/`median` here and `variance`/`stddev`/`quantile`/
+ * library  `sum`/`average`/`median` here and `variance`/`stddev`/`quantile`/
  * `percentile`/`histogram`/`correlation` in stats.ts:
  *
  * - finite numbers pass through unchanged
  * - numeric strings are converted with `Number()`
  * - booleans coerce to `1`/`0`
- * - everything else — `null`, `undefined`, `NaN`, `±Infinity`, empty or
- *   non-numeric strings, objects, Dates — is SKIPPED (never silently treated
+ * - everything else  `null`, `undefined`, `NaN`, `±Infinity`, empty or
+ *   non-numeric strings, objects, Dates  is SKIPPED (never silently treated
  *   as `0`), so e.g. `average` and `stddev` over the same data describe the
  *   same population.
  *

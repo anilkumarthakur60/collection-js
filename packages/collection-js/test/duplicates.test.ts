@@ -59,7 +59,7 @@ describe('duplicates with index-aware retriever (regression: index was hardcoded
   })
 
   it('flags duplicates when the retriever collapses distinct indices', () => {
-    // Keys become [0, 1, 0] — index 2 duplicates index 0.
+    // Keys become [0, 1, 0]  index 2 duplicates index 0.
     expect(collect([10, 20, 30]).duplicates((_item, index) => index % 2)).toEqual({ 2: 30 })
   })
 })

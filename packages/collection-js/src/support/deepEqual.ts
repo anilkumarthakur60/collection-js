@@ -2,7 +2,7 @@ import { isObjectLike } from '@/support/isObject'
 
 /**
  * Recursive structural equality for arrays, plain objects, primitives, Date, RegExp.
- * Cycles are not handled — assume DAG-shaped data (typical for collection items).
+ * Cycles are not handled  assume DAG-shaped data (typical for collection items).
  */
 export function deepEqual<T>(a: T, b: T): boolean {
   if (Object.is(a, b)) return true

@@ -47,7 +47,7 @@ describe('max/min ordering across value types (audit: compareForExtent Date/bigi
   })
 
   it('mixed numeric strings and numbers compare numerically, not lexically', () => {
-    // Lexically '10' < '9'; numerically 10 > 9 — the numeric rule wins.
+    // Lexically '10' < '9'; numerically 10 > 9  the numeric rule wins.
     expect(collect<unknown>(['10', 9]).maxBy((v) => v)).toBe('10')
     expect(collect<unknown>(['10', 9]).minBy((v) => v)).toBe(9)
   })

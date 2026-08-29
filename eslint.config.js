@@ -22,7 +22,7 @@ export default tseslint.config(
   eslint.configs.recommended,
 
   // Library source: type-aware rules (bans any, unsafe assignments, floating
-  // promises) — the bar the other @anil-labs packages hold.
+  // promises)  the bar the other @anil-labs packages hold.
   {
     files: ['packages/*/src/**/*.ts'],
     extends: [...tseslint.configs.recommendedTypeChecked],

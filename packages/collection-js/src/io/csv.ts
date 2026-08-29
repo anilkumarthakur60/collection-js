@@ -2,7 +2,7 @@ export interface CsvParseOptions {
   delimiter?: string
   /** Treat the first row as the header. When true, returns objects keyed by header. */
   header?: boolean
-  /** Quote character — `"` by default. Pass empty string to disable quoting. */
+  /** Quote character  `"` by default. Pass empty string to disable quoting. */
   quote?: string
   /** When true, all values stay as strings; otherwise simple numbers/bools are coerced. */
   raw?: boolean
@@ -12,7 +12,7 @@ export interface CsvSerializeOptions {
   /** Optional explicit column order. When omitted, keys are taken from the first row. */
   columns?: readonly string[]
   delimiter?: string
-  /** EOL sequence — defaults to \n. Use \r\n if Excel compat matters. */
+  /** EOL sequence  defaults to \n. Use \r\n if Excel compat matters. */
   eol?: string
   /** Include the header row at the top of the output. Default true when input is objects. */
   header?: boolean

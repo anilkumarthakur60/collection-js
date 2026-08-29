@@ -17,8 +17,8 @@ export type LazySource<T> = Iterable<T> | (() => Iterable<T>)
  * Wrap a one-shot iterator source in a lazy replay buffer: the first pass
  * pulls values on demand (never ahead of consumption) and caches them; later
  * passes replay the cache before pulling further. Nothing is pulled at wrap
- * time — the underlying iterator is not even created until the first value is
- * requested — so infinite generators are safe.
+ * time  the underlying iterator is not even created until the first value is
+ * requested  so infinite generators are safe.
  */
 function replaySource<T>(acquire: () => Iterator<T>): () => Iterable<T> {
   const cache: T[] = []
@@ -66,7 +66,7 @@ function resolveSource<T>(source: LazySource<T>): () => Iterable<T> {
 /**
  * Lazy generator-backed collection. Mirrors Laravel's `LazyCollection`.
  * The same fluent surface as `Collection`, but every method that returns a new
- * collection returns a `LazyCollection` over a generator — values are produced
+ * collection returns a `LazyCollection` over a generator  values are produced
  * on demand. Mutating methods (push/pop/etc.) are intentionally absent.
  */
 export class LazyCollection<T> implements Enumerable<T> {
@@ -419,7 +419,7 @@ export class LazyCollection<T> implements Enumerable<T> {
   }
 
   /**
-   * Keyed result (terminal — consumes the source): plain record whose group
+   * Keyed result (terminal  consumes the source): plain record whose group
    * values are eager `Collection`s so each group stays chainable.
    */
   mapToGroups<K extends PropertyKey, V>(
@@ -487,7 +487,7 @@ export class LazyCollection<T> implements Enumerable<T> {
     const src = this.source
     return new LazyCollection<T>(function* () {
       if (count <= 0) return
-      // Use a manual iterator so we never pull an extra value past the limit —
+      // Use a manual iterator so we never pull an extra value past the limit 
       // important for `remember()`, throttling, and infinite generators.
       const it = src()[Symbol.iterator]()
       let n = 0
@@ -611,7 +611,7 @@ export class LazyCollection<T> implements Enumerable<T> {
   }
 
   /**
-   * Streaming: chunks are emitted as soon as the predicate breaks — the source
+   * Streaming: chunks are emitted as soon as the predicate breaks  the source
    * is only consumed as far as the consumer pulls, so infinite generators work.
    */
   chunkWhile(
@@ -637,7 +637,7 @@ export class LazyCollection<T> implements Enumerable<T> {
   /**
    * Lazily split into `[matching, non-matching]`. The source is shared through
    * a replay buffer, so it is enumerated at most once and only as far as either
-   * side pulls — safe on infinite generators when combined with `take()`.
+   * side pulls  safe on infinite generators when combined with `take()`.
    */
   partition(predicate: Predicate<T>): [LazyCollection<T>, LazyCollection<T>] {
     const shared = this.remember()
@@ -645,7 +645,7 @@ export class LazyCollection<T> implements Enumerable<T> {
   }
 
   /**
-   * Keyed result (terminal — consumes the source): plain record whose group
+   * Keyed result (terminal  consumes the source): plain record whose group
    * values are eager `Collection`s so each group stays chainable.
    */
   groupBy(
@@ -744,12 +744,12 @@ export class LazyCollection<T> implements Enumerable<T> {
   }
   /**
    * Streaming: deduplicates with a running seen-set, yielding each first
-   * occurrence as it is pulled — safe on infinite generators with `take()`.
+   * occurrence as it is pulled  safe on infinite generators with `take()`.
    */
   unique(by?: RetrieverInput<T>): LazyCollection<T> {
     return this.uniqueLazy(by, false)
   }
-  /** Strict-equality variant of {@link unique} — also streaming. */
+  /** Strict-equality variant of {@link unique}  also streaming. */
   uniqueStrict(by?: RetrieverInput<T>): LazyCollection<T> {
     return this.uniqueLazy(by, true)
   }
@@ -931,7 +931,7 @@ export class LazyCollection<T> implements Enumerable<T> {
   }
 
   /**
-   * Async throttle — yields one value every `seconds` seconds. Only useful in
+   * Async throttle  yields one value every `seconds` seconds. Only useful in
    * an `for await` context: returns an async iterable rather than a sync one.
    */
   throttle(seconds: number): AsyncIterable<T> {
@@ -963,7 +963,7 @@ export class LazyCollection<T> implements Enumerable<T> {
   }
 
   /**
-   * Repeat the sequence `n` times (`Infinity` by default) — fully lazy, so
+   * Repeat the sequence `n` times (`Infinity` by default)  fully lazy, so
    * `lazy(items).cycle().take(k)` works without materialising anything beyond
    * the source itself. An empty source yields nothing (no infinite spin).
    */
@@ -1002,7 +1002,7 @@ export class LazyCollection<T> implements Enumerable<T> {
 
   // ─── Macroable ──────────────────────────────────────────────────────────────
   static macro: MacroableTarget['macro'] = () => {
-    throw new Error('LazyCollection.macro is not yet wired — internal initialisation error.')
+    throw new Error('LazyCollection.macro is not yet wired  internal initialisation error.')
   }
   static hasMacro: MacroableTarget['hasMacro'] = () => false
   static getMacro: MacroableTarget['getMacro'] = () => undefined

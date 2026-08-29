@@ -2,7 +2,7 @@ import { isObjectLike } from '@/support/isObject'
 
 /**
  * Coerce any value to a string for display/matching without triggering the
- * unhelpful `[object Object]` — objects (and arrays) are JSON-serialized, other
+ * unhelpful `[object Object]`  objects (and arrays) are JSON-serialized, other
  * values go through `String()`. Never throws.
  */
 export function toStringValue(value: unknown): string {
@@ -75,7 +75,7 @@ const UNSAFE_SEGMENTS = new Set(['__proto__', 'constructor', 'prototype'])
  *
  * Security: paths containing `__proto__`, `constructor`, or `prototype`
  * segments are rejected outright (the target is returned unchanged), and
- * traversal only ever descends into the target's *own* object-like members —
+ * traversal only ever descends into the target's *own* object-like members 
  * inherited members (e.g. `Object.prototype`) are shadowed with a fresh
  * container instead. This prevents prototype pollution via attacker-controlled
  * keys (reachable through `undot()` and the public `dataSet` export).

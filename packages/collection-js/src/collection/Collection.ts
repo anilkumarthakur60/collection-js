@@ -16,7 +16,7 @@ import type {
 } from '@/support/types'
 import type { RetrieverInput } from '@/support/valueRetriever'
 import { dataGet } from '@/support/dataGet'
-// Type-only import — erased at compile time, so it cannot re-create the
+// Type-only import  erased at compile time, so it cannot re-create the
 // runtime ESM cycle that `setLazyConstructor` exists to avoid.
 import type { LazyCollection } from '@/collection/LazyCollection'
 
@@ -142,7 +142,7 @@ export class Collection<T> implements Enumerable<T> {
   // them as the callable form for autocompletion; the property form works at
   // runtime and is documented separately. The remaining HIGHER_ORDER_TARGETS
   // (each/map/filter/…) are wired by `wireHigherOrderMessages` after the class
-  // definition — see the bottom of this file.
+  // definition  see the bottom of this file.
   get sum(): (by?: RI<T, number> | string) => number {
     const items = this.items
     return callableHigherOrder<number>((by) => ops.sumOf(items, by)) as (
@@ -169,7 +169,7 @@ export class Collection<T> implements Enumerable<T> {
 
   // ─── Retrieval & access ──────────────────────────────────────────────────────
   /**
-   * All items as a native array. Returns a fresh shallow copy — mutating the
+   * All items as a native array. Returns a fresh shallow copy  mutating the
    * result never corrupts the collection (alias of {@link toArray}).
    */
   all(): T[] {
@@ -237,10 +237,10 @@ export class Collection<T> implements Enumerable<T> {
 
   // ─── Search & inspection ─────────────────────────────────────────────────────
   /**
-   * `contains(value)` — loose match on whole item.
-   * `contains(predicate)` — first-match callback.
-   * `contains(key, value)` — match on object property.
-   * `contains(shape)` — partial-shape match.
+   * `contains(value)`  loose match on whole item.
+   * `contains(predicate)`  first-match callback.
+   * `contains(key, value)`  match on object property.
+   * `contains(shape)`  partial-shape match.
    */
   contains(target: unknown, ...rest: readonly unknown[]): boolean {
     const spec = ops.resolveContainsSpec<T>(target as ops.ContainsArg<T>, rest[0], rest.length >= 1)
@@ -681,7 +681,7 @@ export class Collection<T> implements Enumerable<T> {
 
   /**
    * Set `key` to `value` on every item. Like Laravel's `put`, this mutates the
-   * collection in place and returns it. The key may be brand-new — the element
+   * collection in place and returns it. The key may be brand-new  the element
    * type widens to `T & Record<K, V>` so the added key is visible to callers.
    * The original item objects are not touched; each is replaced by a copy.
    */
@@ -1036,14 +1036,14 @@ export class Collection<T> implements Enumerable<T> {
   toSet(): Set<T> {
     return new Set(this.items)
   }
-  /** Shallow copy — mutating the result never corrupts the collection. */
+  /** Shallow copy  mutating the result never corrupts the collection. */
   toJSON(): T[] {
     return [...this.items]
   }
   toString(): string {
     return this.toJson()
   }
-  /** Shallow copy — mutating the result never corrupts the collection. */
+  /** Shallow copy  mutating the result never corrupts the collection. */
   valueOf(): T[] {
     return [...this.items]
   }
@@ -1067,7 +1067,7 @@ export class Collection<T> implements Enumerable<T> {
    */
   lazy(): LazyCollection<T> {
     if (lazyConstructor === null)
-      throw new Error('LazyCollection not registered yet — internal wiring error.')
+      throw new Error('LazyCollection not registered yet  internal wiring error.')
     return new lazyConstructor(this.items) as LazyCollection<T>
   }
 
@@ -1208,7 +1208,7 @@ export class Collection<T> implements Enumerable<T> {
   cycle(n: number = Infinity): Collection<T> {
     if (n === Infinity) {
       throw new Error(
-        'cycle(Infinity) on Collection materialises — use lazy().cycle() for infinite cycles'
+        'cycle(Infinity) on Collection materialises  use lazy().cycle() for infinite cycles'
       )
     }
     return new Collection([...ops.cycleOf(this.items, n)])
@@ -1234,7 +1234,7 @@ export class Collection<T> implements Enumerable<T> {
   // Real implementations are installed by `applyMacroable(Collection)` below.
   // We declare placeholders so TS sees the right signatures.
   static macro: MacroableTarget['macro'] = () => {
-    throw new Error('Collection.macro is not yet wired — internal initialisation error.')
+    throw new Error('Collection.macro is not yet wired  internal initialisation error.')
   }
   static hasMacro: MacroableTarget['hasMacro'] = () => false
   static getMacro: MacroableTarget['getMacro'] = () => undefined

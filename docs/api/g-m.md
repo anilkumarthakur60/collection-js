@@ -4,7 +4,7 @@
 
 Returns the item at a given **numeric index** (negative indices count from the end). If the index is out of range, `undefined` is returned, or an optional default value (which may be a factory function).
 
-Presence is decided by **bounds, not value**: an in-bounds element whose stored value is `undefined` is returned as-is — the default is only used for out-of-range indices.
+Presence is decided by **bounds, not value**: an in-bounds element whose stored value is `undefined` is returned as-is  the default is only used for out-of-range indices.
 
 **Simple Example:**
 
@@ -31,7 +31,7 @@ collect([{ name: 'Anil' }]).value('name') // => 'Anil'
 
 ## `groupBy`
 
-Groups the collection's items by a given key or callback. This is a **terminal** method — it returns a plain object keyed by group. Each group value is a chainable `Collection`, so per-group chaining works: `users.groupBy('account_id')['A'].count()`.
+Groups the collection's items by a given key or callback. This is a **terminal** method  it returns a plain object keyed by group. Each group value is a chainable `Collection`, so per-group chaining works: `users.groupBy('account_id')['A'].count()`.
 
 **Simple Key Example:**
 
@@ -208,7 +208,7 @@ Keys the collection by the given key. If multiple items have the same key, only 
 **Simple Example:**
 
 ````typescript
-This is a **terminal** method — it returns a plain object (not a chainable collection).
+This is a **terminal** method  it returns a plain object (not a chainable collection).
 
 ```typescript
 const items = collect([
@@ -263,7 +263,7 @@ collect([1, 2, 3, 4, 5]).last((i) => i < 4)
 
 ## `lazy`
 
-Converts a standard Collection into a `LazyCollection`. Lazy Collections utilize JavaScript Generators to parse infinite data with minimal memory constraints. The bridge is fully typed — `lazy()` returns `LazyCollection<T>`, so the chain needs no casts.
+Converts a standard Collection into a `LazyCollection`. Lazy Collections utilize JavaScript Generators to parse infinite data with minimal memory constraints. The bridge is fully typed  `lazy()` returns `LazyCollection<T>`, so the chain needs no casts.
 
 **Simple Example:**
 
@@ -353,7 +353,7 @@ collect([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
 ## `mapWithKeys`
 
-Loops over the collection, expecting a `[key, value]` tuple from the callback, and builds an object from those pairs. This is a **terminal** method — it returns a plain object (not a chainable collection).
+Loops over the collection, expecting a `[key, value]` tuple from the callback, and builds an object from those pairs. This is a **terminal** method  it returns a plain object (not a chainable collection).
 
 **Complex Example:**
 

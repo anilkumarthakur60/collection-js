@@ -33,7 +33,7 @@ export function sortDescOf<T>(items: readonly T[]): T[] {
 /**
  * A sortBy spec is always a value retriever (key, dot-path, or `(item, index)`
  * callback), optionally wrapped in a `[retriever, direction]` tuple. Genuine
- * comparators are deliberately not accepted — they belong to `sort()` — so a
+ * comparators are deliberately not accepted  they belong to `sort()`  so a
  * two-argument retriever callback can never be misread as a comparator.
  */
 export type SortBySpec<T> =

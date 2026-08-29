@@ -39,10 +39,10 @@ orders.joinOn(customers, 'customerId', 'id', (order, customer) => ({
 // => [{ id: 1, customerId: 10, customer: 'Acme' }]
 ```
 
-- `joinOn` — inner join (only matched pairs)
-- `leftJoin` — every left row; unmatched right is `undefined`
-- `rightJoin` — every right row; unmatched left is `undefined`
-- `outerJoin` — every left and right row appears at least once
+- `joinOn`  inner join (only matched pairs)
+- `leftJoin`  every left row; unmatched right is `undefined`
+- `rightJoin`  every right row; unmatched left is `undefined`
+- `outerJoin`  every left and right row appears at least once
 
 ## Itertools & Combinatorics
 
@@ -59,11 +59,11 @@ collect([1, 2, 3, 4]).combinations(2).all() // every 2-element subset
 collect([1, 2]).powerSet().all() // [[],[1],[2],[1,2]]
 ```
 
-> `cycle(Infinity)` is only available on a `LazyCollection` — call `.lazy().cycle()` for an unbounded stream and bound it with `take`.
+> `cycle(Infinity)` is only available on a `LazyCollection`  call `.lazy().cycle()` for an unbounded stream and bound it with `take`.
 
 ## Async Collections
 
-`AsyncCollection` mirrors the lazy API for `AsyncIterable` sources, with bounded-parallelism `mapAsync` / `filterAsync` / `eachAsync`. Concurrent operators preserve source order, and `concurrency` must be a positive number. If a task fails, in-flight work is drained first and the operator then rejects with the first error — no unhandled rejections leak.
+`AsyncCollection` mirrors the lazy API for `AsyncIterable` sources, with bounded-parallelism `mapAsync` / `filterAsync` / `eachAsync`. Concurrent operators preserve source order, and `concurrency` must be a positive number. If a task fails, in-flight work is drained first and the operator then rejects with the first error  no unhandled rejections leak.
 
 ```typescript
 import { AsyncCollection } from '@anil-labs/collection-js'
@@ -105,8 +105,8 @@ for await (const line of lines(process.stdin)) {
 
 `LazyCollection` adds operators that only make sense for on-demand evaluation:
 
-- `remember()` — memoize values already pulled so re-iteration replays from cache
-- `tapEach(fn)` — side effects fired as items flow through
-- `takeUntilTimeout(deadline)` — stop enumerating at a `Date`/epoch-ms
-- `throttle(seconds)` — async-iterate one value per interval
-- `withHeartbeat(intervalMs, fn)` — run `fn` periodically while enumerating (extend locks, post progress)
+- `remember()`  memoize values already pulled so re-iteration replays from cache
+- `tapEach(fn)`  side effects fired as items flow through
+- `takeUntilTimeout(deadline)`  stop enumerating at a `Date`/epoch-ms
+- `throttle(seconds)`  async-iterate one value per interval
+- `withHeartbeat(intervalMs, fn)`  run `fn` periodically while enumerating (extend locks, post progress)

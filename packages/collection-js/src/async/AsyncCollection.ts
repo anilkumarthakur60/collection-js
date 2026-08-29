@@ -47,7 +47,7 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
 
   static range(start: number, end: number, step: number = 1): AsyncCollection<number> {
     if (step === 0) throw new RangeError('range step must not be zero')
-    // A sync generator suffices — AsyncSource accepts any Iterable factory.
+    // A sync generator suffices  AsyncSource accepts any Iterable factory.
     return new AsyncCollection<number>(function* () {
       if (step > 0) for (let i = start; i <= end; i += step) yield i
       else for (let i = start; i >= end; i += step) yield i
@@ -188,7 +188,7 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
       // Every dispatched task is stored as a promise that never rejects: the
       // rejection is captured into an `Outcome` instead. This keeps every
       // rejection observed even while a slow head-of-line task is still in
-      // flight (mirrors mapWithConcurrency in concurrent.ts) — otherwise a
+      // flight (mirrors mapWithConcurrency in concurrent.ts)  otherwise a
       // non-head failure would sit unobserved and crash the process under
       // Node's default unhandled-rejection policy.
       const pending = new Map<number, Promise<Outcome>>()
@@ -249,7 +249,7 @@ export class AsyncCollection<T> implements AsyncIterable<T> {
     })
   }
 
-  /** Concurrent filter — predicate runs in parallel; output stays in source order. */
+  /** Concurrent filter  predicate runs in parallel; output stays in source order. */
   filterAsync(
     predicate: (item: T, index: number) => Promise<boolean> | boolean,
     options: { concurrency?: number } = {}

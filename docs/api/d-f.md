@@ -49,7 +49,7 @@ const items = collect([{ color: 'orange', type: 'fruit', remain: 6 }])
 const diff = items.diffAssoc([{ color: 'yellow', type: 'fruit', remain: 3, used: 6 }])
 
 diff.all()
-// => [{ color: 'orange', type: 'fruit', remain: 6 }]  (kept — it differs from the comparison object)
+// => [{ color: 'orange', type: 'fruit', remain: 6 }]  (kept  it differs from the comparison object)
 ```
 
 ---
@@ -121,7 +121,7 @@ items.doesntContainStrict(2) // => false
 
 ## `dot`
 
-Flattens a nested object into a single-level object whose keys use "dot" notation to indicate depth. This is a **terminal** method — it returns a plain object directly (not a chainable collection). Pass the source object as a single collection element.
+Flattens a nested object into a single-level object whose keys use "dot" notation to indicate depth. This is a **terminal** method  it returns a plain object directly (not a chainable collection). Pass the source object as a single collection element.
 
 **Complex Example (Flattening nested configurations):**
 
@@ -162,7 +162,7 @@ collect([1, 2, 3])
 
 ## `duplicates`
 
-Retrieves the duplicate values from a collection. This is a **terminal** method — it returns a plain object keyed by the original indices (not a chainable collection).
+Retrieves the duplicate values from a collection. This is a **terminal** method  it returns a plain object keyed by the original indices (not a chainable collection).
 
 **Simple Example:**
 
@@ -255,7 +255,7 @@ collect([1, 'two']).ensure('number', 'string')
 ```
 
 ::: warning
-Use the string `'number'`, not the `Number` constructor — primitives are not `instanceof Number`, so `ensure(Number)` would throw for `[1, 2, 3]`.
+Use the string `'number'`, not the `Number` constructor  primitives are not `instanceof Number`, so `ensure(Number)` would throw for `[1, 2, 3]`.
 :::
 
 ---
@@ -315,7 +315,7 @@ collect([1, 2, 3, null, false, '', 4]).filter().all()
 
 ## `first`
 
-Returns the first element in the collection that passes a given truth test, or `undefined` when nothing matches. (There is no default-value argument — use `??` to supply a fallback.)
+Returns the first element in the collection that passes a given truth test, or `undefined` when nothing matches. (There is no default-value argument  use `??` to supply a fallback.)
 
 **Simple Example:**
 
@@ -421,7 +421,7 @@ collection.flatten(Infinity).all()
 
 ## `flip`
 
-Maps each scalar value to its index, returning a collection that wraps the resulting object. (It operates on the collection's elements, so pass an array of values — not a pre-built object.)
+Maps each scalar value to its index, returning a collection that wraps the resulting object. (It operates on the collection's elements, so pass an array of values  not a pre-built object.)
 
 **Simple Example:**
 

@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "version": "0.0.0",
-  "description": "Monorepo for @anil-labs/collection-js — a fluent, Laravel-inspired Collection library for JavaScript and TypeScript",
+  "description": "Monorepo for @anil-labs/collection-js  a fluent, Laravel-inspired Collection library for JavaScript and TypeScript",
   "scripts": {
     "build": "pnpm --filter \"./packages/*\" -r build",
     "dev": "pnpm --filter example-playground dev",

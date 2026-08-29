@@ -12,7 +12,7 @@ export interface ReadableLike<T> {
 export interface FromReadableOptions {
   /**
    * Decode each chunk as text using the given encoding, or pass `false` to
-   * keep raw byte chunks (yields stringified buffers — caller likely wants a
+   * keep raw byte chunks (yields stringified buffers  caller likely wants a
    * different signature in that case). Defaults to `'utf-8'`.
    */
   decodeAs?: 'utf8' | 'utf-8' | 'ascii' | 'latin1' | false

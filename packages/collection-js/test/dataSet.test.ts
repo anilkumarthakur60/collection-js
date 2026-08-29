@@ -32,7 +32,7 @@ describe('dataSet', () => {
       expect(target).toEqual({})
     })
 
-    it('never descends into inherited members — it shadows them with own containers', () => {
+    it('never descends into inherited members  it shadows them with own containers', () => {
       const proto = { nested: {} as Record<string, unknown> }
       const target = Object.create(proto) as Record<string, unknown>
       dataSet(target, 'nested.x', 1)

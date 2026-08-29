@@ -28,7 +28,7 @@ export interface FirstWhereSpec {
 }
 
 export function buildFirstWhereSpec(
-  // First positional arg is either an operator or the compared value — so `unknown`.
+  // First positional arg is either an operator or the compared value  so `unknown`.
   operatorOrValue: unknown,
   value: unknown,
   argCount: number

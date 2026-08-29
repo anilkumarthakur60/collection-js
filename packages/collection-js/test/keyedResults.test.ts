@@ -8,7 +8,7 @@ const users = [
 
 describe('keyed-result contract (regression: dead-end plain objects, inconsistently wrapped)', () => {
   describe('groupBy/mapToGroups return plain records with chainable Collection values', () => {
-    it('groupBy group values are Collections — Laravel-style chaining works', () => {
+    it('groupBy group values are Collections  Laravel-style chaining works', () => {
       const groups = collect(users).groupBy('role')
       expect(groups['admin']).toBeInstanceOf(Collection)
       expect(groups['admin'].count()).toBe(2)

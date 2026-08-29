@@ -12,7 +12,7 @@ export type SortDirection = 'asc' | 'desc'
 
 export type Predicate<T> = (item: T, key: number) => boolean
 
-/** Back-compat alias of {@link RetrieverInput} — the two were duplicate shapes. */
+/** Back-compat alias of {@link RetrieverInput}  the two were duplicate shapes. */
 export type Iteratee<T, R = unknown> = RetrieverInput<T, R>
 
 export type ValueOf<T, K> = K extends keyof T ? T[K] : unknown

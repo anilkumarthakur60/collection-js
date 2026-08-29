@@ -1,7 +1,7 @@
 {
   "name": "@anil-labs/collection-js",
   "version": "0.2.0",
-  "description": "A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Provides 120+ chainable methods for elegant array manipulation. Framework-independent — works in Node, any JS framework, or straight off a CDN.",
+  "description": "A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Provides 120+ chainable methods for elegant array manipulation. Framework-independent  works in Node, any JS framework, or straight off a CDN.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

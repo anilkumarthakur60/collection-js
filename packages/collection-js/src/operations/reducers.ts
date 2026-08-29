@@ -9,7 +9,7 @@ export function reduceOf<T, R>(
 }
 
 /**
- * Spread reduce — the reducer is called with the carry tuple spread, followed
+ * Spread reduce  the reducer is called with the carry tuple spread, followed
  * by the current item and its index, and returns the next carry tuple. Mirrors
  * Laravel's `reduceSpread`:
  *

@@ -4,12 +4,12 @@ import { collect, operations } from '../src'
 // The library now has ONE documented rule (see coerceNumeric in aggregations.ts):
 // finite numbers / numeric strings / booleans participate, everything else
 // (null, undefined, NaN, ±Infinity, non-numeric or empty strings, objects) is
-// skipped — never silently treated as 0 — in sum/average/median AND every stat.
+// skipped  never silently treated as 0  in sum/average/median AND every stat.
 describe('regression: numeric coercion unified between aggregations and stats', () => {
   it('average, median and variance describe the same population for mixed data', () => {
     const mixed = collect<unknown>(['x', 2])
     // Previously: average() === 1 and median() === 1 ('x' coerced to 0) while
-    // variance() === 0 ('x' dropped) — statistically incoherent.
+    // variance() === 0 ('x' dropped)  statistically incoherent.
     expect(mixed.average()).toBe(2)
     expect(mixed.median()).toBe(2)
     expect(mixed.variance()).toBe(0)

@@ -12,7 +12,7 @@ const items = collect([1, 2, 3])
 
 ## Extracting the underlying Array
 
-Because almost all collection methods return a **new** instance of a Collection (preserving immutability), you must call `all()` or `toArray()` at the end of your chain to get the items as a native JS array. Both return a fresh shallow copy — mutating the result never corrupts the collection.
+Because almost all collection methods return a **new** instance of a Collection (preserving immutability), you must call `all()` or `toArray()` at the end of your chain to get the items as a native JS array. Both return a fresh shallow copy  mutating the result never corrupts the collection.
 
 ```typescript
 const items = collect([1, 2, 3])
@@ -35,7 +35,7 @@ original.all() // [1, 2, 3]
 doubled.all() // [2, 4, 6]
 ```
 
-A small set of methods mutate the collection **in place** to match Laravel's behavior, returning the same instance: `push`, `prepend`, `pop`, `shift`, `pull`, `forget`, `splice`, `transform`, and `put` (note: `put(key, value)` sets the key on **every** object element — see the [API reference](/api/n-r#put)).
+A small set of methods mutate the collection **in place** to match Laravel's behavior, returning the same instance: `push`, `prepend`, `pop`, `shift`, `pull`, `forget`, `splice`, `transform`, and `put` (note: `put(key, value)` sets the key on **every** object element  see the [API reference](/api/n-r#put)).
 
 ```typescript
 const items = collect([1, 2, 3])
@@ -65,7 +65,7 @@ items.toUpper().all()
 
 ::: warning Macros are app-global
 `macro()` installs the method on the shared `Collection.prototype`, so it is
-visible to every collection in the running application — including ones created
+visible to every collection in the running application  including ones created
 by your dependencies. Libraries should scope their extensions to a subclass
 instead: `class MyCollection extends Collection {}` plus
 `applyMacroable(MyCollection)` gives the subclass its own registry, while its
@@ -107,13 +107,13 @@ Two behaviors, by target:
   calls the named method on every item (forwarding arguments).
 - **Every other target** evaluates eagerly at property access with an accessor
   for the named key (dotted paths work through `dataGet`), returning the real
-  result — a number, boolean, `Collection`, record, or `[Collection, Collection]`.
+  result  a number, boolean, `Collection`, record, or `[Collection, Collection]`.
 
 Because property access *is* the message syntax, `Function.prototype` members
 (`name`, `length`, `call`, `bind`) are intentionally shadowed on these methods.
 
 ::: tip TypeScript
-The property form is runtime-only — the static types keep the plain callable
+The property form is runtime-only  the static types keep the plain callable
 signature, so cast at the access site:
 `(users.map as unknown as { name: Collection<string> }).name`.
 :::

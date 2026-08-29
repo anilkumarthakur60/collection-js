@@ -36,7 +36,7 @@ describe('LazyCollection constructor laziness (regression: iterator sources were
     const l = new LazyCollection(gen)
     expect(l.count()).toBe(3)
     expect(l.all()).toEqual([0, 1, 2])
-    // Second pass replays the cache — the generator ran exactly once.
+    // Second pass replays the cache  the generator ran exactly once.
     expect(pulls()).toBe(3)
   })
 })

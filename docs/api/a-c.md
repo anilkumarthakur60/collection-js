@@ -40,7 +40,7 @@ users.after((user) => user.name === 'Bob')
 
 ## `all`
 
-Returns the collection's items as a native array. The result is a fresh shallow copy — mutating it never corrupts the collection (`toArray()` is an alias).
+Returns the collection's items as a native array. The result is a fresh shallow copy  mutating it never corrupts the collection (`toArray()` is an alias).
 
 **Simple Example:**
 
@@ -80,7 +80,7 @@ orders.avg((order) => order.totals.price * 1.5) // With 50% tax
 // => 300
 ```
 
-Non-numeric values (`null`, `undefined`, `NaN`, non-numeric strings, objects) are **skipped** — excluded from both the sum and the divisor. An empty (or all-non-numeric) collection returns `0`, where Laravel returns `null`.
+Non-numeric values (`null`, `undefined`, `NaN`, non-numeric strings, objects) are **skipped**  excluded from both the sum and the divisor. An empty (or all-non-numeric) collection returns `0`, where Laravel returns `null`.
 
 ---
 
@@ -221,7 +221,7 @@ const items = collect([1, 2, 3])
 
 ## `combine`
 
-Combines the values of the collection, as keys, with the values of another array or collection. This is a **terminal** method — it returns a plain object directly (not a chainable collection).
+Combines the values of the collection, as keys, with the values of another array or collection. This is a **terminal** method  it returns a plain object directly (not a chainable collection).
 
 **Simple Example:**
 
@@ -324,7 +324,7 @@ collect([1, 2, 3, 4]).count()
 
 ## `countBy`
 
-Counts the occurrences of values in the collection. By default, it counts the items themselves. This is a **terminal** method — it returns a `Record<string, number>` directly (not a chainable collection).
+Counts the occurrences of values in the collection. By default, it counts the items themselves. This is a **terminal** method  it returns a `Record<string, number>` directly (not a chainable collection).
 
 **Simple Example:**
 

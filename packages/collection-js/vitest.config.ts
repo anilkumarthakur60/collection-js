@@ -9,7 +9,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    // The suite was written against Jest globals — expose describe/it/expect/vi
+    // The suite was written against Jest globals  expose describe/it/expect/vi
     // globally so all 94 files run unchanged.
     globals: true,
     include: ['test/**/*.test.ts'],

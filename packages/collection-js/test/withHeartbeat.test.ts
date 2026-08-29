@@ -75,7 +75,7 @@ describe('withHeartbeat', () => {
     const cb = vi.fn()
     const lazy = collect([1]).lazy()
     lazy.withHeartbeat(1000, cb).all()
-    // No assertion on call count — just verifying it doesn't throw
+    // No assertion on call count  just verifying it doesn't throw
     expect(true).toBe(true)
   })
 })

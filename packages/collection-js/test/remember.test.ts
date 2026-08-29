@@ -53,17 +53,17 @@ describe('remember', () => {
       }
     }).remember()
 
-    // First pass: take 2 — caches [1, 2], source evaluated 2 times
+    // First pass: take 2  caches [1, 2], source evaluated 2 times
     const partial = lazy.take(2).all()
     expect(partial).toEqual([1, 2])
     expect(evaluations).toBe(2)
 
-    // Second pass: all() — yields [1, 2] from cache, pulls [3,4,5] from source
+    // Second pass: all()  yields [1, 2] from cache, pulls [3,4,5] from source
     const full = lazy.all()
     expect(full).toEqual([1, 2, 3, 4, 5])
     expect(evaluations).toBe(5)
 
-    // Third pass: all() — fully cached, source not touched
+    // Third pass: all()  fully cached, source not touched
     const cached = lazy.all()
     expect(cached).toEqual([1, 2, 3, 4, 5])
     expect(evaluations).toBe(5)

@@ -19,7 +19,7 @@ export function arrayWrap<T>(value: T | T[] | null | undefined): T[] {
   return Array.isArray(value) ? value : [value]
 }
 
-/** Identity transform — preserves the input when already an array. */
+/** Identity transform  preserves the input when already an array. */
 export function ensureArray<T>(value: Iterable<T> | T[]): T[] {
   return Array.isArray(value) ? value : Array.from(value)
 }

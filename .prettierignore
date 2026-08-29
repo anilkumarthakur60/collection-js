@@ -9,7 +9,7 @@ coverage/
 **/node_modules/
 pnpm-lock.yaml
 
-# Markdown is authored by hand (tables, aligned columns) — keep it as-is.
+# Markdown is authored by hand (tables, aligned columns)  keep it as-is.
 *.md
 
 # Generated / vendored

@@ -205,7 +205,7 @@ items.sort().all()
 
 ## `sortBy`
 
-Sorts the collection by the given key, dot-path, or callback. A `[spec, 'asc' | 'desc']` tuple — or an array of specs — expresses direction and multi-key sorts.
+Sorts the collection by the given key, dot-path, or callback. A `[spec, 'asc' | 'desc']` tuple  or an array of specs  expresses direction and multi-key sorts.
 
 **Simple Example:**
 
@@ -237,7 +237,7 @@ users.sortBy([
 ```
 
 ::: warning Callbacks are value retrievers, not comparators
-A function passed to `sortBy` always _extracts the value to sort by_ — including two-argument `(item, index)` callbacks. To sort with a custom `(a, b)` comparator, use [`sort`](#sort) instead.
+A function passed to `sortBy` always _extracts the value to sort by_  including two-argument `(item, index)` callbacks. To sort with a custom `(a, b)` comparator, use [`sort`](#sort) instead.
 :::
 
 ---

@@ -331,7 +331,7 @@ describe('regression: mapAsync leaked unhandled promise rejections', () => {
         { concurrency: 3 }
       )
       await expect(stream.toArray()).rejects.toThrow('boom-1')
-      // unhandledRejection events fire on later macrotask ticks — give the
+      // unhandledRejection events fire on later macrotask ticks  give the
       // event loop time to flush any before asserting none arrived.
       await sleep(50)
       expect(unhandled).toEqual([])

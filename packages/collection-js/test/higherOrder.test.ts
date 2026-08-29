@@ -54,7 +54,7 @@ describe('higher-order messages (regression: 25 targets advertised, only 5 wired
     }
   })
 
-  describe('each family — deferred method invocation (README example)', () => {
+  describe('each family  deferred method invocation (README example)', () => {
     it('users.where(role, admin).each.notify() invokes the method on every item', () => {
       const { log, users } = makeUsers()
       const admins = users.where('role', 'admin')
@@ -88,7 +88,7 @@ describe('higher-order messages (regression: 25 targets advertised, only 5 wired
     })
   })
 
-  describe('map/flatMap family — eager pluck on property access', () => {
+  describe('map/flatMap family  eager pluck on property access', () => {
     it('users.map.name plucks name (regression: used to return the method name "map")', () => {
       const { users } = makeUsers()
       const names = msg<Collection<string>>(users.map, 'name')
@@ -136,7 +136,7 @@ describe('higher-order messages (regression: 25 targets advertised, only 5 wired
     })
   })
 
-  describe('boolean/value family — contains/doesntContain/every/some/first', () => {
+  describe('boolean/value family  contains/doesntContain/every/some/first', () => {
     it('returns plain booleans and items usable directly', () => {
       const { users } = makeUsers()
       expect(msg<boolean>(users.contains, 'active')).toBe(true)
@@ -193,7 +193,7 @@ describe('higher-order messages (regression: 25 targets advertised, only 5 wired
     })
   })
 
-  describe('aggregation family — property access returns the value', () => {
+  describe('aggregation family  property access returns the value', () => {
     it('sum/avg/average/max/min property form on Collection', () => {
       const { users } = makeUsers()
       expect(msg<number>(users.sum, 'age')).toBe(90)

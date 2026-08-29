@@ -7,7 +7,7 @@ export function diffOf<T>(items: readonly T[], other: readonly T[]): T[] {
 
 export function diffAssocOf<T>(items: readonly T[], other: readonly Partial<T>[]): T[] {
   if (items.length === 0) return []
-  // Collection diffAssoc operates on key/value pairs of an object — flatten the
+  // Collection diffAssoc operates on key/value pairs of an object  flatten the
   // single object case Laravel uses, while preserving array-of-objects element
   // semantics for our TS API.
   const otherEntries =
@@ -117,7 +117,7 @@ export function unionOf<T>(items: readonly T[], other: readonly T[]): T[] {
   return out
 }
 
-/** Object-keyed union — original collection's keys take precedence. */
+/** Object-keyed union  original collection's keys take precedence. */
 export function unionObjectsOf<T extends object>(items: readonly T[], other: readonly T[]): T[] {
   if (items.length === 0) return [...other]
   const merged = { ...(items[0] as Record<string, unknown>) }

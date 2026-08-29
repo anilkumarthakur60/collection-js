@@ -10,7 +10,7 @@ export type RetrieverInput<T, R = unknown> =
 
 /**
  * Convert a key, dot-path, or function into a normalized accessor. Used by
- * groupBy, keyBy, sortBy, sum-with-key, etc. — any operation that accepts
+ * groupBy, keyBy, sortBy, sum-with-key, etc.  any operation that accepts
  * either a callback or a property reference.
  */
 export function valueRetriever<T, R = unknown>(

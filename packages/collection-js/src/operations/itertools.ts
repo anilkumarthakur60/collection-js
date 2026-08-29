@@ -31,7 +31,7 @@ export function enumerateOf<T>(items: readonly T[], start: number = 0): [number,
 
 /**
  * Repeat the input `n` times. If `n` is `Infinity`, returns a generator that
- * never terminates — caller must `.take()` to bound it.
+ * never terminates  caller must `.take()` to bound it.
  */
 export function* cycleOf<T>(items: readonly T[], n: number = Infinity): Generator<T> {
   if (items.length === 0) return
@@ -53,7 +53,7 @@ export function interleaveOf<T>(...sources: readonly (readonly T[])[]): T[] {
 /**
  * Split a single iterable into `n` independent iterables that can each be
  * consumed independently. The shared underlying iterator is buffered as
- * needed — memory grows with the gap between fastest and slowest consumer.
+ * needed  memory grows with the gap between fastest and slowest consumer.
  */
 export function teeOf<T>(source: Iterable<T>, n: number): Generator<T>[] {
   const it = source[Symbol.iterator]()
@@ -116,7 +116,7 @@ export function* permutationsOf<T>(items: readonly T[], r?: number): Generator<T
 
 /**
  * All r-length combinations (without repetition). For r = n this yields a
- * single combination — the input itself.
+ * single combination  the input itself.
  */
 export function* combinationsOf<T>(items: readonly T[], r: number): Generator<T[]> {
   const n = items.length
@@ -133,7 +133,7 @@ export function* combinationsOf<T>(items: readonly T[], r: number): Generator<T[
   }
 }
 
-/** Power set — all 2^n subsets, in increasing-size order. */
+/** Power set  all 2^n subsets, in increasing-size order. */
 export function* powerSetOf<T>(items: readonly T[]): Generator<T[]> {
   for (let r = 0; r <= items.length; r++) yield* combinationsOf(items, r)
 }

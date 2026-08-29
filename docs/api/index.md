@@ -3,15 +3,15 @@
 The `Collection` class provides 150+ chainable methods for elegant array manipulation, plus statistics, SQL-style joins, combinatorics, async streams, and CSV/JSONL I/O (see [Beyond Laravel](/guide/beyond-laravel)).
 
 ::: tip Immutability
-Almost all methods return a **new** Collection instance — the original is not mutated. The few in-place mutators are noted below (`push`, `prepend`, `pop`, `shift`, `pull`, `forget`, `splice`, `transform`, `put`). Call `.all()` or `.toArray()` to extract the underlying array.
+Almost all methods return a **new** Collection instance  the original is not mutated. The few in-place mutators are noted below (`push`, `prepend`, `pop`, `shift`, `pull`, `forget`, `splice`, `transform`, `put`). Call `.all()` or `.toArray()` to extract the underlying array.
 :::
 
-::: warning Data model — read this first
+::: warning Data model  read this first
 A collection always wraps an **array**. There is no separate "associative array" type:
 
 - A "dictionary" is just an object stored as a collection element. To work with one object, wrap it in an array: `collect([{ id: 1, name: 'Ada' }])`.
 - `all()` / `toArray()` therefore always return an **array** (e.g. `[{ ... }]`), never a bare object.
-- Methods that reduce to a keyed structure — `groupBy`, `keyBy`, `countBy`, `mapWithKeys`, `mapToGroups`, `combine`, `dot`, `duplicates`, `duplicatesStrict`, `pluck(value, key)` — are **terminal** and return a plain object/`Record` directly (no `.all()`). Consistent contract: the record itself is always a plain object, and any record value that is a *list of items* (`groupBy`, `mapToGroups`) is a chainable `Collection`, so `users.groupBy('role')['admin'].count()` works.
+- Methods that reduce to a keyed structure  `groupBy`, `keyBy`, `countBy`, `mapWithKeys`, `mapToGroups`, `combine`, `dot`, `duplicates`, `duplicatesStrict`, `pluck(value, key)`  are **terminal** and return a plain object/`Record` directly (no `.all()`). Consistent contract: the record itself is always a plain object, and any record value that is a *list of items* (`groupBy`, `mapToGroups`) is a chainable `Collection`, so `users.groupBy('role')['admin'].count()` works.
 - `get(index)` takes a numeric index (not an object key); `pull(value)` removes by value. For object-key lookups use `dataGet`, or plain property access on the element.
 - Object-comparison arguments (`merge`, `diff*`, `intersect*`, `replace*`) must be **arrays/collections**, not bare objects.
 
@@ -31,7 +31,7 @@ A collection always wraps an **array**. There is no separate "associative array"
 
 ## Extraction & Conversion
 
-- **`all()`**: Returns the items as a native array (a fresh shallow copy — safe to mutate).
+- **`all()`**: Returns the items as a native array (a fresh shallow copy  safe to mutate).
 - **`toArray()`**: Returns a shallow copy of the underlying array.
 - **`toJson()` / `toPrettyJson(indent?)`**: Serialize to JSON.
 - **`toMap(keyFn, valueFn)` / `toSet()`**: Convert to a `Map` / `Set`.
@@ -62,21 +62,21 @@ A collection always wraps an **array**. There is no separate "associative array"
 ## Mapping & Transformation
 
 - **`map(callback)`** · **`mapInto(Class)`** · **`mapSpread(callback)`** · **`flatMap(callback)`**
-- **`mapWithKeys(callback)`**: _Terminal_ — returns a plain object. **`mapToGroups(callback)`**: _Terminal_ — plain object whose group values are chainable `Collection`s.
+- **`mapWithKeys(callback)`**: _Terminal_  returns a plain object. **`mapToGroups(callback)`**: _Terminal_  plain object whose group values are chainable `Collection`s.
 - **`flatten(depth?)`** · **`collapse()`** · **`collapseWithKeys()`**
 - **`chunk(size)`** · **`chunkWhile(callback)`** · **`sliding(size, step?)`** · **`split(n)`** · **`splitIn(n)`**
-- **`dot()`**: _Terminal_ — flattens to a dot-keyed object. **`undot()`**: expands a dot-keyed object back into a nested one (returns a collection).
+- **`dot()`**: _Terminal_  flattens to a dot-keyed object. **`undot()`**: expands a dot-keyed object back into a nested one (returns a collection).
 - **`flip()`**: Swaps values→indices for an array of scalars (returns a collection wrapping the resulting object).
-- **`pluck(value)`**: returns a `Collection`. **`pluck(value, key)`**: _terminal_ — returns a keyed object.
+- **`pluck(value)`**: returns a `Collection`. **`pluck(value, key)`**: _terminal_  returns a keyed object.
 - **`values()` / `keys()`** · **`zip(items)`** · **`combine(values)`** (_terminal_) · **`crossJoin(...arrays)`**
 
 ## Math & Aggregation
 
 - **`sum(by?)`** · **`average(by?)` / `avg(by?)`** · **`count()`** · **`percentage(callback, precision?)`**
-- **`min(by?)` / `max(by?)`**: Min/max by natural order — works on numbers, strings, and `Date`s. Use **`minBy<R>(by?)` / `maxBy<R>(by?)`** for fully-typed non-numeric results.
+- **`min(by?)` / `max(by?)`**: Min/max by natural order  works on numbers, strings, and `Date`s. Use **`minBy<R>(by?)` / `maxBy<R>(by?)`** for fully-typed non-numeric results.
 - **`median(by?)`** · **`mode(by?)`**
-- **`countBy(by?)`**: _Terminal_ — returns a `Record<string, number>`.
-- Numeric aggregates (and the statistics below) share one coercion rule: numbers, numeric strings, and booleans count; `null`/`undefined`/`NaN`/non-numeric values are **skipped**, never treated as `0` — so `average` divides by the numeric count. With no numeric values, `sum`/`average` return `0` and `median` returns `undefined`.
+- **`countBy(by?)`**: _Terminal_  returns a `Record<string, number>`.
+- Numeric aggregates (and the statistics below) share one coercion rule: numbers, numeric strings, and booleans count; `null`/`undefined`/`NaN`/non-numeric values are **skipped**, never treated as `0`  so `average` divides by the numeric count. With no numeric values, `sum`/`average` return `0` and `median` returns `undefined`.
 
 ## Statistics
 
@@ -115,7 +115,7 @@ A collection always wraps an **array**. There is no separate "associative array"
 ## Partitioning & Access
 
 - **`partition(callback)`**: `[passed, failed]`.
-- **`groupBy(by)`**: _Terminal_ — plain object whose group values are chainable `Collection`s. **`keyBy(by)`**: _Terminal_ — plain object of items. **`groupByMany(groupers)`**: nested grouping.
+- **`groupBy(by)`**: _Terminal_  plain object whose group values are chainable `Collection`s. **`keyBy(by)`**: _Terminal_  plain object of items. **`groupByMany(groupers)`**: nested grouping.
 - **`take(n)` / `takeUntil(...)` / `takeWhile(...)`** · **`skip(n)` / `skipUntil(...)` / `skipWhile(...)`**
 - **`slice(offset, length?)`** · **`forPage(page, perPage)`** · **`nth(step, offset?)`**
 - **`get(index, default?)`**: Item at a numeric index. **`value(key)`**: a key's value from the first element.

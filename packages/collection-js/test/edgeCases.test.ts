@@ -12,7 +12,7 @@ describe('unicode and emoji handling (audit: zero unicode tests outside streams)
 
   it('whereLike _ matches one UTF-16 code unit: an astral emoji needs two (documented)', () => {
     const rows = [{ v: '😀' }, { v: 'x' }]
-    // '😀' is a surrogate pair (2 code units) — a single '_' does not match it…
+    // '😀' is a surrogate pair (2 code units)  a single '_' does not match it…
     expect(collect(rows).whereLike('v', '_').pluck('v').all()).toEqual(['x'])
     // …but two underscores do. This pins the current code-unit semantics.
     expect(collect(rows).whereLike('v', '__').pluck('v').all()).toEqual(['😀'])
@@ -97,7 +97,7 @@ describe('CSV edge cases (audit: duplicate headers, ragged rows, quote handling)
     expect(parseCsv('a,b\n1', { header: true, raw: true })).toEqual([{ a: '1', b: '' }])
   })
 
-  it("quote:'' disables quote handling — quotes parse literally", () => {
+  it("quote:'' disables quote handling  quotes parse literally", () => {
     expect(parseCsv('a,"b"\n"1",2', { header: true, quote: '' })).toEqual([{ a: '"1"', '"b"': 2 }])
   })
 

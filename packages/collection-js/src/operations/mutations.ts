@@ -1,7 +1,7 @@
 import { isPlainObject } from '@/support/isObject'
 
 /**
- * Pure-style mutation helpers — they always return a new array. Helpers that
+ * Pure-style mutation helpers  they always return a new array. Helpers that
  * also need a removed-value tuple (`pop`, `shift`, `splice`) return both pieces.
  */
 
@@ -58,7 +58,7 @@ export function pullOf<T>(
 }
 
 /**
- * `forget(key)` — supports numeric indexes (delete element at index) and
+ * `forget(key)`  supports numeric indexes (delete element at index) and
  * string keys (delete property from each object element).
  */
 export function forgetOf<T>(items: readonly T[], keys: readonly (number | string)[]): T[] {
@@ -126,8 +126,8 @@ export function mergeRecursiveOf<T>(
 /**
  * Shallow merge mirroring Laravel: a collection wrapping a single plain object
  * models an associative array, so merging two such collections overwrites
- * matching string keys (`{a,b}` ⊕ `{b,c}` → `{a,b',c}`). Any other shape —
- * including a genuine list of multiple objects — is treated positionally and
+ * matching string keys (`{a,b}` ⊕ `{b,c}` → `{a,b',c}`). Any other shape 
+ * including a genuine list of multiple objects  is treated positionally and
  * the values are appended. This avoids silently collapsing `[{a},{b}]` into a
  * single object.
  */

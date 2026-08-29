@@ -87,7 +87,7 @@ Collection.times(5, (i) => i * 10).all()
 
 ## `toArray`
 
-Converts the collection into a plain JavaScript array. The result is a fresh shallow copy (items themselves are not cloned or recursively converted) — mutating it never corrupts the collection. `all()` is an alias.
+Converts the collection into a plain JavaScript array. The result is a fresh shallow copy (items themselves are not cloned or recursively converted)  mutating it never corrupts the collection. `all()` is an alias.
 
 **Simple Example:**
 

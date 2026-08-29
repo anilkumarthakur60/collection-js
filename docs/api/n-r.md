@@ -175,7 +175,7 @@ apps.pluck('title').all()
 ```
 
 **Complex Example (Keyed result):**
-Passing a second argument keys the result by that field. With two arguments `pluck` is **terminal** — it returns a plain object directly (no `.all()`).
+Passing a second argument keys the result by that field. With two arguments `pluck` is **terminal**  it returns a plain object directly (no `.all()`).
 
 ```typescript
 apps.pluck('title', 'os')
@@ -249,7 +249,7 @@ items.push(4).all()
 
 ## `put`
 
-Sets the given key/value on **every object element**. Like the other Laravel-style mutators, it mutates the collection **in place** and returns it — each element is replaced by a shallow copy with the key set, so the original item objects are untouched.
+Sets the given key/value on **every object element**. Like the other Laravel-style mutators, it mutates the collection **in place** and returns it  each element is replaced by a shallow copy with the key set, so the original item objects are untouched.
 
 **Simple Example:**
 

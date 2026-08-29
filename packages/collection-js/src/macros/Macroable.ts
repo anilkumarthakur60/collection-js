@@ -37,7 +37,7 @@ function lookup(target: MacroableClass, name: string): MacroFn | undefined {
  * Register `fn` as a macro named `name` on `target`.
  *
  * GLOBAL BY DESIGN: the macro is installed on `target.prototype`, which is
- * shared by every instance of that class in the running realm — exactly like
+ * shared by every instance of that class in the running realm  exactly like
  * Laravel's `Collection::macro()`. Two consequences worth knowing:
  *
  * - Any module (including a transitive dependency) that registers a macro
@@ -47,7 +47,7 @@ function lookup(target: MacroableClass, name: string): MacroFn | undefined {
  *   scopes macros to the subclass (instances still inherit parent macros via
  *   the prototype-chain lookup).
  * - Two copies of this package (e.g. the CDN IIFE plus the npm ESM build, or
- *   duplicated versions in node_modules) have distinct classes — a macro
+ *   duplicated versions in node_modules) have distinct classes  a macro
  *   registered on one copy does not exist on the other.
  *
  * TypeScript: macros are invisible to the compiler by default. Declare them

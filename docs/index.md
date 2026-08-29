@@ -17,7 +17,7 @@ features:
   - title: ⚡️ Fluent & Chainable
     details: Replace complex loops and confusing array methods with elegant, highly readable, chainable logic.
   - title: 🦋 Strict TypeScript
-    details: Written in strict TypeScript with deep type inference for safe data transformations — no `any` in the public surface.
+    details: Written in strict TypeScript with deep type inference for safe data transformations  no `any` in the public surface.
   - title: 🐘 Laravel Parity
     details: Near-complete coverage of the Laravel 13.x Collections API, so it feels instantly familiar.
   - title: 💤 Lazy & Async

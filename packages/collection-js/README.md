@@ -1,15 +1,15 @@
 # @anil-labs/collection-js
 
-A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Near-complete parity with the **Laravel 13.x Collections** API (see [Laravel Compatibility](#laravel-compatibility) for the gaps) — plus statistics, SQL-style joins, combinatorics, async streams, and CSV/JSONL I/O that go beyond it.
+A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Near-complete parity with the **Laravel 13.x Collections** API (see [Laravel Compatibility](#laravel-compatibility) for the gaps)  plus statistics, SQL-style joins, combinatorics, async streams, and CSV/JSONL I/O that go beyond it.
 
 [![npm version](https://img.shields.io/npm/v/@anil-labs/collection-js)](https://www.npmjs.com/package/@anil-labs/collection-js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-- **Strict TypeScript** — written in strict mode with deep type inference; no `any` in the public surface.
-- **Immutable by default** — methods return new collections; the handful of mutators mirror Laravel exactly.
-- **Three flavours** — eager `Collection`, generator-backed `LazyCollection`, and `AsyncCollection` for `AsyncIterable` sources.
-- **Standalone operations** — every method is also a pure function (`operations.pluckOf(...)`), usable without the `Collection` class.
-- **Runs anywhere** — Node 18+, any framework, or straight off a CDN as a single `<script>` tag.
+- **Strict TypeScript**  written in strict mode with deep type inference; no `any` in the public surface.
+- **Immutable by default**  methods return new collections; the handful of mutators mirror Laravel exactly.
+- **Three flavours**  eager `Collection`, generator-backed `LazyCollection`, and `AsyncCollection` for `AsyncIterable` sources.
+- **Standalone operations**  every method is also a pure function (`operations.pluckOf(...)`), usable without the `Collection` class.
+- **Runs anywhere**  Node 18+, any framework, or straight off a CDN as a single `<script>` tag.
 - **Zero runtime dependencies.**
 
 ## Installation
@@ -18,7 +18,7 @@ A fluent, Laravel-inspired Collection library for JavaScript and TypeScript. Nea
 npm install @anil-labs/collection-js
 ```
 
-Requires Node.js 18+ — or no Node at all: the package ships a browser-ready global build, so a single script tag works with no bundler and no build step:
+Requires Node.js 18+  or no Node at all: the package ships a browser-ready global build, so a single script tag works with no bundler and no build step:
 
 ```html
 <script src="https://unpkg.com/@anil-labs/collection-js"></script>
@@ -56,7 +56,7 @@ users.where('role', 'admin').sortByDesc('score').pluck('name').all()
 // => ['Alice', 'Charlie']
 
 const byRole = users.groupBy('role')
-// => { admin: Collection, user: Collection } — each group stays chainable
+// => { admin: Collection, user: Collection }  each group stays chainable
 byRole['admin'].pluck('name').all() // => ['Alice', 'Charlie']
 
 users.avg('score') // => 88.75
@@ -85,7 +85,7 @@ collect(users).whereNotLike('name', 'A%', true) // case-sensitive: not starting 
 
 ## Lazy Collections
 
-For large or infinite datasets, use generator-backed lazy evaluation — values are produced on demand:
+For large or infinite datasets, use generator-backed lazy evaluation  values are produced on demand:
 
 ```typescript
 import { LazyCollection } from '@anil-labs/collection-js'
@@ -97,7 +97,7 @@ new LazyCollection(function* () {
   .map((n) => n * 2)
   .take(5)
   .toArray()
-// => [0, 4, 8, 12, 16] — only 5 items ever evaluated
+// => [0, 4, 8, 12, 16]  only 5 items ever evaluated
 ```
 
 Lazy-only helpers: `tapEach`, `remember` (memoize pulled values), `takeUntilTimeout`, `throttle`, `withHeartbeat`.
@@ -120,7 +120,7 @@ const results = await AsyncCollection.from(userIds)
 
 These extend the Laravel API for real-world data work:
 
-**Statistics** — `variance` · `sampleVariance` · `stddev` · `sampleStddev` · `quantile` · `percentileAt` · `histogram` · `correlation`
+**Statistics**  `variance` · `sampleVariance` · `stddev` · `sampleStddev` · `quantile` · `percentileAt` · `histogram` · `correlation`
 
 ```typescript
 collect(samples).stddev('latency')
@@ -128,7 +128,7 @@ collect(rows).correlation('spend', 'revenue')
 collect(values).histogram(10)
 ```
 
-**SQL-style joins** — `joinOn` (inner) · `leftJoin` · `rightJoin` · `outerJoin`
+**SQL-style joins**  `joinOn` (inner) · `leftJoin` · `rightJoin` · `outerJoin`
 
 ```typescript
 collect(orders).joinOn(customers, 'customerId', 'id', (order, customer) => ({
@@ -137,7 +137,7 @@ collect(orders).joinOn(customers, 'customerId', 'id', (order, customer) => ({
 }))
 ```
 
-**Combinatorics & itertools** — `scan` · `pairwise` · `enumerate` · `cycle` · `interleave` · `permutations` · `combinations` · `powerSet`
+**Combinatorics & itertools**  `scan` · `pairwise` · `enumerate` · `cycle` · `interleave` · `permutations` · `combinations` · `powerSet`
 
 ```typescript
 collect([1, 2, 3]).permutations().all() // all 3! orderings
@@ -161,14 +161,14 @@ const csv = toCsv(rows.all())
 Every method in `HIGHER_ORDER_TARGETS` (`each`, `map`, `filter`, `sum`, `avg`, `max`, `min`, `groupBy`, `sortBy`, `unique`, …) also accepts its callback as a **property access**, on both `Collection` and `LazyCollection`:
 
 ```typescript
-users.sum.score // => 355   — property form of users.sum((u) => u.score)
+users.sum.score // => 355    property form of users.sum((u) => u.score)
 users.map.name.all() // => ['Alice', 'Bob', 'Charlie', 'Diana']
 users.where('role', 'admin').each.notify() // calls notify() on every admin
 ```
 
 ## Extending with Macros
 
-Add your own methods at runtime — they participate in chaining like built-ins:
+Add your own methods at runtime  they participate in chaining like built-ins:
 
 ```typescript
 import { Collection } from '@anil-labs/collection-js'
@@ -182,7 +182,7 @@ collect(['a', 'b']).toUpper().all() // => ['A', 'B']
 
 ## Laravel Compatibility
 
-This library tracks [Laravel 13.x Collections](https://laravel.com/docs/13.x/collections) closely — `collect()` is the default export and the overwhelming majority of methods match Laravel's names and behavior, so if you know Laravel's `Collection` you'll feel right at home.
+This library tracks [Laravel 13.x Collections](https://laravel.com/docs/13.x/collections) closely  `collect()` is the default export and the overwhelming majority of methods match Laravel's names and behavior, so if you know Laravel's `Collection` you'll feel right at home.
 
 Parity is near-complete rather than total. Known gaps and deliberate divergences:
 
@@ -202,8 +202,8 @@ Source, issues, and the full documentation live in the monorepo:
 
 - **Repository:** https://github.com/anilkumarthakur60/collection-js
 - **Documentation:** [`docs`](https://github.com/anilkumarthakur60/collection-js/tree/main/docs) (a VitePress site)
-- **Playground:** [`examples/playground`](https://github.com/anilkumarthakur60/collection-js/tree/main/examples/playground) — Vite + TypeScript, wired to the workspace build
-- **CDN demo:** [`examples/cdn`](https://github.com/anilkumarthakur60/collection-js/tree/main/examples/cdn) — no-bundler demo of the global build
+- **Playground:** [`examples/playground`](https://github.com/anilkumarthakur60/collection-js/tree/main/examples/playground)  Vite + TypeScript, wired to the workspace build
+- **CDN demo:** [`examples/cdn`](https://github.com/anilkumarthakur60/collection-js/tree/main/examples/cdn)  no-bundler demo of the global build
 
 ## License
 

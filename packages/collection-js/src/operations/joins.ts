@@ -69,7 +69,7 @@ export function leftJoinOf<L, R, K extends PropertyKey, M = [L, R | undefined]>(
   return out
 }
 
-/** Right join — symmetrical to leftJoin. */
+/** Right join  symmetrical to leftJoin. */
 export function rightJoinOf<L, R, K extends PropertyKey, M = [L | undefined, R]>(
   left: readonly L[],
   right: readonly R[],
@@ -93,7 +93,7 @@ export function rightJoinOf<L, R, K extends PropertyKey, M = [L | undefined, R]>
   return out
 }
 
-/** Full outer join — every left and right row appears at least once. */
+/** Full outer join  every left and right row appears at least once. */
 export function outerJoinOf<L, R, K extends PropertyKey, M = [L | undefined, R | undefined]>(
   left: readonly L[],
   right: readonly R[],

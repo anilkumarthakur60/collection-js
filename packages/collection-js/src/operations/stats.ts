@@ -4,7 +4,7 @@ import { type RetrieverInput } from '@/support/valueRetriever'
 // All stats share the library-wide numeric coercion rule (see `coerceNumeric`
 // in aggregations.ts): numbers/numeric strings/booleans are used, everything
 // else (null, undefined, NaN, ±Infinity, non-numeric strings, objects) is
-// skipped — the same population that sum/average/median operate on.
+// skipped  the same population that sum/average/median operate on.
 
 /** Population variance (divides by N). For sample variance, use `sampleVarianceOf`. */
 export function varianceOf<T>(
